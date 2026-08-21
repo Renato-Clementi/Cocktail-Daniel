@@ -308,18 +308,46 @@
             padding: 40px;
             font-size: 1.1em;
         }
+
+        .lang-switcher {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .lang-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.4);
+            border-radius: 8px;
+            padding: 4px 10px;
+            font-size: 1.3em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            line-height: 1;
+        }
+
+        .lang-btn.active {
+            background: rgba(255,255,255,0.9);
+            border-color: white;
+            transform: scale(1.1);
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🍹 COCKTAIL DANIEL SRL</h1>
-        <div class="copyright">© 2026 COCKTAIL DANIEL SRL - Tutti i diritti riservati</div>
+        <div class="lang-switcher">
+            <button class="lang-btn" id="langBtnIt" onclick="setLanguage('it')" title="Italiano">🇮🇹</button>
+            <button class="lang-btn" id="langBtnEn" onclick="setLanguage('en')" title="English">🇬🇧</button>
+        </div>
+        <h1>🍹 <span data-i18n="brandName">COCKTAIL DANIEL SRL</span></h1>
+        <div class="copyright" data-i18n="copyright">© 2026 COCKTAIL DANIEL SRL - Tutti i diritti riservati</div>
         <div id="userGreeting" style="display: none; text-align: center; margin-bottom: 15px;">
             <span style="color: white; font-size: 1em; text-shadow: 1px 1px 4px rgba(0,0,0,0.6);">👤 <strong id="greetingName"></strong></span>
             <button onclick="changeUserName()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; padding: 3px 8px; font-size: 0.7em; cursor: pointer; margin-left: 6px;">✏️</button>
         </div>
 
-        <div id="successMessage" class="success-message">
+        <div id="successMessage" class="success-message" data-i18n="orderSuccess">
             ✓ Ordine inviato con successo!
         </div>
 
@@ -329,31 +357,31 @@
         <!-- Orders Section -->
         <div class="orders-section">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 style="margin-bottom: 0;">📋 Storico Ordini</h2>
+                <h2 style="margin-bottom: 0;" data-i18n="ordersHistory">📋 Storico Ordini</h2>
             </div>
             <div id="ordersList"></div>
             <div id="totalSpent" style="display: none; margin-top: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; padding: 15px; text-align: center;">
-                <div style="font-size: 0.85em; color: rgba(255,255,255,0.85); margin-bottom: 4px;">💰 Totale speso</div>
+                <div style="font-size: 0.85em; color: rgba(255,255,255,0.85); margin-bottom: 4px;" data-i18n="totalSpentLabel">💰 Totale speso</div>
                 <div id="totalAmount" style="font-size: 1.8em; font-weight: bold; color: white;">0,00€</div>
                 <div id="totalCount" style="font-size: 0.8em; color: rgba(255,255,255,0.75); margin-top: 2px;"></div>
-                <button onclick="payAndClose()" style="margin-top: 12px; background: white; color: #667eea; border: none; border-radius: 8px; padding: 12px 24px; font-size: 15px; font-weight: bold; cursor: pointer; transition: opacity 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.2);" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">✅ Paga e chiudi conto</button>
+                <button onclick="payAndClose()" style="margin-top: 12px; background: white; color: #667eea; border: none; border-radius: 8px; padding: 12px 24px; font-size: 15px; font-weight: bold; cursor: pointer; transition: opacity 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.2);" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'" data-i18n="payButton">✅ Paga e chiudi conto</button>
             </div>
         </div>
 
         <!-- Review Button -->
         <div style="margin-top: 20px; text-align: center;">
-            <button onclick="openReviewModal()" style="background: rgba(255,255,255,0.92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: #333; border: none; border-radius: 12px; padding: 16px 30px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 8px 20px rgba(0,0,0,0.3); transition: transform 0.3s ease, box-shadow 0.3s ease; width: 100%;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 30px rgba(0,0,0,0.4)'" onmouseout="this.style.transform=''; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.3)'">⭐ Lascia una recensione</button>
+            <button onclick="openReviewModal()" style="background: rgba(255,255,255,0.92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: #333; border: none; border-radius: 12px; padding: 16px 30px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 8px 20px rgba(0,0,0,0.3); transition: transform 0.3s ease, box-shadow 0.3s ease; width: 100%;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 30px rgba(0,0,0,0.4)'" onmouseout="this.style.transform=''; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.3)'" data-i18n="reviewButton">⭐ Lascia una recensione</button>
         </div>
     </div>
 
     <!-- Review Modal -->
     <div class="modal" id="reviewModal">
         <div class="modal-content" style="text-align: center;">
-            <h2 style="margin-bottom: 5px;">⭐ La tua recensione</h2>
-            <p style="color: #666; margin-bottom: 20px; font-size: 0.9em;">Dicci cosa ne pensi! Verrà inviata al gruppo Family.</p>
+            <h2 style="margin-bottom: 5px;" data-i18n="reviewTitle">⭐ La tua recensione</h2>
+            <p style="color: #666; margin-bottom: 20px; font-size: 0.9em;" data-i18n="reviewSubtitle">Dicci cosa ne pensi! Verrà inviata al gruppo Family.</p>
             
             <div style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 10px; color: #333; font-weight: 600;">Quanto ti è piaciuto?</label>
+                <label style="display: block; margin-bottom: 10px; color: #333; font-weight: 600;" data-i18n="reviewRatingLabel">Quanto ti è piaciuto?</label>
                 <div id="starRating" style="font-size: 2.2em; cursor: pointer; letter-spacing: 5px;">
                     <span onclick="setRating(1)" onmouseover="hoverRating(1)" onmouseout="resetHover()">☆</span>
                     <span onclick="setRating(2)" onmouseover="hoverRating(2)" onmouseout="resetHover()">☆</span>
@@ -364,13 +392,13 @@
             </div>
             
             <div class="form-group" style="text-align: left;">
-                <label>💬 Il tuo commento:</label>
-                <textarea id="reviewText" rows="4" placeholder="es: Mojito fantastico, servizio veloce!" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px; font-family: inherit; resize: vertical;"></textarea>
+                <label data-i18n="reviewCommentLabel">💬 Il tuo commento:</label>
+                <textarea id="reviewText" rows="4" data-i18n-placeholder="reviewCommentPlaceholder" placeholder="es: Mojito fantastico, servizio veloce!" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px; font-family: inherit; resize: vertical;"></textarea>
             </div>
             
             <div class="btn-group">
-                <button class="btn btn-secondary" onclick="closeReviewModal()">Annulla</button>
-                <button class="btn btn-primary" onclick="sendReview()">Invia recensione ⭐</button>
+                <button class="btn btn-secondary" onclick="closeReviewModal()" data-i18n="cancel">Annulla</button>
+                <button class="btn btn-primary" onclick="sendReview()" data-i18n="sendReview">Invia recensione ⭐</button>
             </div>
         </div>
     </div>
@@ -379,67 +407,67 @@
     <div class="modal" id="welcomeModal">
         <div class="modal-content" style="text-align: center;">
             <div style="font-size: 3em; margin-bottom: 10px;">🍹</div>
-            <h2 style="margin-bottom: 5px;">Benvenuto!</h2>
-            <p style="color: #666; margin-bottom: 25px; font-size: 0.95em;">Come ti chiami? Serve per identificare i tuoi ordini.<br>Te lo chiederemo <strong>solo questa volta</strong>.</p>
+            <h2 style="margin-bottom: 5px;" data-i18n="welcomeTitle">Benvenuto!</h2>
+            <p style="color: #666; margin-bottom: 25px; font-size: 0.95em;" data-i18n="welcomeSubtitle">Come ti chiami? Serve per identificare i tuoi ordini.<br>Te lo chiederemo <strong>solo questa volta</strong>.</p>
             <div class="form-group" style="text-align: left;">
-                <label>👤 Il tuo nome:</label>
-                <input type="text" id="regName" placeholder="es: Marco">
+                <label data-i18n="nameLabel">👤 Il tuo nome:</label>
+                <input type="text" id="regName" data-i18n-placeholder="namePlaceholder" placeholder="es: Marco">
             </div>
-            <button class="btn btn-primary" style="width: 100%; padding: 14px;" onclick="saveRegistration()">Inizia a ordinare 🍹</button>
+            <button class="btn btn-primary" style="width: 100%; padding: 14px;" onclick="saveRegistration()" data-i18n="startOrdering">Inizia a ordinare 🍹</button>
         </div>
     </div>
 
     <!-- Order Modal -->
     <div class="modal" id="orderModal">
         <div class="modal-content">
-            <h2>Completa il tuo ordine</h2>
+            <h2 data-i18n="completeOrder">Completa il tuo ordine</h2>
             <div class="form-group">
-                <label>Cocktail:</label>
+                <label data-i18n="cocktailLabel">Cocktail:</label>
                 <input type="text" id="modalCocktail" readonly>
             </div>
             <div class="variant-selection">
-                <label>Scegli la variante:</label>
+                <label data-i18n="chooseVariant">Scegli la variante:</label>
                 <div class="variant-buttons" id="variantButtons"></div>
             </div>
             <div class="form-group">
-                <label>Tavolo / Posizione:</label>
+                <label data-i18n="tablePosition">Tavolo / Posizione:</label>
                 <div class="variant-buttons" id="locationButtons">
-                    <button type="button" class="variant-btn location-btn" onclick="selectLocation('Dove Sono io')">
+                    <button type="button" class="variant-btn location-btn" data-value="Dove Sono io" onclick="selectLocation('Dove Sono io')" data-i18n="locWhereIAm">
                         Dove Sono io
                     </button>
-                    <button type="button" class="variant-btn location-btn" onclick="selectLocation('In Casa')">
+                    <button type="button" class="variant-btn location-btn" data-value="In Casa" onclick="selectLocation('In Casa')" data-i18n="locHome">
                         In Casa
                     </button>
-                    <button type="button" class="variant-btn location-btn" onclick="selectLocation('In Giardino')">
+                    <button type="button" class="variant-btn location-btn" data-value="In Giardino" onclick="selectLocation('In Giardino')" data-i18n="locGarden">
                         In Giardino
                     </button>
                 </div>
             </div>
             <div class="form-group">
-                <label>Orario preferito:</label>
+                <label data-i18n="preferredTime">Orario preferito:</label>
                 <div class="variant-buttons" id="deliveryTimeButtons">
-                    <button type="button" class="variant-btn delivery-time-btn" onclick="selectDeliveryTime('Subito')">
+                    <button type="button" class="variant-btn delivery-time-btn" data-value="Subito" onclick="selectDeliveryTime('Subito')" data-i18n="timeNow">
                         Subito
                     </button>
-                    <button type="button" class="variant-btn delivery-time-btn" onclick="selectDeliveryTime('10 minuti')">
+                    <button type="button" class="variant-btn delivery-time-btn" data-value="10 minuti" onclick="selectDeliveryTime('10 minuti')" data-i18n="time10">
                         10 min
                     </button>
-                    <button type="button" class="variant-btn delivery-time-btn" onclick="selectDeliveryTime('30 minuti')">
+                    <button type="button" class="variant-btn delivery-time-btn" data-value="30 minuti" onclick="selectDeliveryTime('30 minuti')" data-i18n="time30">
                         30 min
                     </button>
                 </div>
             </div>
             <div class="form-group">
-                <label>Note aggiuntive (opzionale):</label>
-                <input type="text" id="orderNotes" placeholder="es: Poco ghiaccio, extra limone...">
+                <label data-i18n="additionalNotes">Note aggiuntive (opzionale):</label>
+                <input type="text" id="orderNotes" data-i18n-placeholder="notesPlaceholder" placeholder="es: Poco ghiaccio, extra limone...">
             </div>
             <div style="background: #f0f7ff; border: 2px solid #667eea; border-radius: 10px; padding: 15px; margin-bottom: 20px; text-align: center;">
-                <div style="font-size: 0.9em; color: #666; margin-bottom: 5px;">💰 Prezzo da pagare alla consegna:</div>
+                <div style="font-size: 0.9em; color: #666; margin-bottom: 5px;" data-i18n="priceToPay">💰 Prezzo da pagare alla consegna:</div>
                 <div id="priceDisplay" style="font-size: 1.8em; font-weight: bold; color: #667eea;">0,50€</div>
             </div>
             <div class="btn-group">
-                <button class="btn btn-secondary" onclick="closeModal()">Annulla</button>
-                <button class="btn btn-primary" onclick="confirmOrder()">Conferma Ordine</button>
+                <button class="btn btn-secondary" onclick="closeModal()" data-i18n="cancel">Annulla</button>
+                <button class="btn btn-primary" onclick="confirmOrder()" data-i18n="confirmOrderBtn">Conferma Ordine</button>
             </div>
         </div>
     </div>
@@ -503,6 +531,220 @@
             }
         ];
 
+        // =============================================
+        // TRADUZIONI (i18n)
+        // I messaggi WhatsApp restano SEMPRE in italiano.
+        // Le traduzioni riguardano solo l'interfaccia visibile.
+        // =============================================
+        const translations = {
+            it: {
+                brandName: "COCKTAIL DANIEL SRL",
+                copyright: "© 2026 COCKTAIL DANIEL SRL - Tutti i diritti riservati",
+                orderSuccess: "✓ Ordine inviato con successo!",
+                ordersHistory: "📋 Storico Ordini",
+                totalSpentLabel: "💰 Totale speso",
+                payButton: "✅ Paga e chiudi conto",
+                reviewButton: "⭐ Lascia una recensione",
+                reviewTitle: "⭐ La tua recensione",
+                reviewSubtitle: "Dicci cosa ne pensi! Verrà inviata al gruppo Family.",
+                reviewRatingLabel: "Quanto ti è piaciuto?",
+                reviewCommentLabel: "💬 Il tuo commento:",
+                reviewCommentPlaceholder: "es: Mojito fantastico, servizio veloce!",
+                cancel: "Annulla",
+                sendReview: "Invia recensione ⭐",
+                welcomeTitle: "Benvenuto!",
+                welcomeSubtitle: "Come ti chiami? Serve per identificare i tuoi ordini.<br>Te lo chiederemo <strong>solo questa volta</strong>.",
+                nameLabel: "👤 Il tuo nome:",
+                namePlaceholder: "es: Marco",
+                startOrdering: "Inizia a ordinare 🍹",
+                completeOrder: "Completa il tuo ordine",
+                cocktailLabel: "Cocktail:",
+                chooseVariant: "Scegli la variante:",
+                tablePosition: "Tavolo / Posizione:",
+                locWhereIAm: "Dove Sono io",
+                locHome: "In Casa",
+                locGarden: "In Giardino",
+                preferredTime: "Orario preferito:",
+                timeNow: "Subito",
+                time10: "10 min",
+                time30: "30 min",
+                additionalNotes: "Note aggiuntive (opzionale):",
+                notesPlaceholder: "es: Poco ghiaccio, extra limone...",
+                priceToPay: "💰 Prezzo da pagare alla consegna:",
+                confirmOrderBtn: "Conferma Ordine",
+                orderNow: "Ordina",
+                noOrders: "Nessun ordine ancora 🍹",
+                orderedLabel: "Ordinato:",
+                orderSingular: "ordine",
+                orderPlural: "ordini",
+                changeName: "Modifica il tuo nome:",
+                enterNameAlert: "Inserisci il tuo nome per continuare.",
+                selectStarAlert: "Seleziona almeno una stella.",
+                writeCommentAlert: "Scrivi un commento per la tua recensione.",
+                reviewSentMsg: "⭐ Recensione inviata! Grazie!",
+                paymentSentMsg: "✅ Pagamento inviato! Conto azzerato.",
+                confirmPayment: "Confermi il pagamento di {total} per {count} ordini?",
+                reviewCopiedAlert: "Recensione copiata! Si aprirà il gruppo Family: incolla il messaggio nella chat.",
+                gpsErrorTitle: "Non riesco ad ottenere la tua posizione GPS.\n\n",
+                gpsErrorDenied: "Hai negato il permesso di accesso alla posizione.\n\nPer usare \"Dove Sono io\" devi:\n1. Consentire l'accesso alla posizione\n2. Oppure scegliere \"In Casa\" o \"In Giardino\"",
+                gpsErrorUnavailable: "Impossibile determinare la posizione.\n\nVerifica di essere connesso a internet e riprova,\noppure scegli \"In Casa\" o \"In Giardino\".",
+                gpsErrorTimeout: "Timeout: ci sta mettendo troppo tempo.\n\nRiprova o scegli \"In Casa\" o \"In Giardino\".",
+                gpsErrorUnknown: "Errore sconosciuto.\n\nScegli \"In Casa\" o \"In Giardino\" per continuare.",
+                gettingLocation: "📍 Ottenendo posizione..."
+            },
+            en: {
+                brandName: "COCKTAIL DANIEL SRL",
+                copyright: "© 2026 COCKTAIL DANIEL SRL - All rights reserved",
+                orderSuccess: "✓ Order sent successfully!",
+                ordersHistory: "📋 Order History",
+                totalSpentLabel: "💰 Total spent",
+                payButton: "✅ Pay and close bill",
+                reviewButton: "⭐ Leave a review",
+                reviewTitle: "⭐ Your review",
+                reviewSubtitle: "Tell us what you think! It will be sent to the Family group.",
+                reviewRatingLabel: "How much did you like it?",
+                reviewCommentLabel: "💬 Your comment:",
+                reviewCommentPlaceholder: "e.g: Fantastic Mojito, fast service!",
+                cancel: "Cancel",
+                sendReview: "Send review ⭐",
+                welcomeTitle: "Welcome!",
+                welcomeSubtitle: "What's your name? We need it to identify your orders.<br>We'll only ask <strong>this one time</strong>.",
+                nameLabel: "👤 Your name:",
+                namePlaceholder: "e.g: Mark",
+                startOrdering: "Start ordering 🍹",
+                completeOrder: "Complete your order",
+                cocktailLabel: "Cocktail:",
+                chooseVariant: "Choose the variant:",
+                tablePosition: "Table / Location:",
+                locWhereIAm: "Where I am",
+                locHome: "At Home",
+                locGarden: "In the Garden",
+                preferredTime: "Preferred time:",
+                timeNow: "Now",
+                time10: "10 min",
+                time30: "30 min",
+                additionalNotes: "Additional notes (optional):",
+                notesPlaceholder: "e.g: Less ice, extra lemon...",
+                priceToPay: "💰 Price to pay on delivery:",
+                confirmOrderBtn: "Confirm Order",
+                orderNow: "Order",
+                noOrders: "No orders yet 🍹",
+                orderedLabel: "Ordered:",
+                orderSingular: "order",
+                orderPlural: "orders",
+                changeName: "Edit your name:",
+                enterNameAlert: "Please enter your name to continue.",
+                selectStarAlert: "Please select at least one star.",
+                writeCommentAlert: "Please write a comment for your review.",
+                reviewSentMsg: "⭐ Review sent! Thank you!",
+                paymentSentMsg: "✅ Payment sent! Bill cleared.",
+                confirmPayment: "Confirm payment of {total} for {count} orders?",
+                reviewCopiedAlert: "Review copied! The Family group will open: paste the message in the chat.",
+                gpsErrorTitle: "Unable to get your GPS location.\n\n",
+                gpsErrorDenied: "You denied location access permission.\n\nTo use \"Where I am\" you need to:\n1. Allow location access\n2. Or choose \"At Home\" or \"In the Garden\"",
+                gpsErrorUnavailable: "Unable to determine location.\n\nCheck that you're connected to the internet and try again,\nor choose \"At Home\" or \"In the Garden\".",
+                gpsErrorTimeout: "Timeout: it's taking too long.\n\nTry again or choose \"At Home\" or \"In the Garden\".",
+                gpsErrorUnknown: "Unknown error.\n\nChoose \"At Home\" or \"In the Garden\" to continue.",
+                gettingLocation: "📍 Getting location..."
+            }
+        };
+
+        // Traduzioni display-only per descrizioni e varianti cocktail
+        // (i dati salvati/inviati via WhatsApp restano sempre in italiano)
+        const cocktailUiTranslations = {
+            en: {
+                descriptions: {
+                    "Rum, menta, lime, zucchero, soda": "Rum, mint, lime, sugar, soda",
+                    "Tequila, triple sec, succo di lime": "Tequila, triple sec, lime juice",
+                    "Gin, Campari, vermouth rosso": "Gin, Campari, red vermouth",
+                    "Aperol, prosecco, soda": "Aperol, prosecco, soda",
+                    "Gin, tonica, lime": "Gin, tonic, lime",
+                    "Gin, limone, soda": "Gin, lemon, soda",
+                    "Prosecco, sambuco, menta, soda": "Prosecco, elderflower, mint, soda",
+                    "Rum, cocco, ananas": "Rum, coconut, pineapple",
+                    "Cachaça, lime, zucchero": "Cachaça, lime, sugar"
+                },
+                variants: {
+                    "Classico": "Classic",
+                    "Classica": "Classic",
+                    "Dolce": "Sweet",
+                    "Fruttato": "Fruity",
+                    "Fruttata": "Fruity",
+                    "Frozen": "Frozen",
+                    "Piccante": "Spicy",
+                    "Sbagliato": "Sbagliato",
+                    "Bianco": "White",
+                    "Strong": "Strong",
+                    "Secco": "Dry",
+                    "Profumato": "Aromatic",
+                    "Speziato": "Spiced",
+                    "Fresco": "Fresh",
+                    "Tropicale": "Tropical"
+                }
+            }
+        };
+
+        let currentLang = localStorage.getItem('appLanguage') || 'it';
+
+        function t(key) {
+            return (translations[currentLang] && translations[currentLang][key]) || translations.it[key] || key;
+        }
+
+        function translateDescription(desc) {
+            if (currentLang === 'it') return desc;
+            return (cocktailUiTranslations.en.descriptions[desc]) || desc;
+        }
+
+        function translateVariant(variant) {
+            if (currentLang === 'it') return variant;
+            return (cocktailUiTranslations.en.variants[variant]) || variant;
+        }
+
+        function translateLocation(loc) {
+            const map = {
+                'Dove Sono io': 'locWhereIAm',
+                'In Casa': 'locHome',
+                'In Giardino': 'locGarden'
+            };
+            return map[loc] ? t(map[loc]) : loc;
+        }
+
+        function translateTime(time) {
+            const map = {
+                'Subito': 'timeNow',
+                '10 minuti': 'time10',
+                '30 minuti': 'time30'
+            };
+            return map[time] ? t(map[time]) : time;
+        }
+
+        // Apply translations to all elements with data-i18n / data-i18n-placeholder
+        function applyTranslations() {
+            document.documentElement.lang = currentLang;
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                el.innerHTML = t(key);
+            });
+
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                el.setAttribute('placeholder', t(key));
+            });
+
+            document.getElementById('langBtnIt').classList.toggle('active', currentLang === 'it');
+            document.getElementById('langBtnEn').classList.toggle('active', currentLang === 'en');
+        }
+
+        // Change language
+        function setLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('appLanguage', lang);
+            applyTranslations();
+            renderCocktails();
+            renderOrders();
+        }
+
         let selectedCocktail = null;
         let selectedVariant = null;
         let selectedDeliveryTime = 'Subito'; // Default value
@@ -524,7 +766,7 @@
         function saveRegistration() {
             const name = document.getElementById('regName').value.trim();
             if (!name) {
-                alert('Inserisci il tuo nome per continuare.');
+                alert(t('enterNameAlert'));
                 document.getElementById('regName').focus();
                 return;
             }
@@ -536,7 +778,7 @@
 
         // Change name (pencil button)
         function changeUserName() {
-            const newName = prompt('Modifica il tuo nome:', customerName);
+            const newName = prompt(t('changeName'), customerName);
             if (newName && newName.trim()) {
                 customerName = newName.trim();
                 localStorage.setItem('customerName', customerName);
@@ -626,7 +868,8 @@
             }, 0);
             const totalFormatted = total.toFixed(2).replace('.', ',') + '€';
 
-            if (!confirm(`Confermi il pagamento di ${totalFormatted} per ${orders.length} ordini?`)) return;
+            const confirmMsg = t('confirmPayment').replace('{total}', totalFormatted).replace('{count}', orders.length);
+            if (!confirm(confirmMsg)) return;
 
             // Build WhatsApp receipt message
             let message = `💳 *PAGAMENTO EFFETTUATO*\n\n`;
@@ -651,7 +894,7 @@
 
             // Show success
             const successMsg = document.getElementById('successMessage');
-            successMsg.textContent = '✅ Pagamento inviato! Conto azzerato.';
+            successMsg.textContent = t('paymentSentMsg');
             successMsg.classList.add('show');
             setTimeout(() => {
                 successMsg.classList.remove('show');
@@ -666,10 +909,10 @@
                     <div class="cocktail-icon">${cocktail.icon}</div>
                     <div class="cocktail-info">
                         <div class="cocktail-name">${cocktail.name}</div>
-                        <div class="cocktail-description">${cocktail.description}</div>
+                        <div class="cocktail-description">${translateDescription(cocktail.description)}</div>
                     </div>
                     <button class="order-btn" onclick="event.stopPropagation(); openOrderModal('${cocktail.name}')">
-                        Ordina
+                        ${t('orderNow')}
                     </button>
                 </div>
             `).join('');
@@ -690,8 +933,8 @@
             // Render variant buttons
             const variantButtons = document.getElementById('variantButtons');
             variantButtons.innerHTML = cocktail.variants.map(variant => `
-                <button type="button" class="variant-btn cocktail-variant-btn" onclick="selectVariant('${variant}')">
-                    ${variant}
+                <button type="button" class="variant-btn cocktail-variant-btn" data-value="${variant}" onclick="selectVariant('${variant}')">
+                    ${translateVariant(variant)}
                 </button>
             `).join('');
             
@@ -717,7 +960,7 @@
             // Update button states - ONLY for cocktail variant buttons
             const buttons = document.querySelectorAll('.cocktail-variant-btn');
             buttons.forEach(btn => {
-                if (btn.textContent.trim() === variant) {
+                if (btn.getAttribute('data-value') === variant) {
                     btn.classList.add('selected');
                 } else {
                     btn.classList.remove('selected');
@@ -767,15 +1010,10 @@
         function selectDeliveryTime(time) {
             selectedDeliveryTime = time;
             
-            // Update button states for delivery time buttons using the specific class
+            // Update button states for delivery time buttons using data-value
             const timeButtons = document.querySelectorAll('.delivery-time-btn');
             timeButtons.forEach(btn => {
-                const btnText = btn.textContent.trim();
-                if (btnText === 'Subito' && time === 'Subito') {
-                    btn.classList.add('selected');
-                } else if (btnText === '10 min' && time === '10 minuti') {
-                    btn.classList.add('selected');
-                } else if (btnText === '30 min' && time === '30 minuti') {
+                if (btn.getAttribute('data-value') === time) {
                     btn.classList.add('selected');
                 } else {
                     btn.classList.remove('selected');
@@ -790,10 +1028,10 @@
         function selectLocation(location) {
             selectedLocation = location;
             
-            // Update button states for location buttons
+            // Update button states for location buttons using data-value
             const locationButtons = document.querySelectorAll('.location-btn');
             locationButtons.forEach(btn => {
-                if (btn.textContent.trim() === location) {
+                if (btn.getAttribute('data-value') === location) {
                     btn.classList.add('selected');
                 } else {
                     btn.classList.remove('selected');
@@ -901,7 +1139,7 @@
                 // Show loading message
                 const confirmBtn = document.querySelector('.btn-primary');
                 const originalText = confirmBtn.textContent;
-                confirmBtn.textContent = '📍 Ottenendo posizione...';
+                confirmBtn.textContent = t('gettingLocation');
                 confirmBtn.disabled = true;
                 
                 try {
@@ -914,23 +1152,16 @@
                     confirmBtn.disabled = false;
                     
                     // Determine error type and show appropriate message
-                    let errorMessage = 'Non riesco ad ottenere la tua posizione GPS.\n\n';
+                    let errorMessage = t('gpsErrorTitle');
                     
                     if (error.code === 1) { // PERMISSION_DENIED
-                        errorMessage += 'Hai negato il permesso di accesso alla posizione.\n\n';
-                        errorMessage += 'Per usare "Dove Sono io" devi:\n';
-                        errorMessage += '1. Consentire l\'accesso alla posizione\n';
-                        errorMessage += '2. Oppure scegliere "In Casa" o "In Giardino"';
+                        errorMessage += t('gpsErrorDenied');
                     } else if (error.code === 2) { // POSITION_UNAVAILABLE
-                        errorMessage += 'Impossibile determinare la posizione.\n\n';
-                        errorMessage += 'Verifica di essere connesso a internet e riprova,\n';
-                        errorMessage += 'oppure scegli "In Casa" o "In Giardino".';
+                        errorMessage += t('gpsErrorUnavailable');
                     } else if (error.code === 3) { // TIMEOUT
-                        errorMessage += 'Timeout: ci sta mettendo troppo tempo.\n\n';
-                        errorMessage += 'Riprova o scegli "In Casa" o "In Giardino".';
+                        errorMessage += t('gpsErrorTimeout');
                     } else {
-                        errorMessage += 'Errore sconosciuto.\n\n';
-                        errorMessage += 'Scegli "In Casa" o "In Giardino" per continuare.';
+                        errorMessage += t('gpsErrorUnknown');
                     }
                     
                     alert(errorMessage);
@@ -970,7 +1201,7 @@
 
             // Show success message
             const successMsg = document.getElementById('successMessage');
-            successMsg.textContent = '✓ Ordine inviato con successo!';
+            successMsg.textContent = t('orderSuccess');
             successMsg.classList.add('show');
             setTimeout(() => {
                 successMsg.classList.remove('show');
@@ -1014,7 +1245,7 @@
             const totalSpentEl = document.getElementById('totalSpent');
             
             if (orders.length === 0) {
-                ordersList.innerHTML = '<div class="no-orders">Nessun ordine ancora 🍹</div>';
+                ordersList.innerHTML = `<div class="no-orders">${t('noOrders')}</div>`;
                 totalSpentEl.style.display = 'none';
                 return;
             }
@@ -1026,15 +1257,15 @@
             }, 0);
             
             document.getElementById('totalAmount').textContent = total.toFixed(2).replace('.', ',') + '€';
-            document.getElementById('totalCount').textContent = orders.length + (orders.length === 1 ? ' ordine' : ' ordini');
+            document.getElementById('totalCount').textContent = orders.length + ' ' + (orders.length === 1 ? t('orderSingular') : t('orderPlural'));
             totalSpentEl.style.display = 'block';
 
-            // Mostra gli ordini salvati (ultimi 50)
+            // Mostra gli ordini salvati (ultimi 50) - i dati restano in italiano, solo le etichette sono tradotte
             ordersList.innerHTML = orders.slice(0, 50).map(order => `
                 <div class="order-item">
-                    <strong>${order.cocktail}</strong> - <em>${order.variant}</em> - <strong style="color: #667eea;">${order.price}</strong><br>
-                    📍 ${order.location} | ⏰ ${order.time}<br>
-                    <small style="color: #666;">Ordinato: ${order.orderDate} ${order.orderTime}</small>
+                    <strong>${order.cocktail}</strong> - <em>${translateVariant(order.variant)}</em> - <strong style="color: #667eea;">${order.price}</strong><br>
+                    📍 ${translateLocation(order.location)} | ⏰ ${translateTime(order.time)}<br>
+                    <small style="color: #666;">${t('orderedLabel')} ${order.orderDate} ${order.orderTime}</small>
                     ${order.notes ? `<br><small>📝 ${order.notes}</small>` : ''}
                 </div>
             `).join('');
@@ -1083,11 +1314,11 @@
             const reviewText = document.getElementById('reviewText').value.trim();
 
             if (selectedRating === 0) {
-                alert('Seleziona almeno una stella.');
+                alert(t('selectStarAlert'));
                 return;
             }
             if (!reviewText) {
-                alert('Scrivi un commento per la tua recensione.');
+                alert(t('writeCommentAlert'));
                 document.getElementById('reviewText').focus();
                 return;
             }
@@ -1107,7 +1338,7 @@
             if (FAMILY_GROUP_LINK && !FAMILY_GROUP_LINK.includes('INCOLLA_QUI')) {
                 // For group links we can't pre-fill text, so we copy and open group
                 navigator.clipboard.writeText(message.replace(/\*/g, '')).then(() => {
-                    alert('Recensione copiata! Si aprirà il gruppo Family: incolla il messaggio nella chat.');
+                    alert(t('reviewCopiedAlert'));
                     window.open(FAMILY_GROUP_LINK, '_blank');
                 }).catch(() => {
                     // Fallback: send to admin number
@@ -1123,7 +1354,7 @@
             closeReviewModal();
 
             const successMsg = document.getElementById('successMessage');
-            successMsg.textContent = '⭐ Recensione inviata! Grazie!';
+            successMsg.textContent = t('reviewSentMsg');
             successMsg.classList.add('show');
             setTimeout(() => {
                 successMsg.classList.remove('show');
@@ -1131,6 +1362,7 @@
         }
 
         // Initialize
+        applyTranslations();
         renderCocktails();
         renderOrders();
         loadOrdersFromCloud();
