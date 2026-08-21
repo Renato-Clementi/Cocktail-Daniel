@@ -302,19 +302,6 @@
             color: #667eea;
         }
 
-        .customer-group {
-            margin-bottom: 25px;
-        }
-
-        .customer-group-header {
-            font-size: 1.05em;
-            font-weight: bold;
-            color: #667eea;
-            margin-bottom: 10px;
-            padding-bottom: 6px;
-            border-bottom: 2px solid #e0e0e0;
-        }
-
         .pagination {
             display: flex;
             justify-content: center;
@@ -1072,12 +1059,32 @@
         let customerName = localStorage.getItem('customerName') || '';
         const ADMIN_PHONE = '3515292930';
 
+        // Genera un ID utente univoco a partire dal nome (case/spazi insensitive)
+        // Es: " Marco Rossi " e "marco rossi" → "marco_rossi"
+        function getUserId(name) {
+            return (name || '')
+                .trim()
+                .toLowerCase()
+                .replace(/\s+/g, '_');
+        }
+
+        // =============================================
+        // MODALITÀ ADMIN
+        // Chi si registra con uno di questi nomi vede TUTTI gli ordini
+        // =============================================
+        const ADMIN_USER_IDS = ['daniel'];
+
+        function isAdmin() {
+            return ADMIN_USER_IDS.includes(getUserId(customerName));
+        }
+
         // Check if user is registered
         function checkRegistration() {
             if (!customerName) {
                 document.getElementById('welcomeModal').classList.add('active');
             } else {
                 showGreeting();
+                loadOrdersFromCloud();
             }
         }
 
@@ -1093,6 +1100,8 @@
             localStorage.setItem('customerName', customerName);
             document.getElementById('welcomeModal').classList.remove('active');
             showGreeting();
+            // Carica dal cloud gli ordini già associati a questo nome (da altri dispositivi)
+            loadOrdersFromCloud();
         }
 
         // Change name (pencil button)
@@ -1102,12 +1111,18 @@
                 customerName = newName.trim();
                 localStorage.setItem('customerName', customerName);
                 showGreeting();
+                // Cambiando identità, svuota la cache locale e ricarica gli ordini del nuovo utente
+                orders = [];
+                ordersPage = 1;
+                saveOrders();
+                renderOrders();
+                loadOrdersFromCloud();
             }
         }
 
         // Show greeting bar
         function showGreeting() {
-            document.getElementById('greetingName').textContent = customerName;
+            document.getElementById('greetingName').textContent = customerName + (isAdmin() ? ' (ADMIN)' : '');
             document.getElementById('userGreeting').style.display = 'block';
         }
 
@@ -1138,11 +1153,19 @@
         }
 
         // Load orders from Firestore
+        // Admin (Daniel) vede TUTTI gli ordini, gli altri solo i propri
         async function loadOrdersFromCloud() {
-            if (!isApiConfigured()) return;
+            if (!isApiConfigured() || !customerName) return;
             try {
-                const snapshot = await firestoreDb.collection('orders').orderBy('id', 'desc').get();
-                orders = snapshot.docs.map(doc => doc.data());
+                let query = firestoreDb.collection('orders');
+                if (!isAdmin()) {
+                    query = query.where('userId', '==', getUserId(customerName));
+                }
+                const snapshot = await query.get();
+                // Ordinamento lato client (evita di dover creare un indice composto su Firestore)
+                orders = snapshot.docs
+                    .map(doc => doc.data())
+                    .sort((a, b) => b.id - a.id);
                 localStorage.setItem('cocktailOrders', JSON.stringify(orders));
                 renderOrders();
             } catch (error) {
@@ -1161,10 +1184,15 @@
         }
 
         // Clear orders on Firestore
+        // Admin cancella tutti gli ordini, gli altri solo i propri
         async function clearOrdersOnCloud() {
-            if (!isApiConfigured()) return;
+            if (!isApiConfigured() || !customerName) return;
             try {
-                const snapshot = await firestoreDb.collection('orders').get();
+                let query = firestoreDb.collection('orders');
+                if (!isAdmin()) {
+                    query = query.where('userId', '==', getUserId(customerName));
+                }
+                const snapshot = await query.get();
                 const batch = firestoreDb.batch();
                 snapshot.docs.forEach(doc => batch.delete(doc.ref));
                 await batch.commit();
@@ -1200,16 +1228,21 @@
             const confirmMsg = t('confirmPayment').replace('{total}', totalFormatted).replace('{count}', orders.length);
             if (!confirm(confirmMsg)) return;
 
+            // Avviso extra: l'admin cancellerebbe gli ordini di TUTTI i clienti
+            if (isAdmin() && !confirm('ATTENZIONE (admin): questa operazione cancellerà gli ordini di TUTTI i clienti. Continuare?')) {
+                return;
+            }
+
             // Build WhatsApp receipt message
-            let message = `💳 *PAGAMENTO EFFETTUATO*\n\n`;
-            message += `👤 *Cliente:* ${customerName}\n\n`;
-            message += `📋 *Riepilogo ordini:*\n`;
+            let message = `*PAGAMENTO EFFETTUATO*\n\n`;
+            message += `*Cliente:* ${customerName}\n\n`;
+            message += `*Riepilogo ordini:*\n`;
             orders.forEach((order, i) => {
                 message += `${i + 1}. ${order.cocktail} (${order.variant}) - ${order.price}\n`;
             });
-            message += `\n💰 *TOTALE PAGATO: ${totalFormatted}*\n`;
-            message += `📅 ${new Date().toLocaleDateString('it-IT')} ore ${new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}\n`;
-            message += `\n✅ Conto saldato - Grazie!`;
+            message += `\n*TOTALE PAGATO: ${totalFormatted}*\n`;
+            message += `${new Date().toLocaleDateString('it-IT')} ore ${new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}\n`;
+            message += `\n>> Conto saldato - Grazie!`;
 
             const encodedMessage = encodeURIComponent(message);
             const whatsappUrl = `https://wa.me/${ADMIN_PHONE}?text=${encodedMessage}`;
@@ -1508,6 +1541,7 @@
 
             const order = {
                 id: Date.now(),
+                userId: getUserId(customerName),
                 customerName: customerName,
                 cocktail: selectedCocktail,
                 variant: selectedVariant,
@@ -1544,26 +1578,26 @@
 
         // Send WhatsApp message
         function sendWhatsAppMessage(order, phone) {
-            let message = `🍹 *NUOVO ORDINE COCKTAIL*\n\n`;
-            message += `👤 *Cliente:* ${order.customerName}\n`;
-            message += `📋 *Cocktail:* ${order.cocktail} - ${order.variant}\n`;
-            message += `📍 *Posizione:* ${order.location}\n`;
+            let message = `*NUOVO ORDINE COCKTAIL*\n\n`;
+            message += `*Cliente:* ${order.customerName}\n`;
+            message += `*Cocktail:* ${order.cocktail} - ${order.variant}\n`;
+            message += `*Posizione:* ${order.location}\n`;
             
             // Add GPS coordinates if available
             if (order.gps) {
                 const lat = order.gps.latitude.toFixed(6);
                 const lng = order.gps.longitude.toFixed(6);
-                message += `🌍 *Coordinate GPS:*\n`;
+                message += `*Coordinate GPS:*\n`;
                 message += `https://www.google.com/maps?q=${lat},${lng}\n`;
             }
             
-            message += `⏰ *Da servire:* ${order.time}\n`;
-            message += `🕐 *Ordinato alle:* ${order.orderTime}\n`;
-            message += `💰 *Prezzo:* ${order.price}\n`;
+            message += `*Da servire:* ${order.time}\n`;
+            message += `*Ordinato alle:* ${order.orderTime}\n`;
+            message += `*Prezzo:* ${order.price}\n`;
             if (order.notes) {
-                message += `📝 *Note:* ${order.notes}\n`;
+                message += `*Note:* ${order.notes}\n`;
             }
-            message += `\n✅ Preparare e servire!`;
+            message += `\n>> Preparare e servire!`;
 
             const encodedMessage = encodeURIComponent(message);
             const whatsappUrl = `https://wa.me/${phone}?text=${encodedMessage}`;
@@ -1592,7 +1626,7 @@
             document.getElementById('totalCount').textContent = orders.length + ' ' + (orders.length === 1 ? t('orderSingular') : t('orderPlural'));
             totalSpentEl.style.display = 'block';
 
-            // Pagina prima sugli ORDINI (i più recenti per primi), poi raggruppa per cliente
+            // Paginazione sugli ordini (i più recenti per primi)
             const totalPages = Math.max(1, Math.ceil(orders.length / ORDERS_PER_PAGE));
 
             // Mantieni la pagina corrente entro i limiti validi
@@ -1602,30 +1636,15 @@
             const startIdx = (ordersPage - 1) * ORDERS_PER_PAGE;
             const pageOrders = orders.slice(startIdx, startIdx + ORDERS_PER_PAGE);
 
-            // Raggruppa per cliente solo gli ordini della pagina corrente
-            const groups = new Map();
-            pageOrders.forEach(order => {
-                const name = order.customerName || '-';
-                if (!groups.has(name)) groups.set(name, []);
-                groups.get(name).push(order);
-            });
-
-            let html = '';
-            groups.forEach((customerOrders, name) => {
-                html += `
-                    <div class="customer-group">
-                        <div class="customer-group-header">👤 ${name}</div>
-                        ${customerOrders.map(order => `
-                            <div class="order-item">
-                                <strong>${order.cocktail}</strong> - <em>${translateVariant(order.variant)}</em> - <strong style="color: #667eea;">${order.price}</strong><br>
-                                📍 ${translateLocation(order.location)} | ⏰ ${translateTime(order.time)}<br>
-                                <small style="color: #666;">${t('orderedLabel')} ${order.orderDate} ${order.orderTime}</small>
-                                ${order.notes ? `<br><small>📝 ${order.notes}</small>` : ''}
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-            });
+            let html = pageOrders.map(order => `
+                <div class="order-item">
+                    <strong>${order.cocktail}</strong> - <em>${translateVariant(order.variant)}</em> - <strong style="color: #667eea;">${order.price}</strong><br>
+                    👤 ${order.customerName || '-'}<br>
+                    📍 ${translateLocation(order.location)} | ⏰ ${translateTime(order.time)}<br>
+                    <small style="color: #666;">${t('orderedLabel')} ${order.orderDate} ${order.orderTime}</small>
+                    ${order.notes ? `<br><small>📝 ${order.notes}</small>` : ''}
+                </div>
+            `).join('');
 
             // Controlli di paginazione (solo se serve più di una pagina)
             if (totalPages > 1) {
@@ -1704,13 +1723,11 @@
                 return;
             }
 
-            const starsDisplay = '⭐'.repeat(selectedRating) + '☆'.repeat(5 - selectedRating);
-
-            let message = `⭐ *RECENSIONE COCKTAIL DANIEL*\n\n`;
-            message += `👤 *Da:* ${customerName}\n`;
-            message += `${starsDisplay} (${selectedRating}/5)\n\n`;
-            message += `💬 "${reviewText}"\n\n`;
-            message += `📅 ${new Date().toLocaleDateString('it-IT')} ore ${new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}`;
+            let message = `*RECENSIONE COCKTAIL DANIEL*\n\n`;
+            message += `*Da:* ${customerName}\n`;
+            message += `*Voto:* ${selectedRating}/5\n\n`;
+            message += `"${reviewText}"\n\n`;
+            message += `${new Date().toLocaleDateString('it-IT')} ore ${new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}`;
 
             const encodedMessage = encodeURIComponent(message);
 
@@ -1746,8 +1763,7 @@
         applyTranslations();
         renderCocktails();
         renderOrders();
-        loadOrdersFromCloud();
-        checkRegistration();
+        checkRegistration(); // Mostra il popup nome oppure carica gli ordini dell'utente dal cloud
 
         // Close modal on outside click
         document.getElementById('orderModal').addEventListener('click', function(e) {
