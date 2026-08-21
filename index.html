@@ -396,6 +396,101 @@
             opacity: 0.9;
         }
 
+        .cocktail-special {
+            border: 2px solid #f5a623;
+            position: relative;
+        }
+
+        .special-badge {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #ff9800 0%, #f5a623 100%);
+            color: white;
+            font-size: 0.7em;
+            font-weight: bold;
+            padding: 3px 12px;
+            border-radius: 12px;
+            white-space: nowrap;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+        }
+
+        .cocktail-price {
+            margin-top: 6px;
+            font-weight: bold;
+            color: #667eea;
+            font-size: 0.9em;
+        }
+
+        .price-card {
+            background: #f5f5f5;
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 14px;
+            border-left: 4px solid #667eea;
+        }
+
+        .price-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .special-toggle {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.8em;
+            cursor: pointer;
+            color: #b8860b;
+            font-weight: 600;
+        }
+
+        .special-toggle input {
+            width: auto;
+            margin: 0;
+        }
+
+        .price-row, .surcharge-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .price-variant {
+            flex: 1;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        .surcharge-row label {
+            flex: 1;
+            font-size: 0.9em;
+            color: #555;
+            margin: 0;
+        }
+
+        .price-row input, .surcharge-row input {
+            width: 90px;
+            padding: 8px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 15px;
+            text-align: right;
+            margin: 0;
+        }
+
+        .price-currency {
+            color: #667eea;
+            font-weight: bold;
+            width: 14px;
+        }
+
         .pagination {
             display: flex;
             justify-content: center;
@@ -477,12 +572,14 @@
             <button class="lang-btn" id="langBtnEs" onclick="setLanguage('es')" title="Español">🇪🇸</button>
             <button class="lang-btn" id="langBtnDe" onclick="setLanguage('de')" title="Deutsch">🇩🇪</button>
             <button class="lang-btn" id="langBtnFr" onclick="setLanguage('fr')" title="Français">🇫🇷</button>
+            <button class="lang-btn" id="langBtnUk" onclick="setLanguage('uk')" title="Українська">🇺🇦</button>
         </div>
         <h1>🍹 <span data-i18n="brandName">COCKTAIL DANIEL SRL</span></h1>
         <div class="copyright" data-i18n="copyright">© 2026 COCKTAIL DANIEL SRL - Tutti i diritti riservati</div>
         <div id="userGreeting" style="display: none; text-align: center; margin-bottom: 15px;">
             <span style="color: white; font-size: 1em; text-shadow: 1px 1px 4px rgba(0,0,0,0.6);">👤 <strong id="greetingName"></strong></span>
             <button onclick="changeUserName()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; padding: 3px 8px; font-size: 0.7em; cursor: pointer; margin-left: 6px;">✏️</button>
+            <button id="priceListBtn" onclick="openPriceList()" style="display:none; background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; padding: 3px 10px; font-size: 0.7em; cursor: pointer; margin-left: 6px;" data-i18n="priceListBtn">💵 Listino</button>
         </div>
 
         <div id="successMessage" class="success-message" data-i18n="orderSuccess">
@@ -528,6 +625,37 @@
         <!-- Review Button -->
         <div style="margin-top: 20px; text-align: center;">
             <button onclick="openReviewModal()" style="background: rgba(255,255,255,0.92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: #333; border: none; border-radius: 12px; padding: 16px 30px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 8px 20px rgba(0,0,0,0.3); transition: transform 0.3s ease, box-shadow 0.3s ease; width: 100%;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 30px rgba(0,0,0,0.4)'" onmouseout="this.style.transform=''; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.3)'" data-i18n="reviewButton">⭐ Lascia una recensione</button>
+        </div>
+    </div>
+
+    <!-- Price List Modal (solo admin) -->
+    <div class="modal" id="priceListModal">
+        <div class="modal-content">
+            <h2 data-i18n="priceListTitle">💵 Listino prezzi</h2>
+            <p style="color:#666; font-size:0.85em; margin-bottom:18px;" data-i18n="priceListSubtitle">Modifica i prezzi base per ogni variante e segnala le offerte speciali.</p>
+
+            <div id="priceListForm"></div>
+
+            <div style="background:#f0f7ff; border:2px solid #667eea; border-radius:10px; padding:15px; margin:18px 0;">
+                <div style="font-weight:600; margin-bottom:10px; color:#333;" data-i18n="surchargeTitle">⏱️ Supplementi orario</div>
+                <div class="surcharge-row">
+                    <label data-i18n="timeNow">Subito</label>
+                    <input type="number" step="0.10" min="0" id="surchargeNow">
+                </div>
+                <div class="surcharge-row">
+                    <label data-i18n="time10">10 min</label>
+                    <input type="number" step="0.10" min="0" id="surcharge10">
+                </div>
+                <div class="surcharge-row">
+                    <label data-i18n="time30">30 min</label>
+                    <input type="number" step="0.10" min="0" id="surcharge30">
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="closePriceList()" data-i18n="cancel">Annulla</button>
+                <button class="btn btn-primary" onclick="savePriceList()" data-i18n="savePriceList">Salva listino</button>
+            </div>
         </div>
     </div>
 
@@ -756,7 +884,16 @@
                 pendingTitle: "Pagamento in attesa di conferma",
                 pendingText: "Daniel deve confermare di aver ricevuto il pagamento.",
                 paymentRequests: "Richieste di pagamento",
-                confirmReceived: "✓ Confermo ricezione"
+                confirmReceived: "✓ Confermo ricezione",
+                priceListBtn: "💵 Listino",
+                priceListTitle: "💵 Listino prezzi",
+                priceListSubtitle: "Modifica i prezzi base per ogni variante e segnala le offerte speciali.",
+                surchargeTitle: "⏱️ Supplementi orario",
+                savePriceList: "Salva listino",
+                priceListSaved: "✅ Listino salvato e pubblicato!",
+                priceListSavedLocal: "⚠️ Listino salvato solo in locale (cloud non raggiungibile).",
+                specialOffer: "OFFERTA",
+                fromPrice: "da"
             },
             en: {
                 brandName: "COCKTAIL DANIEL SRL",
@@ -820,7 +957,16 @@
                 pendingTitle: "Payment awaiting confirmation",
                 pendingText: "Daniel must confirm he received the payment.",
                 paymentRequests: "Payment requests",
-                confirmReceived: "✓ Confirm received"
+                confirmReceived: "✓ Confirm received",
+                priceListBtn: "💵 Prices",
+                priceListTitle: "💵 Price list",
+                priceListSubtitle: "Edit base prices for each variant and mark special offers.",
+                surchargeTitle: "⏱️ Time surcharges",
+                savePriceList: "Save price list",
+                priceListSaved: "✅ Price list saved and published!",
+                priceListSavedLocal: "⚠️ Price list saved locally only (cloud unreachable).",
+                specialOffer: "SPECIAL",
+                fromPrice: "from"
             },
             es: {
                 brandName: "COCKTAIL DANIEL SRL",
@@ -884,7 +1030,16 @@
                 pendingTitle: "Pago pendiente de confirmación",
                 pendingText: "Daniel debe confirmar que ha recibido el pago.",
                 paymentRequests: "Solicitudes de pago",
-                confirmReceived: "✓ Confirmar recibido"
+                confirmReceived: "✓ Confirmar recibido",
+                priceListBtn: "💵 Precios",
+                priceListTitle: "💵 Lista de precios",
+                priceListSubtitle: "Edita los precios base de cada variante y marca las ofertas especiales.",
+                surchargeTitle: "⏱️ Recargos por horario",
+                savePriceList: "Guardar lista",
+                priceListSaved: "✅ ¡Lista de precios guardada y publicada!",
+                priceListSavedLocal: "⚠️ Lista guardada solo localmente (nube no disponible).",
+                specialOffer: "OFERTA",
+                fromPrice: "desde"
             },
             de: {
                 brandName: "COCKTAIL DANIEL SRL",
@@ -948,7 +1103,16 @@
                 pendingTitle: "Zahlung wartet auf Bestätigung",
                 pendingText: "Daniel muss den Zahlungseingang bestätigen.",
                 paymentRequests: "Zahlungsanfragen",
-                confirmReceived: "✓ Erhalt bestätigen"
+                confirmReceived: "✓ Erhalt bestätigen",
+                priceListBtn: "💵 Preise",
+                priceListTitle: "💵 Preisliste",
+                priceListSubtitle: "Bearbeite die Grundpreise jeder Variante und markiere Sonderangebote.",
+                surchargeTitle: "⏱️ Zeitzuschläge",
+                savePriceList: "Preisliste speichern",
+                priceListSaved: "✅ Preisliste gespeichert und veröffentlicht!",
+                priceListSavedLocal: "⚠️ Preisliste nur lokal gespeichert (Cloud nicht erreichbar).",
+                specialOffer: "ANGEBOT",
+                fromPrice: "ab"
             },
             fr: {
                 brandName: "COCKTAIL DANIEL SRL",
@@ -1012,7 +1176,89 @@
                 pendingTitle: "Paiement en attente de confirmation",
                 pendingText: "Daniel doit confirmer avoir reçu le paiement.",
                 paymentRequests: "Demandes de paiement",
-                confirmReceived: "✓ Confirmer réception"
+                confirmReceived: "✓ Confirmer réception",
+                priceListBtn: "💵 Tarifs",
+                priceListTitle: "💵 Liste des prix",
+                priceListSubtitle: "Modifiez les prix de base de chaque variante et signalez les offres spéciales.",
+                surchargeTitle: "⏱️ Suppléments horaires",
+                savePriceList: "Enregistrer les tarifs",
+                priceListSaved: "✅ Tarifs enregistrés et publiés !",
+                priceListSavedLocal: "⚠️ Tarifs enregistrés localement uniquement (cloud indisponible).",
+                specialOffer: "PROMO",
+                fromPrice: "à partir de"
+            },
+            uk: {
+                brandName: "COCKTAIL DANIEL SRL",
+                copyright: "© 2026 COCKTAIL DANIEL SRL - Усі права захищено",
+                orderSuccess: "✓ Замовлення успішно надіслано!",
+                ordersHistory: "📋 Історія замовлень",
+                totalSpentLabel: "💰 Загалом витрачено",
+                payButton: "✅ Оплатити та закрити рахунок",
+                reviewButton: "⭐ Залишити відгук",
+                reviewTitle: "⭐ Ваш відгук",
+                reviewSubtitle: "Розкажіть, що ви думаєте! Буде надіслано до групи Family.",
+                reviewRatingLabel: "Наскільки вам сподобалося?",
+                reviewCommentLabel: "💬 Ваш коментар:",
+                reviewCommentPlaceholder: "напр.: Чудовий Мохіто, швидке обслуговування!",
+                cancel: "Скасувати",
+                sendReview: "Надіслати відгук ⭐",
+                welcomeTitle: "Ласкаво просимо!",
+                welcomeSubtitle: "Як вас звати? Це потрібно для ідентифікації ваших замовлень.<br>Ми запитаємо <strong>лише один раз</strong>.",
+                nameLabel: "👤 Ваше ім'я:",
+                namePlaceholder: "напр.: Марко",
+                startOrdering: "Почати замовляти 🍹",
+                completeOrder: "Завершіть замовлення",
+                cocktailLabel: "Коктейль:",
+                chooseVariant: "Оберіть варіант:",
+                tablePosition: "Стіл / Місце:",
+                locWhereIAm: "Де я є",
+                locHome: "Вдома",
+                locGarden: "У саду",
+                preferredTime: "Бажаний час:",
+                timeNow: "Зараз",
+                time10: "10 хв",
+                time30: "30 хв",
+                additionalNotes: "Додаткові примітки (необов'язково):",
+                notesPlaceholder: "напр.: Менше льоду, більше лимона...",
+                priceToPay: "💰 Ціна до сплати при доставці:",
+                confirmOrderBtn: "Підтвердити замовлення",
+                orderNow: "Замовити",
+                noOrders: "Ще немає замовлень 🍹",
+                orderedLabel: "Замовлено:",
+                orderSingular: "замовлення",
+                orderPlural: "замовлень",
+                changeName: "Змінити ваше ім'я:",
+                enterNameAlert: "Будь ласка, введіть ваше ім'я, щоб продовжити.",
+                selectStarAlert: "Будь ласка, оберіть хоча б одну зірку.",
+                writeCommentAlert: "Будь ласка, напишіть коментар до відгуку.",
+                reviewSentMsg: "⭐ Відгук надіслано! Дякуємо!",
+                paymentSentMsg: "✅ Оплату надіслано! Рахунок закрито.",
+                confirmPayment: "Підтвердити оплату {total} за {count} замовлень?",
+                reviewCopiedAlert: "Відгук скопійовано! Відкриється група Family: вставте повідомлення в чат.",
+                gpsErrorTitle: "Не вдалося отримати ваше GPS-місцезнаходження.\n\n",
+                gpsErrorDenied: "Ви відмовили у доступі до місцезнаходження.\n\nЩоб використовувати \"Де я є\", потрібно:\n1. Дозволити доступ до місцезнаходження\n2. Або обрати \"Вдома\" чи \"У саду\"",
+                gpsErrorUnavailable: "Не вдалося визначити місцезнаходження.\n\nПеревірте зв'язок з інтернетом і спробуйте знову,\nабо оберіть \"Вдома\" чи \"У саду\".",
+                gpsErrorTimeout: "Час очікування вичерпано: це триває занадто довго.\n\nСпробуйте знову або оберіть \"Вдома\" чи \"У саду\".",
+                gpsErrorUnknown: "Невідома помилка.\n\nОберіть \"Вдома\" чи \"У саду\", щоб продовжити.",
+                gettingLocation: "📍 Визначення місцезнаходження...",
+                pendingTag: "в очікуванні",
+                stillToPay: "Ще до сплати:",
+                paymentRequestedMsg: "⏳ Запит надіслано! Очікується підтвердження.",
+                paymentConfirmedMsg: "✅ Оплату підтверджено! Рахунок закрито. Дякуємо!",
+                paymentClosedMsg: "✅ Оплату підтверджено, рахунок закрито.",
+                pendingTitle: "Оплата очікує підтвердження",
+                pendingText: "Деніел має підтвердити отримання оплати.",
+                paymentRequests: "Запити на оплату",
+                confirmReceived: "✓ Підтверджую отримання",
+                priceListBtn: "💵 Ціни",
+                priceListTitle: "💵 Прайс-лист",
+                priceListSubtitle: "Змінюйте базові ціни кожного варіанту та позначайте спеціальні пропозиції.",
+                surchargeTitle: "⏱️ Доплати за час",
+                savePriceList: "Зберегти прайс",
+                priceListSaved: "✅ Прайс збережено та опубліковано!",
+                priceListSavedLocal: "⚠️ Прайс збережено лише локально (хмара недоступна).",
+                specialOffer: "АКЦІЯ",
+                fromPrice: "від"
             }
         };
 
@@ -1138,8 +1384,139 @@
                     "Fresco": "Frais",
                     "Tropicale": "Tropical"
                 }
+            },
+            uk: {
+                descriptions: {
+                    "Rum, menta, lime, zucchero, soda": "Ром, м'ята, лайм, цукор, содова",
+                    "Tequila, triple sec, succo di lime": "Текіла, трипл сек, сік лайма",
+                    "Gin, Campari, vermouth rosso": "Джин, Кампарі, червоний вермут",
+                    "Aperol, prosecco, soda": "Апероль, просекко, содова",
+                    "Gin, tonica, lime": "Джин, тонік, лайм",
+                    "Gin, limone, soda": "Джин, лимон, содова",
+                    "Prosecco, sambuco, menta, soda": "Просекко, бузина, м'ята, содова",
+                    "Rum, cocco, ananas": "Ром, кокос, ананас",
+                    "Cachaça, lime, zucchero": "Кашаса, лайм, цукор"
+                },
+                variants: {
+                    "Classico": "Класичний",
+                    "Classica": "Класична",
+                    "Dolce": "Солодкий",
+                    "Fruttato": "Фруктовий",
+                    "Fruttata": "Фруктова",
+                    "Frozen": "Заморожений",
+                    "Piccante": "Гострий",
+                    "Sbagliato": "Sbagliato",
+                    "Bianco": "Білий",
+                    "Strong": "Міцний",
+                    "Secco": "Сухий",
+                    "Profumato": "Ароматний",
+                    "Speziato": "Пряний",
+                    "Fresco": "Свіжий",
+                    "Tropicale": "Тропічний"
+                }
             }
         };
+
+        // =============================================
+        // LISTINO PREZZI
+        // Configurabile dall'admin, salvato su Firestore (settings/pricing).
+        // Se non presente nel cloud, si usano questi valori di default.
+        // =============================================
+        function buildDefaultPricing() {
+            const items = {};
+            cocktails.forEach(c => {
+                items[c.name] = {
+                    prices: [0.50, 1.00, 2.00].slice(0, c.variants.length),
+                    special: false
+                };
+            });
+            return {
+                items: items,
+                timeSurcharge: { 'Subito': 1.00, '10 minuti': 0.50, '30 minuti': 0 }
+            };
+        }
+
+        let pricing = buildDefaultPricing();
+        try {
+            const cachedPricing = localStorage.getItem('cocktailPricing');
+            if (cachedPricing) {
+                const parsed = JSON.parse(cachedPricing);
+                if (parsed && parsed.items) pricing = parsed;
+            }
+        } catch (e) { /* usa i default */ }
+
+        // Prezzo base di un cocktail per la variante selezionata
+        function getBasePrice(cocktailName, variantIndex) {
+            const item = pricing.items[cocktailName];
+            if (!item || !Array.isArray(item.prices)) return 0.50;
+            const p = item.prices[variantIndex >= 0 ? variantIndex : 0];
+            return (typeof p === 'number' && !isNaN(p)) ? p : 0.50;
+        }
+
+        // Supplemento in base all'orario di consegna
+        function getTimeSurcharge(time) {
+            const s = pricing.timeSurcharge ? pricing.timeSurcharge[time] : undefined;
+            return (typeof s === 'number' && !isNaN(s)) ? s : 0;
+        }
+
+        // Prezzo totale (base + supplemento orario)
+        function computePrice(cocktailName, variant, time) {
+            const cocktail = cocktails.find(c => c.name === cocktailName);
+            if (!cocktail) return 0;
+            const variantIndex = cocktail.variants.indexOf(variant);
+            return getBasePrice(cocktailName, variantIndex) + getTimeSurcharge(time);
+        }
+
+        function formatPrice(value) {
+            return value.toFixed(2).replace('.', ',') + '€';
+        }
+
+        function isSpecial(cocktailName) {
+            return !!(pricing.items[cocktailName] && pricing.items[cocktailName].special);
+        }
+
+        // Carica il listino dal cloud (tutti gli utenti)
+        async function loadPricing() {
+            if (!isApiConfigured()) return;
+            try {
+                const doc = await firestoreDb.collection('settings').doc('pricing').get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    const merged = buildDefaultPricing();
+                    // Unisce i valori salvati con i default (per cocktail aggiunti dopo)
+                    if (data.items) {
+                        Object.keys(merged.items).forEach(name => {
+                            if (data.items[name]) {
+                                merged.items[name] = {
+                                    prices: data.items[name].prices || merged.items[name].prices,
+                                    special: !!data.items[name].special
+                                };
+                            }
+                        });
+                    }
+                    if (data.timeSurcharge) merged.timeSurcharge = data.timeSurcharge;
+                    pricing = merged;
+                    localStorage.setItem('cocktailPricing', JSON.stringify(pricing));
+                    renderCocktails();
+                    updatePriceDisplay();
+                }
+            } catch (error) {
+                console.log('Listino non disponibile, uso valori locali:', error);
+            }
+        }
+
+        // Salva il listino sul cloud (solo admin)
+        async function savePricing() {
+            if (!isApiConfigured() || !isAdmin()) return false;
+            try {
+                await firestoreDb.collection('settings').doc('pricing').set(pricing);
+                localStorage.setItem('cocktailPricing', JSON.stringify(pricing));
+                return true;
+            } catch (error) {
+                console.log('Errore salvataggio listino:', error);
+                return false;
+            }
+        }
 
         let currentLang = localStorage.getItem('appLanguage') || 'it';
 
@@ -1196,6 +1573,7 @@
             document.getElementById('langBtnEs').classList.toggle('active', currentLang === 'es');
             document.getElementById('langBtnDe').classList.toggle('active', currentLang === 'de');
             document.getElementById('langBtnFr').classList.toggle('active', currentLang === 'fr');
+            document.getElementById('langBtnUk').classList.toggle('active', currentLang === 'uk');
         }
 
         // Change language
@@ -1290,6 +1668,8 @@
         function showGreeting() {
             document.getElementById('greetingName').textContent = customerName + (isAdmin() ? ' (ADMIN)' : '');
             document.getElementById('userGreeting').style.display = 'block';
+            const priceBtn = document.getElementById('priceListBtn');
+            if (priceBtn) priceBtn.style.display = isAdmin() ? 'inline-block' : 'none';
         }
 
         // =============================================
@@ -1587,21 +1967,114 @@
             }
         }
 
+        // =============================================
+        // PAGINA LISTINO (solo admin)
+        // =============================================
+        function openPriceList() {
+            if (!isAdmin()) return;
+
+            const form = document.getElementById('priceListForm');
+            form.innerHTML = cocktails.map(c => {
+                const item = pricing.items[c.name] || { prices: [], special: false };
+                const rows = c.variants.map((v, i) => `
+                    <div class="price-row">
+                        <span class="price-variant">${translateVariant(v)}</span>
+                        <input type="number" step="0.10" min="0"
+                               data-cocktail="${c.name}" data-index="${i}"
+                               value="${(item.prices[i] ?? 0.5).toFixed(2)}">
+                        <span class="price-currency">€</span>
+                    </div>
+                `).join('');
+                return `
+                    <div class="price-card">
+                        <div class="price-card-header">
+                            <span>${c.icon} <strong>${c.name}</strong></span>
+                            <label class="special-toggle">
+                                <input type="checkbox" data-special="${c.name}" ${item.special ? 'checked' : ''}>
+                                <span>🔥 ${t('specialOffer')}</span>
+                            </label>
+                        </div>
+                        ${rows}
+                    </div>
+                `;
+            }).join('');
+
+            const ts = pricing.timeSurcharge || {};
+            document.getElementById('surchargeNow').value = (ts['Subito'] ?? 1).toFixed(2);
+            document.getElementById('surcharge10').value = (ts['10 minuti'] ?? 0.5).toFixed(2);
+            document.getElementById('surcharge30').value = (ts['30 minuti'] ?? 0).toFixed(2);
+
+            document.getElementById('priceListModal').classList.add('active');
+        }
+
+        function closePriceList() {
+            document.getElementById('priceListModal').classList.remove('active');
+        }
+
+        async function savePriceList() {
+            if (!isAdmin()) return;
+
+            const updated = buildDefaultPricing();
+
+            // Prezzi per variante
+            document.querySelectorAll('#priceListForm input[data-cocktail]').forEach(input => {
+                const name = input.getAttribute('data-cocktail');
+                const idx = parseInt(input.getAttribute('data-index'), 10);
+                const val = parseFloat(input.value);
+                if (!updated.items[name]) updated.items[name] = { prices: [], special: false };
+                updated.items[name].prices[idx] = isNaN(val) ? 0.5 : val;
+            });
+
+            // Offerte speciali
+            document.querySelectorAll('#priceListForm input[data-special]').forEach(chk => {
+                const name = chk.getAttribute('data-special');
+                if (updated.items[name]) updated.items[name].special = chk.checked;
+            });
+
+            // Supplementi orario
+            const num = (id, fallback) => {
+                const v = parseFloat(document.getElementById(id).value);
+                return isNaN(v) ? fallback : v;
+            };
+            updated.timeSurcharge = {
+                'Subito': num('surchargeNow', 1),
+                '10 minuti': num('surcharge10', 0.5),
+                '30 minuti': num('surcharge30', 0)
+            };
+
+            pricing = updated;
+            const ok = await savePricing();
+
+            closePriceList();
+            renderCocktails();
+            updatePriceDisplay();
+
+            const successMsg = document.getElementById('successMessage');
+            successMsg.textContent = ok ? t('priceListSaved') : t('priceListSavedLocal');
+            successMsg.classList.add('show');
+            setTimeout(() => successMsg.classList.remove('show'), 3000);
+        }
+
         // Render cocktails
         function renderCocktails() {
             const grid = document.getElementById('cocktailGrid');
-            grid.innerHTML = cocktails.map(cocktail => `
-                <div class="cocktail-card" onclick="openOrderModal('${cocktail.name}')">
+            grid.innerHTML = cocktails.map(cocktail => {
+                const special = isSpecial(cocktail.name);
+                const fromPrice = Math.min(...(pricing.items[cocktail.name]?.prices || [0.50]));
+                return `
+                <div class="cocktail-card${special ? ' cocktail-special' : ''}" onclick="openOrderModal('${cocktail.name}')">
+                    ${special ? `<div class="special-badge">🔥 ${t('specialOffer')}</div>` : ''}
                     <div class="cocktail-icon">${cocktail.icon}</div>
                     <div class="cocktail-info">
                         <div class="cocktail-name">${cocktail.name}</div>
                         <div class="cocktail-description">${translateDescription(cocktail.description)}</div>
+                        <div class="cocktail-price">${t('fromPrice')} ${formatPrice(fromPrice)}</div>
                     </div>
                     <button class="order-btn" onclick="event.stopPropagation(); openOrderModal('${cocktail.name}')">
                         ${t('orderNow')}
                     </button>
-                </div>
-            `).join('');
+                </div>`;
+            }).join('');
         }
 
         // Open order modal
@@ -1661,30 +2134,9 @@
         function updatePriceDisplay() {
             const cocktail = cocktails.find(c => c.name === selectedCocktail);
             if (!cocktail) return;
-            
-            const variantIndex = cocktail.variants.indexOf(selectedVariant);
-            let basePrice = 0.50;
-            
-            if (variantIndex === 0) {
-                basePrice = 0.50;
-            } else if (variantIndex === 1) {
-                basePrice = 1.00;
-            } else if (variantIndex === 2) {
-                basePrice = 2.00;
-            }
-            
-            // Add delivery time surcharge
-            let timeSurcharge = 0;
-            if (selectedDeliveryTime === 'Subito') {
-                timeSurcharge = 1.00;
-            } else if (selectedDeliveryTime === '10 minuti') {
-                timeSurcharge = 0.50;
-            } else if (selectedDeliveryTime === '30 minuti') {
-                timeSurcharge = 0;
-            }
-            
-            const totalPrice = basePrice + timeSurcharge;
-            const priceFormatted = totalPrice.toFixed(2).replace('.', ',') + '€';
+
+            const totalPrice = computePrice(selectedCocktail, selectedVariant, selectedDeliveryTime);
+            const priceFormatted = formatPrice(totalPrice);
             
             const priceDisplay = document.getElementById('priceDisplay');
             if (priceDisplay) {
@@ -1793,31 +2245,8 @@
         async function confirmOrder() {
             const notes = document.getElementById('orderNotes').value.trim();
 
-            // Calculate price based on variant position
-            const cocktail = cocktails.find(c => c.name === selectedCocktail);
-            const variantIndex = cocktail.variants.indexOf(selectedVariant);
-            let basePrice = 0.50;
-            
-            if (variantIndex === 0) {
-                basePrice = 0.50;
-            } else if (variantIndex === 1) {
-                basePrice = 1.00;
-            } else if (variantIndex === 2) {
-                basePrice = 2.00;
-            }
-            
-            // Add delivery time surcharge
-            let timeSurcharge = 0;
-            if (selectedDeliveryTime === 'Subito') {
-                timeSurcharge = 1.00;
-            } else if (selectedDeliveryTime === '10 minuti') {
-                timeSurcharge = 0.50;
-            } else if (selectedDeliveryTime === '30 minuti') {
-                timeSurcharge = 0;
-            }
-            
-            const totalPrice = basePrice + timeSurcharge;
-            const price = totalPrice.toFixed(2).replace('.', ',') + '€';
+            // Calculate price using the shared pricing configuration
+            const price = formatPrice(computePrice(selectedCocktail, selectedVariant, selectedDeliveryTime));
 
             // Get GPS coordinates if location is "Dove Sono io"
             let gpsCoordinates = null;
@@ -2129,6 +2558,7 @@
         renderOrders();
         checkRegistration(); // Mostra il popup nome oppure carica gli ordini dell'utente dal cloud
         startPaymentPolling();
+        loadPricing();       // Carica il listino aggiornato dal cloud
 
         // Close modal on outside click
         document.getElementById('orderModal').addEventListener('click', function(e) {
