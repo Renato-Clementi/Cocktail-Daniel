@@ -491,6 +491,49 @@
             width: 14px;
         }
 
+        .cocktail-premium {
+            border: 2px solid #d4af37;
+            position: relative;
+            background: rgba(255, 252, 240, 0.94);
+        }
+
+        .premium-badge {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
+            color: white;
+            font-size: 0.7em;
+            font-weight: bold;
+            padding: 3px 12px;
+            border-radius: 12px;
+            white-space: nowrap;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+        }
+
+        .premium-section {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #d0d0d0;
+        }
+
+        .premium-toggle {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.8em;
+            cursor: pointer;
+            color: #b8860b;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .premium-toggle input {
+            width: auto;
+            margin: 0;
+        }
+
         .pagination {
             display: flex;
             justify-content: center;
@@ -893,7 +936,11 @@
                 priceListSaved: "✅ Listino salvato e pubblicato!",
                 priceListSavedLocal: "⚠️ Listino salvato solo in locale (cloud non raggiungibile).",
                 specialOffer: "OFFERTA",
-                fromPrice: "da"
+                fromPrice: "da",
+                premiumLabel: "PREMIUM",
+                premiumDesc: "ingredienti selezionati",
+                premiumEnable: "Abilita versione Premium",
+                premiumSurcharge: "Maggiorazione Premium"
             },
             en: {
                 brandName: "COCKTAIL DANIEL SRL",
@@ -966,7 +1013,11 @@
                 priceListSaved: "✅ Price list saved and published!",
                 priceListSavedLocal: "⚠️ Price list saved locally only (cloud unreachable).",
                 specialOffer: "SPECIAL",
-                fromPrice: "from"
+                fromPrice: "from",
+                premiumLabel: "PREMIUM",
+                premiumDesc: "selected ingredients",
+                premiumEnable: "Enable Premium version",
+                premiumSurcharge: "Premium surcharge"
             },
             es: {
                 brandName: "COCKTAIL DANIEL SRL",
@@ -1039,7 +1090,11 @@
                 priceListSaved: "✅ ¡Lista de precios guardada y publicada!",
                 priceListSavedLocal: "⚠️ Lista guardada solo localmente (nube no disponible).",
                 specialOffer: "OFERTA",
-                fromPrice: "desde"
+                fromPrice: "desde",
+                premiumLabel: "PREMIUM",
+                premiumDesc: "ingredientes seleccionados",
+                premiumEnable: "Activar versión Premium",
+                premiumSurcharge: "Recargo Premium"
             },
             de: {
                 brandName: "COCKTAIL DANIEL SRL",
@@ -1112,7 +1167,11 @@
                 priceListSaved: "✅ Preisliste gespeichert und veröffentlicht!",
                 priceListSavedLocal: "⚠️ Preisliste nur lokal gespeichert (Cloud nicht erreichbar).",
                 specialOffer: "ANGEBOT",
-                fromPrice: "ab"
+                fromPrice: "ab",
+                premiumLabel: "PREMIUM",
+                premiumDesc: "ausgewählte Zutaten",
+                premiumEnable: "Premium-Version aktivieren",
+                premiumSurcharge: "Premium-Zuschlag"
             },
             fr: {
                 brandName: "COCKTAIL DANIEL SRL",
@@ -1185,7 +1244,11 @@
                 priceListSaved: "✅ Tarifs enregistrés et publiés !",
                 priceListSavedLocal: "⚠️ Tarifs enregistrés localement uniquement (cloud indisponible).",
                 specialOffer: "PROMO",
-                fromPrice: "à partir de"
+                fromPrice: "à partir de",
+                premiumLabel: "PREMIUM",
+                premiumDesc: "ingrédients sélectionnés",
+                premiumEnable: "Activer la version Premium",
+                premiumSurcharge: "Supplément Premium"
             },
             uk: {
                 brandName: "COCKTAIL DANIEL SRL",
@@ -1258,7 +1321,11 @@
                 priceListSaved: "✅ Прайс збережено та опубліковано!",
                 priceListSavedLocal: "⚠️ Прайс збережено лише локально (хмара недоступна).",
                 specialOffer: "АКЦІЯ",
-                fromPrice: "від"
+                fromPrice: "від",
+                premiumLabel: "ПРЕМІУМ",
+                premiumDesc: "добірні інгредієнти",
+                premiumEnable: "Увімкнути Преміум-версію",
+                premiumSurcharge: "Преміум-доплата"
             }
         };
 
@@ -1427,7 +1494,9 @@
             cocktails.forEach(c => {
                 items[c.name] = {
                     prices: [0.50, 1.00, 2.00].slice(0, c.variants.length),
-                    special: false
+                    special: false,
+                    premium: false,        // Se attivo, appare una card "Nome Premium" nel catalogo
+                    premiumSurcharge: 2.00 // Maggiorazione applicata alla versione premium
                 };
             });
             return {
@@ -1460,11 +1529,18 @@
         }
 
         // Prezzo totale (base + supplemento orario)
+        // Prezzo totale (base + supplemento orario + eventuale maggiorazione premium)
+        // Accetta sia "Mojito" sia "Mojito Premium".
         function computePrice(cocktailName, variant, time) {
-            const cocktail = cocktails.find(c => c.name === cocktailName);
+            const base = baseNameOf(cocktailName);
+            const cocktail = cocktails.find(c => c.name === base);
             if (!cocktail) return 0;
             const variantIndex = cocktail.variants.indexOf(variant);
-            return getBasePrice(cocktailName, variantIndex) + getTimeSurcharge(time);
+            let price = getBasePrice(base, variantIndex) + getTimeSurcharge(time);
+            if (isPremiumName(cocktailName)) {
+                price += getPremiumSurcharge(base);
+            }
+            return price;
         }
 
         function formatPrice(value) {
@@ -1473,6 +1549,51 @@
 
         function isSpecial(cocktailName) {
             return !!(pricing.items[cocktailName] && pricing.items[cocktailName].special);
+        }
+
+        // =============================================
+        // VERSIONE PREMIUM
+        // Il suffisso " Premium" viene aggiunto al nome del cocktail.
+        // I dati salvati (ordini/WhatsApp) usano il nome completo,
+        // mentre i prezzi si basano sempre sul cocktail base.
+        // =============================================
+        const PREMIUM_SUFFIX = ' Premium';
+
+        function isPremiumName(name) {
+            return typeof name === 'string' && name.endsWith(PREMIUM_SUFFIX);
+        }
+
+        // Dal nome visualizzato ricava il cocktail base del listino
+        function baseNameOf(name) {
+            return isPremiumName(name) ? name.slice(0, -PREMIUM_SUFFIX.length) : name;
+        }
+
+        function isPremiumEnabled(cocktailName) {
+            const item = pricing.items[cocktailName];
+            return !!(item && item.premium);
+        }
+
+        function getPremiumSurcharge(cocktailName) {
+            const item = pricing.items[cocktailName];
+            const s = item ? item.premiumSurcharge : undefined;
+            return (typeof s === 'number' && !isNaN(s)) ? s : 0;
+        }
+
+        // Elenco delle card da mostrare nel catalogo: i cocktail base
+        // più, per quelli con premium attivo, una card dedicata.
+        function getCatalogItems() {
+            const list = [];
+            cocktails.forEach(c => {
+                list.push({ ...c, displayName: c.name, premium: false });
+                if (isPremiumEnabled(c.name)) {
+                    list.push({
+                        ...c,
+                        displayName: c.name + PREMIUM_SUFFIX,
+                        premium: true
+                    });
+                }
+            });
+            return list;
         }
 
         // Carica il listino dal cloud (tutti gli utenti)
@@ -1489,7 +1610,11 @@
                             if (data.items[name]) {
                                 merged.items[name] = {
                                     prices: data.items[name].prices || merged.items[name].prices,
-                                    special: !!data.items[name].special
+                                    special: !!data.items[name].special,
+                                    premium: !!data.items[name].premium,
+                                    premiumSurcharge: (typeof data.items[name].premiumSurcharge === 'number')
+                                        ? data.items[name].premiumSurcharge
+                                        : merged.items[name].premiumSurcharge
                                 };
                             }
                         });
@@ -1975,7 +2100,7 @@
 
             const form = document.getElementById('priceListForm');
             form.innerHTML = cocktails.map(c => {
-                const item = pricing.items[c.name] || { prices: [], special: false };
+                const item = pricing.items[c.name] || { prices: [], special: false, premium: false, premiumSurcharge: 2 };
                 const rows = c.variants.map((v, i) => `
                     <div class="price-row">
                         <span class="price-variant">${translateVariant(v)}</span>
@@ -1995,6 +2120,20 @@
                             </label>
                         </div>
                         ${rows}
+                        <div class="premium-section">
+                            <label class="premium-toggle">
+                                <input type="checkbox" data-premium="${c.name}" ${item.premium ? 'checked' : ''}
+                                       onchange="togglePremiumInput('${c.name}', this.checked)">
+                                <span>⭐ ${t('premiumEnable')}</span>
+                            </label>
+                            <div class="price-row" id="premiumRow-${c.name.replace(/\s+/g,'_')}" style="${item.premium ? '' : 'display:none;'}">
+                                <span class="price-variant">${t('premiumSurcharge')}</span>
+                                <input type="number" step="0.10" min="0"
+                                       data-premium-surcharge="${c.name}"
+                                       value="${(item.premiumSurcharge ?? 2).toFixed(2)}">
+                                <span class="price-currency">€</span>
+                            </div>
+                        </div>
                     </div>
                 `;
             }).join('');
@@ -2005,6 +2144,12 @@
             document.getElementById('surcharge30').value = (ts['30 minuti'] ?? 0).toFixed(2);
 
             document.getElementById('priceListModal').classList.add('active');
+        }
+
+        // Mostra/nasconde il campo maggiorazione quando si attiva Premium
+        function togglePremiumInput(cocktailName, checked) {
+            const row = document.getElementById('premiumRow-' + cocktailName.replace(/\s+/g, '_'));
+            if (row) row.style.display = checked ? '' : 'none';
         }
 
         function closePriceList() {
@@ -2029,6 +2174,21 @@
             document.querySelectorAll('#priceListForm input[data-special]').forEach(chk => {
                 const name = chk.getAttribute('data-special');
                 if (updated.items[name]) updated.items[name].special = chk.checked;
+            });
+
+            // Versione premium attiva/disattiva
+            document.querySelectorAll('#priceListForm input[data-premium]').forEach(chk => {
+                const name = chk.getAttribute('data-premium');
+                if (updated.items[name]) updated.items[name].premium = chk.checked;
+            });
+
+            // Maggiorazione premium per cocktail
+            document.querySelectorAll('#priceListForm input[data-premium-surcharge]').forEach(input => {
+                const name = input.getAttribute('data-premium-surcharge');
+                const val = parseFloat(input.value);
+                if (updated.items[name]) {
+                    updated.items[name].premiumSurcharge = isNaN(val) ? 2.00 : val;
+                }
             });
 
             // Supplementi orario
@@ -2058,19 +2218,28 @@
         // Render cocktails
         function renderCocktails() {
             const grid = document.getElementById('cocktailGrid');
-            grid.innerHTML = cocktails.map(cocktail => {
-                const special = isSpecial(cocktail.name);
-                const fromPrice = Math.min(...(pricing.items[cocktail.name]?.prices || [0.50]));
+            grid.innerHTML = getCatalogItems().map(item => {
+                const baseName = item.name;
+                const special = !item.premium && isSpecial(baseName);
+                const basePrices = pricing.items[baseName]?.prices || [0.50];
+                let fromPrice = Math.min(...basePrices);
+                if (item.premium) fromPrice += getPremiumSurcharge(baseName);
+
+                const cardClass = item.premium ? ' cocktail-premium' : (special ? ' cocktail-special' : '');
+                const badge = item.premium
+                    ? `<div class="premium-badge">⭐ ${t('premiumLabel')}</div>`
+                    : (special ? `<div class="special-badge">🔥 ${t('specialOffer')}</div>` : '');
+
                 return `
-                <div class="cocktail-card${special ? ' cocktail-special' : ''}" onclick="openOrderModal('${cocktail.name}')">
-                    ${special ? `<div class="special-badge">🔥 ${t('specialOffer')}</div>` : ''}
-                    <div class="cocktail-icon">${cocktail.icon}</div>
+                <div class="cocktail-card${cardClass}" onclick="openOrderModal('${item.displayName}')">
+                    ${badge}
+                    <div class="cocktail-icon">${item.icon}</div>
                     <div class="cocktail-info">
-                        <div class="cocktail-name">${cocktail.name}</div>
-                        <div class="cocktail-description">${translateDescription(cocktail.description)}</div>
+                        <div class="cocktail-name">${item.displayName}</div>
+                        <div class="cocktail-description">${translateDescription(item.description)}${item.premium ? ` · <em>${t('premiumDesc')}</em>` : ''}</div>
                         <div class="cocktail-price">${t('fromPrice')} ${formatPrice(fromPrice)}</div>
                     </div>
-                    <button class="order-btn" onclick="event.stopPropagation(); openOrderModal('${cocktail.name}')">
+                    <button class="order-btn" onclick="event.stopPropagation(); openOrderModal('${item.displayName}')">
                         ${t('orderNow')}
                     </button>
                 </div>`;
@@ -2079,7 +2248,8 @@
 
         // Open order modal
         function openOrderModal(cocktailName) {
-            const cocktail = cocktails.find(c => c.name === cocktailName);
+            // cocktailName può essere "Mojito" o "Mojito Premium"
+            const cocktail = cocktails.find(c => c.name === baseNameOf(cocktailName));
             if (!cocktail) return;
             
             selectedCocktail = cocktailName;
@@ -2132,7 +2302,7 @@
 
         // Update price display based on selected variant
         function updatePriceDisplay() {
-            const cocktail = cocktails.find(c => c.name === selectedCocktail);
+            const cocktail = cocktails.find(c => c.name === baseNameOf(selectedCocktail));
             if (!cocktail) return;
 
             const totalPrice = computePrice(selectedCocktail, selectedVariant, selectedDeliveryTime);
