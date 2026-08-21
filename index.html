@@ -302,6 +302,83 @@
             color: #667eea;
         }
 
+        .pending-banner {
+            background: rgba(255, 248, 225, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid #f5a623;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+        }
+
+        .pending-banner-title {
+            font-weight: bold;
+            color: #b8860b;
+            margin-bottom: 6px;
+        }
+
+        .pending-banner-amount {
+            font-size: 1.6em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .pending-banner-text {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #e74c3c;
+            color: white;
+            border-radius: 12px;
+            padding: 2px 9px;
+            font-size: 0.7em;
+            vertical-align: middle;
+            margin-left: 6px;
+        }
+
+        .payment-request {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            background: #fff8e1;
+            border-left: 4px solid #f5a623;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 12px;
+        }
+
+        .payment-amount {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .confirm-payment-btn {
+            background: linear-gradient(135deg, #43a047 0%, #2e7d32 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 18px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .confirm-payment-btn:hover {
+            opacity: 0.9;
+        }
+
         .pagination {
             display: flex;
             justify-content: center;
@@ -395,6 +472,24 @@
             ✓ Ordine inviato con successo!
         </div>
 
+        <!-- Banner: richiesta di pagamento in attesa (vista cliente) -->
+        <div id="paymentPendingBanner" style="display:none;">
+            <div class="pending-banner">
+                <div class="pending-banner-title">⏳ <span data-i18n="pendingTitle">Pagamento in attesa di conferma</span></div>
+                <div class="pending-banner-amount" id="pendingAmount"></div>
+                <div class="pending-banner-text" data-i18n="pendingText">Daniel deve confermare di aver ricevuto il pagamento.</div>
+            </div>
+        </div>
+
+        <!-- Sezione admin: richieste di pagamento da confermare -->
+        <div id="pendingPaymentsSection" class="orders-section" style="display:none; margin-bottom:20px;">
+            <h2 style="margin-bottom:15px;">
+                🔔 <span data-i18n="paymentRequests">Richieste di pagamento</span>
+                <span class="badge" id="pendingCount">0</span>
+            </h2>
+            <div id="pendingPaymentsList"></div>
+        </div>
+
         <!-- Cocktail Grid -->
         <div class="cocktail-grid" id="cocktailGrid"></div>
 
@@ -408,7 +503,7 @@
                 <div style="font-size: 0.85em; color: rgba(255,255,255,0.85); margin-bottom: 4px;" data-i18n="totalSpentLabel">💰 Totale speso</div>
                 <div id="totalAmount" style="font-size: 1.8em; font-weight: bold; color: white;">0,00€</div>
                 <div id="totalCount" style="font-size: 0.8em; color: rgba(255,255,255,0.75); margin-top: 2px;"></div>
-                <button onclick="payAndClose()" style="margin-top: 12px; background: white; color: #667eea; border: none; border-radius: 8px; padding: 12px 24px; font-size: 15px; font-weight: bold; cursor: pointer; transition: opacity 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.2);" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'" data-i18n="payButton">✅ Paga e chiudi conto</button>
+                <button id="payButton" onclick="payAndClose()" style="margin-top: 12px; background: white; color: #667eea; border: none; border-radius: 8px; padding: 12px 24px; font-size: 15px; font-weight: bold; cursor: pointer; transition: opacity 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.2);" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'" data-i18n="payButton">✅ Paga e chiudi conto</button>
             </div>
         </div>
 
@@ -634,7 +729,14 @@
                 gpsErrorUnavailable: "Impossibile determinare la posizione.\n\nVerifica di essere connesso a internet e riprova,\noppure scegli \"In Casa\" o \"In Giardino\".",
                 gpsErrorTimeout: "Timeout: ci sta mettendo troppo tempo.\n\nRiprova o scegli \"In Casa\" o \"In Giardino\".",
                 gpsErrorUnknown: "Errore sconosciuto.\n\nScegli \"In Casa\" o \"In Giardino\" per continuare.",
-                gettingLocation: "📍 Ottenendo posizione..."
+                gettingLocation: "📍 Ottenendo posizione...",
+                paymentRequestedMsg: "⏳ Richiesta inviata! In attesa di conferma.",
+                paymentConfirmedMsg: "✅ Pagamento confermato! Conto chiuso. Grazie!",
+                paymentClosedMsg: "✅ Pagamento confermato e conto chiuso.",
+                pendingTitle: "Pagamento in attesa di conferma",
+                pendingText: "Daniel deve confermare di aver ricevuto il pagamento.",
+                paymentRequests: "Richieste di pagamento",
+                confirmReceived: "✓ Confermo ricezione"
             },
             en: {
                 brandName: "COCKTAIL DANIEL SRL",
@@ -689,7 +791,14 @@
                 gpsErrorUnavailable: "Unable to determine location.\n\nCheck that you're connected to the internet and try again,\nor choose \"At Home\" or \"In the Garden\".",
                 gpsErrorTimeout: "Timeout: it's taking too long.\n\nTry again or choose \"At Home\" or \"In the Garden\".",
                 gpsErrorUnknown: "Unknown error.\n\nChoose \"At Home\" or \"In the Garden\" to continue.",
-                gettingLocation: "📍 Getting location..."
+                gettingLocation: "📍 Getting location...",
+                paymentRequestedMsg: "⏳ Request sent! Awaiting confirmation.",
+                paymentConfirmedMsg: "✅ Payment confirmed! Bill closed. Thank you!",
+                paymentClosedMsg: "✅ Payment confirmed and bill closed.",
+                pendingTitle: "Payment awaiting confirmation",
+                pendingText: "Daniel must confirm he received the payment.",
+                paymentRequests: "Payment requests",
+                confirmReceived: "✓ Confirm received"
             },
             es: {
                 brandName: "COCKTAIL DANIEL SRL",
@@ -744,7 +853,14 @@
                 gpsErrorUnavailable: "No se puede determinar la ubicación.\n\nComprueba que estás conectado a internet e inténtalo de nuevo,\no elige \"En Casa\" o \"En el Jardín\".",
                 gpsErrorTimeout: "Tiempo agotado: está tardando demasiado.\n\nInténtalo de nuevo o elige \"En Casa\" o \"En el Jardín\".",
                 gpsErrorUnknown: "Error desconocido.\n\nElige \"En Casa\" o \"En el Jardín\" para continuar.",
-                gettingLocation: "📍 Obteniendo ubicación..."
+                gettingLocation: "📍 Obteniendo ubicación...",
+                paymentRequestedMsg: "⏳ ¡Solicitud enviada! Esperando confirmación.",
+                paymentConfirmedMsg: "✅ ¡Pago confirmado! Cuenta cerrada. ¡Gracias!",
+                paymentClosedMsg: "✅ Pago confirmado y cuenta cerrada.",
+                pendingTitle: "Pago pendiente de confirmación",
+                pendingText: "Daniel debe confirmar que ha recibido el pago.",
+                paymentRequests: "Solicitudes de pago",
+                confirmReceived: "✓ Confirmar recibido"
             },
             de: {
                 brandName: "COCKTAIL DANIEL SRL",
@@ -799,7 +915,14 @@
                 gpsErrorUnavailable: "Standort konnte nicht ermittelt werden.\n\nPrüfe deine Internetverbindung und versuche es erneut,\noder wähle \"Zu Hause\" oder \"Im Garten\".",
                 gpsErrorTimeout: "Zeitüberschreitung: Es dauert zu lange.\n\nVersuche es erneut oder wähle \"Zu Hause\" oder \"Im Garten\".",
                 gpsErrorUnknown: "Unbekannter Fehler.\n\nWähle \"Zu Hause\" oder \"Im Garten\", um fortzufahren.",
-                gettingLocation: "📍 Standort wird ermittelt..."
+                gettingLocation: "📍 Standort wird ermittelt...",
+                paymentRequestedMsg: "⏳ Anfrage gesendet! Warte auf Bestätigung.",
+                paymentConfirmedMsg: "✅ Zahlung bestätigt! Rechnung geschlossen. Danke!",
+                paymentClosedMsg: "✅ Zahlung bestätigt und Rechnung geschlossen.",
+                pendingTitle: "Zahlung wartet auf Bestätigung",
+                pendingText: "Daniel muss den Zahlungseingang bestätigen.",
+                paymentRequests: "Zahlungsanfragen",
+                confirmReceived: "✓ Erhalt bestätigen"
             },
             fr: {
                 brandName: "COCKTAIL DANIEL SRL",
@@ -854,7 +977,14 @@
                 gpsErrorUnavailable: "Impossible de déterminer la position.\n\nVérifiez votre connexion internet et réessayez,\nou choisissez \"À la Maison\" ou \"Au Jardin\".",
                 gpsErrorTimeout: "Délai dépassé : cela prend trop de temps.\n\nRéessayez ou choisissez \"À la Maison\" ou \"Au Jardin\".",
                 gpsErrorUnknown: "Erreur inconnue.\n\nChoisissez \"À la Maison\" ou \"Au Jardin\" pour continuer.",
-                gettingLocation: "📍 Localisation en cours..."
+                gettingLocation: "📍 Localisation en cours...",
+                paymentRequestedMsg: "⏳ Demande envoyée ! En attente de confirmation.",
+                paymentConfirmedMsg: "✅ Paiement confirmé ! Compte clôturé. Merci !",
+                paymentClosedMsg: "✅ Paiement confirmé et compte clôturé.",
+                pendingTitle: "Paiement en attente de confirmation",
+                pendingText: "Daniel doit confirmer avoir reçu le paiement.",
+                paymentRequests: "Demandes de paiement",
+                confirmReceived: "✓ Confirmer réception"
             }
         };
 
@@ -1056,6 +1186,8 @@
         let orders = JSON.parse(localStorage.getItem('cocktailOrders') || '[]');
         let ordersPage = 1;              // Pagina corrente dello storico ordini
         const ORDERS_PER_PAGE = 3;       // Numero di ordini mostrati per pagina
+        let pendingPayments = [];        // Richieste di pagamento in attesa (vista admin)
+        let myPaymentPending = false;    // Il cliente ha una richiesta in attesa?
         let customerName = localStorage.getItem('customerName') || '';
         const ADMIN_PHONE = '3515292930';
 
@@ -1102,6 +1234,7 @@
             showGreeting();
             // Carica dal cloud gli ordini già associati a questo nome (da altri dispositivi)
             loadOrdersFromCloud();
+            if (isAdmin()) { loadPendingPayments(); } else { checkMyPaymentStatus(); }
         }
 
         // Change name (pencil button)
@@ -1114,9 +1247,13 @@
                 // Cambiando identità, svuota la cache locale e ricarica gli ordini del nuovo utente
                 orders = [];
                 ordersPage = 1;
+                myPaymentPending = false;
+                pendingPayments = [];
+                document.getElementById('paymentPendingBanner').style.display = 'none';
                 saveOrders();
                 renderOrders();
                 loadOrdersFromCloud();
+                if (isAdmin()) { loadPendingPayments(); } else { checkMyPaymentStatus(); }
             }
         }
 
@@ -1215,9 +1352,16 @@
             }
         }
 
-        // Pay and close: send WhatsApp receipt and reset
-        function payAndClose() {
+        // Il cliente richiede la chiusura del conto: crea una richiesta in attesa
+        // che solo l'admin (Daniel) potrà confermare.
+        async function payAndClose() {
             if (orders.length === 0) return;
+
+            // L'admin non richiede pagamenti: gestisce quelli dei clienti
+            if (isAdmin()) {
+                alert('Sei in modalità admin: conferma i pagamenti dalla sezione "Richieste di pagamento".');
+                return;
+            }
 
             const total = orders.reduce((sum, order) => {
                 const priceNum = parseFloat(order.price.replace(',', '.').replace('€', ''));
@@ -1228,39 +1372,153 @@
             const confirmMsg = t('confirmPayment').replace('{total}', totalFormatted).replace('{count}', orders.length);
             if (!confirm(confirmMsg)) return;
 
-            // Avviso extra: l'admin cancellerebbe gli ordini di TUTTI i clienti
-            if (isAdmin() && !confirm('ATTENZIONE (admin): questa operazione cancellerà gli ordini di TUTTI i clienti. Continuare?')) {
-                return;
-            }
+            // Registra la richiesta di pagamento nel cloud (in attesa di conferma admin)
+            await createPaymentRequest(total, totalFormatted);
 
             // Build WhatsApp receipt message
-            let message = `*PAGAMENTO EFFETTUATO*\n\n`;
+            let message = `*RICHIESTA CHIUSURA CONTO*\n\n`;
             message += `*Cliente:* ${customerName}\n\n`;
             message += `*Riepilogo ordini:*\n`;
             orders.forEach((order, i) => {
                 message += `${i + 1}. ${order.cocktail} (${order.variant}) - ${order.price}\n`;
             });
-            message += `\n*TOTALE PAGATO: ${totalFormatted}*\n`;
+            message += `\n*TOTALE DA PAGARE: ${totalFormatted}*\n`;
             message += `${new Date().toLocaleDateString('it-IT')} ore ${new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}\n`;
-            message += `\n>> Conto saldato - Grazie!`;
+            message += `\n>> In attesa di conferma pagamento`;
 
             const encodedMessage = encodeURIComponent(message);
             const whatsappUrl = `https://wa.me/${ADMIN_PHONE}?text=${encodedMessage}`;
             window.open(whatsappUrl, '_blank');
 
-            // Reset orders
-            orders = [];
-            saveOrders();
-            clearOrdersOnCloud();
-            renderOrders();
+            // Aggiorna la UI: conto in attesa di conferma
+            await checkMyPaymentStatus();
 
-            // Show success
             const successMsg = document.getElementById('successMessage');
-            successMsg.textContent = t('paymentSentMsg');
+            successMsg.textContent = t('paymentRequestedMsg');
             successMsg.classList.add('show');
             setTimeout(() => {
                 successMsg.classList.remove('show');
             }, 3000);
+        }
+
+        // =============================================
+        // GESTIONE RICHIESTE DI PAGAMENTO
+        // =============================================
+
+        // Il cliente crea la richiesta (documento con id = userId)
+        async function createPaymentRequest(total, totalFormatted) {
+            if (!isApiConfigured() || !customerName) return;
+            try {
+                await firestoreDb.collection('payments').doc(getUserId(customerName)).set({
+                    userId: getUserId(customerName),
+                    customerName: customerName,
+                    total: total,
+                    totalFormatted: totalFormatted,
+                    orderCount: orders.length,
+                    requestedAt: Date.now(),
+                    requestedDate: new Date().toLocaleDateString('it-IT'),
+                    requestedTime: new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }),
+                    status: 'pending'
+                });
+            } catch (error) {
+                console.log('Errore creazione richiesta pagamento:', error);
+            }
+        }
+
+        // Il cliente controlla se ha una richiesta in attesa
+        async function checkMyPaymentStatus() {
+            if (!isApiConfigured() || !customerName || isAdmin()) return;
+            const banner = document.getElementById('paymentPendingBanner');
+            try {
+                const doc = await firestoreDb.collection('payments').doc(getUserId(customerName)).get();
+                if (doc.exists) {
+                    myPaymentPending = true;
+                    document.getElementById('pendingAmount').textContent = doc.data().totalFormatted || '';
+                    banner.style.display = 'block';
+                } else {
+                    // Nessuna richiesta: se prima era in attesa, l'admin ha confermato → conto chiuso
+                    if (myPaymentPending) {
+                        myPaymentPending = false;
+                        await loadOrdersFromCloud();
+                        alert(t('paymentConfirmedMsg'));
+                    }
+                    banner.style.display = 'none';
+                }
+                renderOrders();
+            } catch (error) {
+                console.log('Errore verifica pagamento:', error);
+            }
+        }
+
+        // L'admin carica tutte le richieste in attesa
+        async function loadPendingPayments() {
+            if (!isApiConfigured() || !isAdmin()) return;
+            try {
+                const snapshot = await firestoreDb.collection('payments').get();
+                pendingPayments = snapshot.docs
+                    .map(doc => doc.data())
+                    .sort((a, b) => b.requestedAt - a.requestedAt);
+                renderPendingPayments();
+            } catch (error) {
+                console.log('Errore caricamento richieste pagamento:', error);
+            }
+        }
+
+        // L'admin visualizza le richieste in attesa
+        function renderPendingPayments() {
+            const section = document.getElementById('pendingPaymentsSection');
+            const list = document.getElementById('pendingPaymentsList');
+
+            if (!isAdmin() || pendingPayments.length === 0) {
+                section.style.display = 'none';
+                return;
+            }
+
+            section.style.display = 'block';
+            document.getElementById('pendingCount').textContent = pendingPayments.length;
+            list.innerHTML = pendingPayments.map(p => `
+                <div class="payment-request">
+                    <div class="payment-request-info">
+                        <strong>${p.customerName}</strong><br>
+                        <span class="payment-amount">${p.totalFormatted}</span>
+                        <small style="color:#666;"> · ${p.orderCount} ${p.orderCount === 1 ? t('orderSingular') : t('orderPlural')}</small><br>
+                        <small style="color:#666;">${p.requestedDate} ${p.requestedTime}</small>
+                    </div>
+                    <button class="confirm-payment-btn" onclick="confirmPaymentReceived('${p.userId}')">${t('confirmReceived')}</button>
+                </div>
+            `).join('');
+        }
+
+        // L'admin conferma di aver ricevuto il pagamento → chiude il conto del cliente
+        async function confirmPaymentReceived(userId) {
+            const payment = pendingPayments.find(p => p.userId === userId);
+            if (!payment) return;
+
+            if (!confirm(`Confermi di aver ricevuto ${payment.totalFormatted} da ${payment.customerName}?`)) return;
+
+            try {
+                // Cancella tutti gli ordini di quel cliente
+                const snapshot = await firestoreDb.collection('orders')
+                    .where('userId', '==', userId)
+                    .get();
+                const batch = firestoreDb.batch();
+                snapshot.docs.forEach(doc => batch.delete(doc.ref));
+                // Cancella la richiesta di pagamento
+                batch.delete(firestoreDb.collection('payments').doc(userId));
+                await batch.commit();
+
+                // Aggiorna la vista admin
+                await loadPendingPayments();
+                await loadOrdersFromCloud();
+
+                const successMsg = document.getElementById('successMessage');
+                successMsg.textContent = t('paymentClosedMsg');
+                successMsg.classList.add('show');
+                setTimeout(() => successMsg.classList.remove('show'), 3000);
+            } catch (error) {
+                console.log('Errore conferma pagamento:', error);
+                alert('Errore durante la conferma. Riprova.');
+            }
         }
 
         // Render cocktails
@@ -1626,6 +1884,13 @@
             document.getElementById('totalCount').textContent = orders.length + ' ' + (orders.length === 1 ? t('orderSingular') : t('orderPlural'));
             totalSpentEl.style.display = 'block';
 
+            // Nascondi il pulsante di pagamento se c'è già una richiesta in attesa
+            // oppure se si è in modalità admin (l'admin conferma, non paga)
+            const payBtn = document.getElementById('payButton');
+            if (payBtn) {
+                payBtn.style.display = (myPaymentPending || isAdmin()) ? 'none' : 'inline-block';
+            }
+
             // Paginazione sugli ordini (i più recenti per primi)
             const totalPages = Math.max(1, Math.ceil(orders.length / ORDERS_PER_PAGE));
 
@@ -1759,11 +2024,28 @@
             }, 3000);
         }
 
+        // Controlla periodicamente lo stato dei pagamenti
+        // - Admin: nuove richieste da confermare
+        // - Cliente: se l'admin ha confermato, il conto viene chiuso
+        function startPaymentPolling() {
+            const poll = () => {
+                if (!customerName) return;
+                if (isAdmin()) {
+                    loadPendingPayments();
+                } else {
+                    checkMyPaymentStatus();
+                }
+            };
+            poll();
+            setInterval(poll, 15000); // ogni 15 secondi
+        }
+
         // Initialize
         applyTranslations();
         renderCocktails();
         renderOrders();
         checkRegistration(); // Mostra il popup nome oppure carica gli ordini dell'utente dal cloud
+        startPaymentPolling();
 
         // Close modal on outside click
         document.getElementById('orderModal').addEventListener('click', function(e) {
