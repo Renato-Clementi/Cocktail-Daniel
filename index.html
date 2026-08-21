@@ -4,7 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>COCKTAIL DANIEL SRL</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        /* =============================================
+           SUNSET ON THE BEACH — design tokens
+           Palette estratta dalla foto di sfondo
+           ============================================= */
+        :root {
+            --coral: #FF6B4A;          /* sole al tramonto — azioni primarie */
+            --coral-deep: #E0492C;     /* corallo scuro — hover/ombre */
+            --sand-gold: #F5A623;      /* oro sabbia — offerte */
+            --lagoon: #2EC4B6;         /* turchese laguna — accenti */
+            --dusk: #1B3A5C;           /* blu crepuscolo — testo */
+            --dusk-soft: #4A6B85;      /* blu tenue — testo secondario */
+            --sand: #FFF4E6;           /* sabbia — fondo card */
+            --sand-deep: #F7E4CC;      /* sabbia bagnata — bordi/fondi */
+            --palm: #B8860B;           /* oro scuro — premium */
+
+            --radius: 18px;
+            --radius-sm: 10px;
+            --shadow-card: 0 10px 28px rgba(27, 58, 92, 0.28);
+            --shadow-lift: 0 16px 38px rgba(27, 58, 92, 0.38);
+
+            --font-display: 'Alfa Slab One', Georgia, serif;
+            --font-body: 'Outfit', 'Segoe UI', sans-serif;
+            --font-mono: 'Space Mono', monospace;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -12,12 +40,13 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: var(--font-body);
             background: url('background.png') no-repeat center center fixed;
             background-size: cover;
             min-height: 100vh;
             padding: 20px;
             position: relative;
+            color: var(--dusk);
         }
 
         body::before {
@@ -39,11 +68,14 @@
         }
 
         h1 {
+            font-family: var(--font-display);
             color: white;
             text-align: center;
-            margin-bottom: 10px;
-            font-size: 2.5em;
-            text-shadow: 2px 2px 8px rgba(0,0,0,0.6);
+            margin-bottom: 6px;
+            font-size: 2.1em;
+            line-height: 1.1;
+            letter-spacing: 0.5px;
+            text-shadow: 0 3px 14px rgba(27, 58, 92, 0.7);
         }
 
         .copyright {
@@ -56,13 +88,15 @@
         }
 
         .success-message {
-            background: #4CAF50;
+            background: linear-gradient(135deg, var(--lagoon) 0%, #1FA396 100%);
             color: white;
             padding: 15px;
-            border-radius: 8px;
+            border-radius: var(--radius-sm);
             margin-bottom: 20px;
             text-align: center;
+            font-weight: 500;
             display: none;
+            box-shadow: 0 6px 18px rgba(46, 196, 182, 0.35);
         }
 
         .success-message.show {
@@ -73,32 +107,67 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             grid-auto-flow: row;
+            grid-auto-rows: 1fr;
             gap: 15px;
             margin-bottom: 30px;
         }
 
         .cocktail-card {
-            background: rgba(255, 255, 255, 0.92);
+            background: rgba(255, 244, 230, 0.94);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            border-radius: 12px;
-            padding: 15px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            border-radius: var(--radius);
+            padding: 0 15px 15px;
+            box-shadow: var(--shadow-card);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             cursor: pointer;
             display: flex;
             flex-direction: column;
             align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* ELEMENTO FIRMA: il sole che cala sul mare.
+           Il disco in gradiente è il sole, la linea turchese l'orizzonte;
+           l'emoji del cocktail ci si appoggia sopra. */
+        .cocktail-card::before {
+            content: '';
+            position: absolute;
+            top: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 50% 40%, #FFD9A0 0%, var(--sand-gold) 45%, var(--coral) 100%);
+            opacity: 0.42;
+            pointer-events: none;
+        }
+
+        .cocktail-card::after {
+            content: '';
+            position: absolute;
+            top: 60px;
+            left: 14%;
+            width: 72%;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(46,196,182,0) 0%, var(--lagoon) 50%, rgba(46,196,182,0) 100%);
+            opacity: 0.85;
+            pointer-events: none;
         }
 
         .cocktail-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lift);
         }
 
         .cocktail-icon {
-            font-size: 2.5em;
-            margin-bottom: 8px;
+            font-size: 2.6em;
+            margin: 22px 0 10px;
+            position: relative;
+            z-index: 1;
+            filter: drop-shadow(0 3px 6px rgba(224, 73, 44, 0.35));
         }
 
         .cocktail-info {
@@ -108,19 +177,23 @@
             align-items: center;
             text-align: center;
             flex: 1;
+            position: relative;
+            z-index: 1;
         }
 
         .cocktail-name {
-            font-size: 0.85em;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 5px;
+            font-family: var(--font-display);
+            font-size: 0.95em;
+            font-weight: 400;
+            color: var(--dusk);
+            line-height: 1.2;
+            margin-bottom: 6px;
         }
 
         .cocktail-description {
-            color: #666;
-            font-size: 0.65em;
-            line-height: 1.3;
+            color: var(--dusk-soft);
+            font-size: 0.68em;
+            line-height: 1.35;
             margin-bottom: 10px;
             height: 32px;
             overflow: hidden;
@@ -131,15 +204,25 @@
 
         .order-btn {
             width: 100%;
-            padding: 8px 10px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 10px;
+            background: linear-gradient(135deg, var(--coral) 0%, var(--coral-deep) 100%);
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-body);
             font-size: 12px;
-            font-weight: bold;
+            font-weight: 600;
+            letter-spacing: 0.4px;
             cursor: pointer;
-            transition: opacity 0.3s ease;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 4px 12px rgba(224, 73, 44, 0.35);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .order-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(224, 73, 44, 0.45);
         }
 
         .order-btn:hover {
@@ -164,17 +247,23 @@
         }
 
         .modal-content {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
+            background: var(--sand);
+            border-radius: var(--radius);
+            padding: 28px 24px;
             max-width: 500px;
             width: 90%;
             max-height: 90vh;
             overflow-y: auto;
+            box-shadow: var(--shadow-lift);
+            border-top: 5px solid var(--coral);
         }
 
         .modal-content h2 {
-            color: #667eea;
+            font-family: var(--font-display);
+            font-weight: 400;
+            color: var(--dusk);
+            font-size: 1.35em;
+            line-height: 1.25;
             margin-bottom: 20px;
         }
 
@@ -185,7 +274,7 @@
         .form-group label {
             display: block;
             margin-bottom: 8px;
-            color: #333;
+            color: var(--dusk);
             font-weight: 500;
         }
 
@@ -193,15 +282,19 @@
         .form-group select {
             width: 100%;
             padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
+            border: 2px solid var(--sand-deep);
+            border-radius: var(--radius-sm);
+            font-family: var(--font-body);
             font-size: 16px;
+            background: #fff;
+            color: var(--dusk);
         }
 
         .form-group input:focus,
         .form-group select:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--coral);
+            box-shadow: 0 0 0 3px rgba(255, 107, 74, 0.18);
         }
 
         .variant-selection {
@@ -211,9 +304,9 @@
         .variant-selection label {
             display: block;
             margin-bottom: 12px;
-            color: #333;
+            color: var(--dusk);
             font-weight: 600;
-            font-size: 1.1em;
+            font-size: 1.05em;
         }
 
         .variant-buttons {
@@ -224,25 +317,27 @@
 
         .variant-btn {
             padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            background: white;
-            color: #333;
+            border: 2px solid var(--sand-deep);
+            border-radius: var(--radius-sm);
+            background: #fff;
+            color: var(--dusk);
+            font-family: var(--font-body);
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.25s ease;
         }
 
         .variant-btn:hover {
-            border-color: #667eea;
-            background: #f5f5ff;
+            border-color: var(--lagoon);
+            background: rgba(46, 196, 182, 0.08);
         }
 
         .variant-btn.selected {
-            border-color: #667eea;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: var(--coral);
+            background: linear-gradient(135deg, var(--coral) 0%, var(--coral-deep) 100%);
             color: white;
+            box-shadow: 0 4px 12px rgba(224, 73, 44, 0.3);
         }
 
         .btn-group {
@@ -253,57 +348,63 @@
 
         .btn {
             flex: 1;
-            padding: 12px;
+            padding: 13px;
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-body);
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
             cursor: pointer;
-            transition: opacity 0.3s ease;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--coral) 0%, var(--coral-deep) 100%);
             color: white;
+            box-shadow: 0 4px 14px rgba(224, 73, 44, 0.35);
         }
 
         .btn-secondary {
-            background: #e0e0e0;
-            color: #333;
+            background: var(--sand-deep);
+            color: var(--dusk);
         }
 
         .btn:hover {
-            opacity: 0.9;
+            transform: translateY(-1px);
         }
 
         .orders-section {
-            background: rgba(255, 255, 255, 0.92);
+            background: rgba(255, 244, 230, 0.94);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            border-radius: 15px;
+            border-radius: var(--radius);
             padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            box-shadow: var(--shadow-card);
         }
 
         .orders-section h2 {
-            color: #667eea;
+            font-family: var(--font-display);
+            font-weight: 400;
+            color: var(--dusk);
+            font-size: 1.2em;
             margin-bottom: 20px;
         }
 
         .order-item {
-            background: #f5f5f5;
+            background: #fff;
             padding: 15px;
-            border-radius: 10px;
+            border-radius: var(--radius-sm);
             margin-bottom: 15px;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid var(--lagoon);
         }
 
         .order-item strong {
-            color: #667eea;
+            color: var(--dusk);
         }
 
         .order-pending {
-            background: #fff8e1;
+            background: rgba(245, 166, 35, 0.12);
             border-left-color: #f5a623;
         }
 
@@ -311,7 +412,7 @@
             display: inline-block;
             background: #f5a623;
             color: white;
-            border-radius: 10px;
+            border-radius: var(--radius-sm);
             padding: 1px 8px;
             font-size: 0.7em;
             font-weight: bold;
@@ -340,13 +441,13 @@
         .pending-banner-amount {
             font-size: 1.6em;
             font-weight: bold;
-            color: #333;
+            color: var(--dusk);
             margin-bottom: 4px;
         }
 
         .pending-banner-text {
             font-size: 0.85em;
-            color: #666;
+            color: var(--dusk-soft);
         }
 
         .badge {
@@ -366,9 +467,9 @@
             align-items: center;
             gap: 12px;
             flex-wrap: wrap;
-            background: #fff8e1;
+            background: rgba(245, 166, 35, 0.12);
             border-left: 4px solid #f5a623;
-            border-radius: 10px;
+            border-radius: var(--radius-sm);
             padding: 15px;
             margin-bottom: 12px;
         }
@@ -376,14 +477,14 @@
         .payment-amount {
             font-size: 1.2em;
             font-weight: bold;
-            color: #667eea;
+            color: var(--coral);
         }
 
         .confirm-payment-btn {
             background: linear-gradient(135deg, #43a047 0%, #2e7d32 100%);
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: var(--radius-sm);
             padding: 12px 18px;
             font-size: 14px;
             font-weight: bold;
@@ -397,38 +498,43 @@
         }
 
         .cocktail-special {
-            border: 2px solid #f5a623;
-            position: relative;
+            border: 2px solid var(--sand-gold);
         }
 
         .special-badge {
             position: absolute;
-            top: -10px;
+            top: 8px;
             left: 50%;
             transform: translateX(-50%);
-            background: linear-gradient(135deg, #ff9800 0%, #f5a623 100%);
+            background: linear-gradient(135deg, var(--sand-gold) 0%, #E08C00 100%);
             color: white;
-            font-size: 0.7em;
-            font-weight: bold;
+            font-family: var(--font-body);
+            font-size: 0.62em;
+            font-weight: 700;
+            letter-spacing: 0.8px;
             padding: 3px 12px;
-            border-radius: 12px;
+            border-radius: 999px;
             white-space: nowrap;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+            z-index: 2;
+            box-shadow: 0 2px 8px rgba(27, 58, 92, 0.3);
         }
 
         .cocktail-price {
-            margin-top: 6px;
-            font-weight: bold;
-            color: #667eea;
-            font-size: 0.9em;
+            margin-top: auto;
+            padding-top: 6px;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            color: var(--coral-deep);
+            font-size: 0.8em;
+            letter-spacing: -0.5px;
         }
 
         .price-card {
-            background: #f5f5f5;
-            border-radius: 10px;
+            background: #fff;
+            border-radius: var(--radius-sm);
             padding: 14px;
             margin-bottom: 14px;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid var(--coral);
         }
 
         .price-card-header {
@@ -478,7 +584,7 @@
         .price-row input, .surcharge-row input {
             width: 90px;
             padding: 8px;
-            border: 2px solid #e0e0e0;
+            border: 2px solid var(--sand-deep);
             border-radius: 6px;
             font-size: 15px;
             text-align: right;
@@ -486,36 +592,42 @@
         }
 
         .price-currency {
-            color: #667eea;
+            color: var(--coral);
             font-weight: bold;
             width: 14px;
         }
 
         .cocktail-premium {
-            border: 2px solid #d4af37;
-            position: relative;
-            background: rgba(255, 252, 240, 0.94);
+            border: 2px solid #D4AF37;
+            background: rgba(255, 250, 236, 0.95);
+        }
+
+        .cocktail-premium::before {
+            background: radial-gradient(circle at 50% 40%, #FBEEC1 0%, #E5C158 45%, var(--palm) 100%);
         }
 
         .premium-badge {
             position: absolute;
-            top: -10px;
+            top: 8px;
             left: 50%;
             transform: translateX(-50%);
-            background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
+            background: linear-gradient(135deg, #D4AF37 0%, var(--palm) 100%);
             color: white;
-            font-size: 0.7em;
-            font-weight: bold;
+            font-family: var(--font-body);
+            font-size: 0.62em;
+            font-weight: 700;
+            letter-spacing: 0.8px;
             padding: 3px 12px;
-            border-radius: 12px;
+            border-radius: 999px;
             white-space: nowrap;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+            z-index: 2;
+            box-shadow: 0 2px 8px rgba(27, 58, 92, 0.3);
         }
 
         .premium-section {
             margin-top: 10px;
             padding-top: 10px;
-            border-top: 1px dashed #d0d0d0;
+            border-top: 1px dashed var(--sand-deep);
         }
 
         .premium-toggle {
@@ -538,7 +650,7 @@
             display: flex;
             gap: 18px;
             align-items: center;
-            background: #f5f5f5;
+            background: #fff;
             border-radius: 12px;
             padding: 16px;
             margin-bottom: 18px;
@@ -553,7 +665,7 @@
         .reviews-avg {
             font-size: 2.4em;
             font-weight: bold;
-            color: #667eea;
+            color: var(--coral);
             line-height: 1;
         }
 
@@ -565,7 +677,7 @@
 
         .reviews-count {
             font-size: 0.75em;
-            color: #666;
+            color: var(--dusk-soft);
             margin-top: 4px;
         }
 
@@ -583,14 +695,14 @@
 
         .rating-bar-label {
             font-size: 0.75em;
-            color: #666;
+            color: var(--dusk-soft);
             width: 24px;
         }
 
         .rating-bar {
             flex: 1;
             height: 8px;
-            background: #e0e0e0;
+            background: var(--sand-deep);
             border-radius: 4px;
             overflow: hidden;
         }
@@ -603,15 +715,15 @@
 
         .rating-bar-count {
             font-size: 0.75em;
-            color: #666;
+            color: var(--dusk-soft);
             width: 22px;
             text-align: right;
         }
 
         .review-item {
-            background: #f5f5f5;
+            background: #fff;
             border-left: 4px solid #f5a623;
-            border-radius: 10px;
+            border-radius: var(--radius-sm);
             padding: 14px;
             margin-bottom: 12px;
         }
@@ -631,7 +743,7 @@
         }
 
         .review-text {
-            color: #333;
+            color: var(--dusk);
             font-size: 0.95em;
             line-height: 1.5;
             margin-bottom: 6px;
@@ -643,7 +755,7 @@
             justify-content: space-between;
             align-items: center;
             font-size: 0.75em;
-            color: #888;
+            color: var(--dusk-soft);
         }
 
         .delete-review-btn {
@@ -671,24 +783,25 @@
         .page-btn {
             min-width: 36px;
             padding: 8px 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            background: white;
-            color: #333;
-            font-size: 14px;
-            font-weight: 600;
+            border: 2px solid var(--sand-deep);
+            border-radius: var(--radius-sm);
+            background: #fff;
+            color: var(--dusk);
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.2s ease;
         }
 
         .page-btn:hover:not(:disabled) {
-            border-color: #667eea;
-            background: #f5f5ff;
+            border-color: var(--lagoon);
+            background: rgba(46, 196, 182, 0.1);
         }
 
         .page-btn.active {
-            border-color: #667eea;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: var(--coral);
+            background: linear-gradient(135deg, var(--coral) 0%, var(--coral-deep) 100%);
             color: white;
         }
 
@@ -699,7 +812,7 @@
 
         .no-orders {
             text-align: center;
-            color: #999;
+            color: var(--dusk-soft);
             padding: 40px;
             font-size: 1.1em;
         }
@@ -715,7 +828,7 @@
         .lang-btn {
             background: rgba(255,255,255,0.2);
             border: 2px solid rgba(255,255,255,0.4);
-            border-radius: 8px;
+            border-radius: var(--radius-sm);
             padding: 4px 8px;
             font-size: 1.2em;
             cursor: pointer;
@@ -781,19 +894,19 @@
                 <h2 style="margin-bottom: 0;" data-i18n="ordersHistory">📋 Storico Ordini</h2>
             </div>
             <div id="ordersList"></div>
-            <div id="totalSpent" style="display: none; margin-top: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; padding: 15px; text-align: center;">
-                <div style="font-size: 0.85em; color: rgba(255,255,255,0.85); margin-bottom: 4px;" data-i18n="totalSpentLabel">💰 Totale speso</div>
-                <div id="totalAmount" style="font-size: 1.8em; font-weight: bold; color: white;">0,00€</div>
-                <div id="totalCount" style="font-size: 0.8em; color: rgba(255,255,255,0.75); margin-top: 2px;"></div>
-                <div id="openAmountInfo" style="display:none; font-size: 0.85em; color: #ffe082; margin-top: 6px; font-weight: bold;"></div>
-                <button id="payButton" onclick="payAndClose()" style="margin-top: 12px; background: white; color: #667eea; border: none; border-radius: 8px; padding: 12px 24px; font-size: 15px; font-weight: bold; cursor: pointer; transition: opacity 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.2);" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'" data-i18n="payButton">✅ Paga e chiudi conto</button>
+            <div id="totalSpent" style="display: none; margin-top: 20px; background: linear-gradient(160deg, var(--dusk) 0%, #2C5578 100%); border-radius: var(--radius); padding: 18px; text-align: center; box-shadow: 0 8px 22px rgba(27,58,92,0.35);">
+                <div style="font-size: 0.8em; color: rgba(255,255,255,0.8); letter-spacing: 0.5px; margin-bottom: 6px;" data-i18n="totalSpentLabel">💰 Totale speso</div>
+                <div id="totalAmount" style="font-family: var(--font-mono); font-size: 1.9em; font-weight: 700; color: #fff;">0,00€</div>
+                <div id="totalCount" style="font-size: 0.78em; color: rgba(255,255,255,0.7); margin-top: 2px;"></div>
+                <div id="openAmountInfo" style="display:none; font-size: 0.85em; color: var(--sand-gold); margin-top: 6px; font-weight: 600;"></div>
+                <button id="payButton" onclick="payAndClose()" style="margin-top: 14px; background: linear-gradient(135deg, var(--coral) 0%, var(--coral-deep) 100%); color: #fff; border: none; border-radius: var(--radius-sm); padding: 13px 26px; font-family: var(--font-body); font-size: 15px; font-weight: 600; cursor: pointer; transition: transform 0.2s ease; box-shadow: 0 4px 14px rgba(224,73,44,0.4);" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform=''" data-i18n="payButton">✅ Paga e chiudi conto</button>
             </div>
         </div>
 
         <!-- Review Buttons -->
         <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
-            <button onclick="openReviewModal()" style="flex: 1; min-width: 150px; background: rgba(255,255,255,0.92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: #333; border: none; border-radius: 12px; padding: 16px 20px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 8px 20px rgba(0,0,0,0.3); transition: transform 0.3s ease, box-shadow 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''" data-i18n="reviewButton">⭐ Lascia una recensione</button>
-            <button onclick="openReviewsPage()" style="flex: 1; min-width: 150px; background: rgba(255,255,255,0.92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: #333; border: none; border-radius: 12px; padding: 16px 20px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 8px 20px rgba(0,0,0,0.3); transition: transform 0.3s ease, box-shadow 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''" data-i18n="viewReviewsButton">💬 Leggi le recensioni</button>
+            <button onclick="openReviewModal()" style="flex: 1; min-width: 150px; background: rgba(255,244,230,0.94); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: var(--dusk); border: none; border-radius: var(--radius); padding: 16px 20px; font-family: var(--font-body); font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: var(--shadow-card); transition: transform 0.3s ease, box-shadow 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''" data-i18n="reviewButton">⭐ Lascia una recensione</button>
+            <button onclick="openReviewsPage()" style="flex: 1; min-width: 150px; background: rgba(255,244,230,0.94); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: var(--dusk); border: none; border-radius: var(--radius); padding: 16px 20px; font-family: var(--font-body); font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: var(--shadow-card); transition: transform 0.3s ease, box-shadow 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''" data-i18n="viewReviewsButton">💬 Leggi le recensioni</button>
         </div>
     </div>
 
@@ -829,7 +942,7 @@
 
             <div id="priceListForm"></div>
 
-            <div style="background:#f0f7ff; border:2px solid #667eea; border-radius:10px; padding:15px; margin:18px 0;">
+            <div style="background:#f0f7ff; border:2px solid var(--coral); border-radius:10px; padding:15px; margin:18px 0;">
                 <div style="font-weight:600; margin-bottom:10px; color:#333;" data-i18n="surchargeTitle">⏱️ Supplementi orario</div>
                 <div class="surcharge-row">
                     <label data-i18n="timeNow">Subito</label>
@@ -939,9 +1052,9 @@
                 <label data-i18n="additionalNotes">Note aggiuntive (opzionale):</label>
                 <input type="text" id="orderNotes" data-i18n-placeholder="notesPlaceholder" placeholder="es: Poco ghiaccio, extra limone...">
             </div>
-            <div style="background: #f0f7ff; border: 2px solid #667eea; border-radius: 10px; padding: 15px; margin-bottom: 20px; text-align: center;">
+            <div style="background: #f0f7ff; border: 2px solid var(--coral); border-radius: 10px; padding: 15px; margin-bottom: 20px; text-align: center;">
                 <div style="font-size: 0.9em; color: #666; margin-bottom: 5px;" data-i18n="priceToPay">💰 Prezzo da pagare alla consegna:</div>
-                <div id="priceDisplay" style="font-size: 1.8em; font-weight: bold; color: #667eea;">0,50€</div>
+                <div id="priceDisplay" style="font-size: 1.8em; font-weight: bold; color: var(--coral);">0,50€</div>
             </div>
             <div class="btn-group">
                 <button class="btn btn-secondary" onclick="closeModal()" data-i18n="cancel">Annulla</button>
@@ -1796,7 +1909,7 @@
 
         // Carica il listino dal cloud (tutti gli utenti)
         async function loadPricing() {
-            if (!isApiConfigured()) return;
+            if (!cloudReady()) return;
             try {
                 const doc = await firestoreDb.collection('settings').doc('pricing').get();
                 if (doc.exists) {
@@ -1830,7 +1943,7 @@
 
         // Salva il listino sul cloud (solo admin)
         async function savePricing() {
-            if (!isApiConfigured() || !isAdmin()) return false;
+            if (!cloudReady() || !isAdmin()) return false;
             try {
                 await firestoreDb.collection('settings').doc('pricing').set(pricing);
                 localStorage.setItem('cocktailPricing', JSON.stringify(pricing));
@@ -2016,15 +2129,27 @@
                    firebaseConfig.projectId && !firebaseConfig.projectId.includes('INCOLLA_QUI');
         }
 
+        // Inizializza Firebase in modo tollerante: se lo script CDN non è
+        // raggiungibile (rete assente), l'app continua a funzionare in locale.
         if (isApiConfigured()) {
-            const firebaseApp = firebase.initializeApp(firebaseConfig);
-            firestoreDb = firebase.firestore();
+            try {
+                firebase.initializeApp(firebaseConfig);
+                firestoreDb = firebase.firestore();
+            } catch (error) {
+                console.log('Firebase non disponibile, modalità locale:', error);
+                firestoreDb = null;
+            }
+        }
+
+        // Il cloud è utilizzabile solo se configurato E inizializzato correttamente
+        function cloudReady() {
+            return isApiConfigured() && firestoreDb !== null;
         }
 
         // Load orders from Firestore
         // Admin (Daniel) vede TUTTI gli ordini, gli altri solo i propri
         async function loadOrdersFromCloud() {
-            if (!isApiConfigured() || !customerName) return;
+            if (!cloudReady() || !customerName) return;
             try {
                 let query = firestoreDb.collection('orders');
                 if (!isAdmin()) {
@@ -2044,7 +2169,7 @@
 
         // Save single order to Firestore
         async function saveOrderToCloud(order) {
-            if (!isApiConfigured()) return;
+            if (!cloudReady()) return;
             try {
                 await firestoreDb.collection('orders').doc(String(order.id)).set(order);
             } catch (error) {
@@ -2055,7 +2180,7 @@
         // Clear orders on Firestore
         // Admin cancella tutti gli ordini, gli altri solo i propri
         async function clearOrdersOnCloud() {
-            if (!isApiConfigured() || !customerName) return;
+            if (!cloudReady() || !customerName) return;
             try {
                 let query = firestoreDb.collection('orders');
                 if (!isAdmin()) {
@@ -2169,7 +2294,7 @@
         // Il cliente crea la richiesta (documento con id = userId)
         // Salva gli ID degli ordini inclusi: solo QUELLI verranno chiusi alla conferma
         async function createPaymentRequest(total, totalFormatted, orderIds) {
-            if (!isApiConfigured() || !customerName) return;
+            if (!cloudReady() || !customerName) return;
             try {
                 await firestoreDb.collection('payments').doc(getUserId(customerName)).set({
                     userId: getUserId(customerName),
@@ -2190,7 +2315,7 @@
 
         // Il cliente controlla se ha una richiesta in attesa
         async function checkMyPaymentStatus() {
-            if (!isApiConfigured() || !customerName || isAdmin()) return;
+            if (!cloudReady() || !customerName || isAdmin()) return;
             const banner = document.getElementById('paymentPendingBanner');
             try {
                 const doc = await firestoreDb.collection('payments').doc(getUserId(customerName)).get();
@@ -2218,7 +2343,7 @@
 
         // L'admin carica tutte le richieste in attesa
         async function loadPendingPayments() {
-            if (!isApiConfigured() || !isAdmin()) return;
+            if (!cloudReady() || !isAdmin()) return;
             try {
                 const snapshot = await firestoreDb.collection('payments').get();
                 pendingPayments = snapshot.docs
@@ -2784,7 +2909,7 @@
                 const isPending = myPendingOrderIds.includes(order.id);
                 return `
                 <div class="order-item${isPending ? ' order-pending' : ''}">
-                    <strong>${order.cocktail}</strong> - <em>${translateVariant(order.variant)}</em> - <strong style="color: #667eea;">${order.price}</strong>
+                    <strong>${order.cocktail}</strong> - <em>${translateVariant(order.variant)}</em> - <strong style="color: var(--coral);">${order.price}</strong>
                     ${isPending ? `<span class="pending-tag">⏳ ${t('pendingTag')}</span>` : ''}<br>
                     👤 ${order.customerName || '-'}<br>
                     📍 ${translateLocation(order.location)} | ⏰ ${translateTime(order.time)}<br>
@@ -2867,7 +2992,7 @@
         const REVIEWS_PER_PAGE = 5;
 
         async function saveReviewToCloud(rating, text) {
-            if (!isApiConfigured()) return;
+            if (!cloudReady()) return;
             try {
                 const id = Date.now();
                 await firestoreDb.collection('reviews').doc(String(id)).set({
@@ -2885,7 +3010,7 @@
         }
 
         async function loadReviews() {
-            if (!isApiConfigured()) return;
+            if (!cloudReady()) return;
             try {
                 const snapshot = await firestoreDb.collection('reviews').get();
                 allReviews = snapshot.docs
