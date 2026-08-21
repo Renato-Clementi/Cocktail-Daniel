@@ -830,16 +830,22 @@
                 renderOrders();
             } catch (error) {
                 console.log('Cloud non disponibile, uso dati locali:', error);
+                alert('DEBUG - Errore lettura cloud: ' + error.message);
             }
         }
 
         // Save single order to Firestore
         async function saveOrderToCloud(order) {
-            if (!isApiConfigured()) return;
+            if (!isApiConfigured()) {
+                alert('DEBUG - Firebase non configurato!');
+                return;
+            }
             try {
                 await firestoreDb.collection('orders').doc(String(order.id)).set(order);
+                alert('DEBUG - Ordine salvato su Firebase con successo!');
             } catch (error) {
                 console.log('Errore salvataggio cloud:', error);
+                alert('DEBUG - Errore salvataggio: ' + error.message);
             }
         }
 
