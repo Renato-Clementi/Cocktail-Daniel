@@ -333,6 +333,8 @@
             transform: scale(1.1);
         }
     </style>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
     <div class="container">
@@ -793,52 +795,62 @@
         }
 
         // =============================================
-        // GOOGLE SHEETS CONFIG
-        // Inserisci qui l'URL del tuo Apps Script distribuito
+        // FIREBASE CONFIG
+        // Inserisci qui la configurazione del tuo progetto Firebase
+        // (Firebase Console → Impostazioni progetto → Le tue app → Config)
         // =============================================
-        const SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbw44uJa9_-XEb01jHslOTT2LzADMDB3zr88BlvreC5Bu6_b9HzOMuu9LBzeQUgdK0Xi/exec';
+        const firebaseConfig = {
+            apiKey: "AIzaSyD4-aaRF7E2KFHLE9GY8xSe3dwyb_veNJI",
+            authDomain: "cocktail-daniel.firebaseapp.com",
+            projectId: "cocktail-daniel",
+            storageBucket: "cocktail-daniel.firebasestorage.app",
+            messagingSenderId: "942098944901",
+            appId: "1:942098944901:web:6df0d9a5039afca7f02aec"
+        };
+
+        let firestoreDb = null;
 
         function isApiConfigured() {
-            return SHEETS_API_URL && !SHEETS_API_URL.includes('INCOLLA_QUI');
+            return firebaseConfig.apiKey && !firebaseConfig.apiKey.includes('INCOLLA_QUI') &&
+                   firebaseConfig.projectId && !firebaseConfig.projectId.includes('INCOLLA_QUI');
         }
 
-        // Load orders from Google Sheets
+        if (isApiConfigured()) {
+            const firebaseApp = firebase.initializeApp(firebaseConfig);
+            firestoreDb = firebase.firestore();
+        }
+
+        // Load orders from Firestore
         async function loadOrdersFromCloud() {
             if (!isApiConfigured()) return;
             try {
-                const response = await fetch(SHEETS_API_URL + '?action=read');
-                const data = await response.json();
-                if (data.success && data.orders) {
-                    orders = data.orders.reverse(); // più recenti prima
-                    localStorage.setItem('cocktailOrders', JSON.stringify(orders));
-                    renderOrders();
-                }
+                const snapshot = await firestoreDb.collection('orders').orderBy('id', 'desc').get();
+                orders = snapshot.docs.map(doc => doc.data());
+                localStorage.setItem('cocktailOrders', JSON.stringify(orders));
+                renderOrders();
             } catch (error) {
                 console.log('Cloud non disponibile, uso dati locali:', error);
             }
         }
 
-        // Save single order to Google Sheets
+        // Save single order to Firestore
         async function saveOrderToCloud(order) {
             if (!isApiConfigured()) return;
             try {
-                await fetch(SHEETS_API_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'add', order: order })
-                });
+                await firestoreDb.collection('orders').doc(String(order.id)).set(order);
             } catch (error) {
                 console.log('Errore salvataggio cloud:', error);
             }
         }
 
-        // Clear orders on Google Sheets
+        // Clear orders on Firestore
         async function clearOrdersOnCloud() {
             if (!isApiConfigured()) return;
             try {
-                await fetch(SHEETS_API_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'clear' })
-                });
+                const snapshot = await firestoreDb.collection('orders').get();
+                const batch = firestoreDb.batch();
+                snapshot.docs.forEach(doc => batch.delete(doc.ref));
+                await batch.commit();
             } catch (error) {
                 console.log('Errore pulizia cloud:', error);
             }
