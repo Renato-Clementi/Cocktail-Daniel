@@ -1233,8 +1233,10 @@
             
             // Add GPS coordinates if available
             if (order.gps) {
+                const lat = order.gps.latitude.toFixed(6);
+                const lng = order.gps.longitude.toFixed(6);
                 message += `🌍 *Coordinate GPS:*\n`;
-                message += `https://www.google.com/maps?q=${order.gps.latitude},${order.gps.longitude}\n`;
+                message += `https://www.google.com/maps?q=${lat},${lng}\n`;
             }
             
             message += `⏰ *Da servire:* ${order.time}\n`;
