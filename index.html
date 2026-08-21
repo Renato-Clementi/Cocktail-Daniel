@@ -1068,7 +1068,7 @@
         let selectedLocation = 'Dove Sono io'; // Default value
         let orders = JSON.parse(localStorage.getItem('cocktailOrders') || '[]');
         let ordersPage = 1;              // Pagina corrente dello storico ordini
-        const GROUPS_PER_PAGE = 3;       // Numero di clienti (gruppi) mostrati per pagina
+        const ORDERS_PER_PAGE = 3;       // Numero di ordini mostrati per pagina
         let customerName = localStorage.getItem('customerName') || '';
         const ADMIN_PHONE = '3515292930';
 
@@ -1592,27 +1592,26 @@
             document.getElementById('totalCount').textContent = orders.length + ' ' + (orders.length === 1 ? t('orderSingular') : t('orderPlural'));
             totalSpentEl.style.display = 'block';
 
-            // Raggruppa gli ordini per nome cliente (l'array orders è già ordinato dal più recente)
-            // L'ordine dei gruppi segue il primo ordine incontrato per ciascun nome (cioè il più recente)
-            const groups = new Map();
-            orders.forEach(order => {
-                const name = order.customerName || '-';
-                if (!groups.has(name)) groups.set(name, []);
-                groups.get(name).push(order);
-            });
-
-            const groupEntries = Array.from(groups.entries());
-            const totalPages = Math.max(1, Math.ceil(groupEntries.length / GROUPS_PER_PAGE));
+            // Pagina prima sugli ORDINI (i più recenti per primi), poi raggruppa per cliente
+            const totalPages = Math.max(1, Math.ceil(orders.length / ORDERS_PER_PAGE));
 
             // Mantieni la pagina corrente entro i limiti validi
             if (ordersPage > totalPages) ordersPage = totalPages;
             if (ordersPage < 1) ordersPage = 1;
 
-            const startIdx = (ordersPage - 1) * GROUPS_PER_PAGE;
-            const pageGroups = groupEntries.slice(startIdx, startIdx + GROUPS_PER_PAGE);
+            const startIdx = (ordersPage - 1) * ORDERS_PER_PAGE;
+            const pageOrders = orders.slice(startIdx, startIdx + ORDERS_PER_PAGE);
+
+            // Raggruppa per cliente solo gli ordini della pagina corrente
+            const groups = new Map();
+            pageOrders.forEach(order => {
+                const name = order.customerName || '-';
+                if (!groups.has(name)) groups.set(name, []);
+                groups.get(name).push(order);
+            });
 
             let html = '';
-            pageGroups.forEach(([name, customerOrders]) => {
+            groups.forEach((customerOrders, name) => {
                 html += `
                     <div class="customer-group">
                         <div class="customer-group-header">👤 ${name}</div>
