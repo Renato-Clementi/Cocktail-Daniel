@@ -312,7 +312,8 @@
         .lang-switcher {
             display: flex;
             justify-content: center;
-            gap: 10px;
+            flex-wrap: wrap;
+            gap: 6px;
             margin-bottom: 10px;
         }
 
@@ -320,8 +321,8 @@
             background: rgba(255,255,255,0.2);
             border: 2px solid rgba(255,255,255,0.4);
             border-radius: 8px;
-            padding: 4px 10px;
-            font-size: 1.3em;
+            padding: 4px 8px;
+            font-size: 1.2em;
             cursor: pointer;
             transition: all 0.2s ease;
             line-height: 1;
@@ -341,6 +342,9 @@
         <div class="lang-switcher">
             <button class="lang-btn" id="langBtnIt" onclick="setLanguage('it')" title="Italiano">🇮🇹</button>
             <button class="lang-btn" id="langBtnEn" onclick="setLanguage('en')" title="English">🇬🇧</button>
+            <button class="lang-btn" id="langBtnEs" onclick="setLanguage('es')" title="Español">🇪🇸</button>
+            <button class="lang-btn" id="langBtnDe" onclick="setLanguage('de')" title="Deutsch">🇩🇪</button>
+            <button class="lang-btn" id="langBtnFr" onclick="setLanguage('fr')" title="Français">🇫🇷</button>
         </div>
         <h1>🍹 <span data-i18n="brandName">COCKTAIL DANIEL SRL</span></h1>
         <div class="copyright" data-i18n="copyright">© 2026 COCKTAIL DANIEL SRL - Tutti i diritti riservati</div>
@@ -648,6 +652,171 @@
                 gpsErrorTimeout: "Timeout: it's taking too long.\n\nTry again or choose \"At Home\" or \"In the Garden\".",
                 gpsErrorUnknown: "Unknown error.\n\nChoose \"At Home\" or \"In the Garden\" to continue.",
                 gettingLocation: "📍 Getting location..."
+            },
+            es: {
+                brandName: "COCKTAIL DANIEL SRL",
+                copyright: "© 2026 COCKTAIL DANIEL SRL - Todos los derechos reservados",
+                orderSuccess: "✓ ¡Pedido enviado con éxito!",
+                ordersHistory: "📋 Historial de Pedidos",
+                totalSpentLabel: "💰 Total gastado",
+                payButton: "✅ Pagar y cerrar cuenta",
+                reviewButton: "⭐ Dejar una reseña",
+                reviewTitle: "⭐ Tu reseña",
+                reviewSubtitle: "¡Cuéntanos qué piensas! Se enviará al grupo Family.",
+                reviewRatingLabel: "¿Cuánto te ha gustado?",
+                reviewCommentLabel: "💬 Tu comentario:",
+                reviewCommentPlaceholder: "ej: ¡Mojito fantástico, servicio rápido!",
+                cancel: "Cancelar",
+                sendReview: "Enviar reseña ⭐",
+                welcomeTitle: "¡Bienvenido!",
+                welcomeSubtitle: "¿Cómo te llamas? Lo necesitamos para identificar tus pedidos.<br>Solo lo preguntaremos <strong>esta vez</strong>.",
+                nameLabel: "👤 Tu nombre:",
+                namePlaceholder: "ej: Marco",
+                startOrdering: "Empezar a pedir 🍹",
+                completeOrder: "Completa tu pedido",
+                cocktailLabel: "Cóctel:",
+                chooseVariant: "Elige la variante:",
+                tablePosition: "Mesa / Ubicación:",
+                locWhereIAm: "Donde estoy",
+                locHome: "En Casa",
+                locGarden: "En el Jardín",
+                preferredTime: "Horario preferido:",
+                timeNow: "Ahora",
+                time10: "10 min",
+                time30: "30 min",
+                additionalNotes: "Notas adicionales (opcional):",
+                notesPlaceholder: "ej: Poco hielo, limón extra...",
+                priceToPay: "💰 Precio a pagar en la entrega:",
+                confirmOrderBtn: "Confirmar Pedido",
+                orderNow: "Pedir",
+                noOrders: "Aún no hay pedidos 🍹",
+                orderedLabel: "Pedido:",
+                orderSingular: "pedido",
+                orderPlural: "pedidos",
+                changeName: "Editar tu nombre:",
+                enterNameAlert: "Por favor, introduce tu nombre para continuar.",
+                selectStarAlert: "Por favor, selecciona al menos una estrella.",
+                writeCommentAlert: "Por favor, escribe un comentario para tu reseña.",
+                reviewSentMsg: "⭐ ¡Reseña enviada! ¡Gracias!",
+                paymentSentMsg: "✅ ¡Pago enviado! Cuenta cerrada.",
+                confirmPayment: "¿Confirmas el pago de {total} por {count} pedidos?",
+                reviewCopiedAlert: "¡Reseña copiada! Se abrirá el grupo Family: pega el mensaje en el chat.",
+                gpsErrorTitle: "No se puede obtener tu ubicación GPS.\n\n",
+                gpsErrorDenied: "Has denegado el permiso de acceso a la ubicación.\n\nPara usar \"Donde estoy\" debes:\n1. Permitir el acceso a la ubicación\n2. O elegir \"En Casa\" o \"En el Jardín\"",
+                gpsErrorUnavailable: "No se puede determinar la ubicación.\n\nComprueba que estás conectado a internet e inténtalo de nuevo,\no elige \"En Casa\" o \"En el Jardín\".",
+                gpsErrorTimeout: "Tiempo agotado: está tardando demasiado.\n\nInténtalo de nuevo o elige \"En Casa\" o \"En el Jardín\".",
+                gpsErrorUnknown: "Error desconocido.\n\nElige \"En Casa\" o \"En el Jardín\" para continuar.",
+                gettingLocation: "📍 Obteniendo ubicación..."
+            },
+            de: {
+                brandName: "COCKTAIL DANIEL SRL",
+                copyright: "© 2026 COCKTAIL DANIEL SRL - Alle Rechte vorbehalten",
+                orderSuccess: "✓ Bestellung erfolgreich gesendet!",
+                ordersHistory: "📋 Bestellverlauf",
+                totalSpentLabel: "💰 Gesamt ausgegeben",
+                payButton: "✅ Bezahlen und Konto schließen",
+                reviewButton: "⭐ Bewertung abgeben",
+                reviewTitle: "⭐ Deine Bewertung",
+                reviewSubtitle: "Sag uns, was du denkst! Wird an die Family-Gruppe gesendet.",
+                reviewRatingLabel: "Wie sehr hat es dir gefallen?",
+                reviewCommentLabel: "💬 Dein Kommentar:",
+                reviewCommentPlaceholder: "z.B: Fantastischer Mojito, schneller Service!",
+                cancel: "Abbrechen",
+                sendReview: "Bewertung senden ⭐",
+                welcomeTitle: "Willkommen!",
+                welcomeSubtitle: "Wie heißt du? Wir brauchen das, um deine Bestellungen zu identifizieren.<br>Wir fragen nur <strong>dieses eine Mal</strong>.",
+                nameLabel: "👤 Dein Name:",
+                namePlaceholder: "z.B: Max",
+                startOrdering: "Jetzt bestellen 🍹",
+                completeOrder: "Bestellung abschließen",
+                cocktailLabel: "Cocktail:",
+                chooseVariant: "Variante wählen:",
+                tablePosition: "Tisch / Standort:",
+                locWhereIAm: "Wo ich bin",
+                locHome: "Zu Hause",
+                locGarden: "Im Garten",
+                preferredTime: "Bevorzugte Zeit:",
+                timeNow: "Jetzt",
+                time10: "10 Min",
+                time30: "30 Min",
+                additionalNotes: "Zusätzliche Hinweise (optional):",
+                notesPlaceholder: "z.B: Wenig Eis, extra Zitrone...",
+                priceToPay: "💰 Bei Lieferung zu zahlender Preis:",
+                confirmOrderBtn: "Bestellung bestätigen",
+                orderNow: "Bestellen",
+                noOrders: "Noch keine Bestellungen 🍹",
+                orderedLabel: "Bestellt:",
+                orderSingular: "Bestellung",
+                orderPlural: "Bestellungen",
+                changeName: "Namen bearbeiten:",
+                enterNameAlert: "Bitte gib deinen Namen ein, um fortzufahren.",
+                selectStarAlert: "Bitte wähle mindestens einen Stern aus.",
+                writeCommentAlert: "Bitte schreibe einen Kommentar für deine Bewertung.",
+                reviewSentMsg: "⭐ Bewertung gesendet! Danke!",
+                paymentSentMsg: "✅ Zahlung gesendet! Konto geschlossen.",
+                confirmPayment: "Zahlung von {total} für {count} Bestellungen bestätigen?",
+                reviewCopiedAlert: "Bewertung kopiert! Die Family-Gruppe wird geöffnet: Nachricht im Chat einfügen.",
+                gpsErrorTitle: "Dein GPS-Standort konnte nicht ermittelt werden.\n\n",
+                gpsErrorDenied: "Du hast den Standortzugriff verweigert.\n\nUm \"Wo ich bin\" zu nutzen, musst du:\n1. Standortzugriff erlauben\n2. Oder \"Zu Hause\" oder \"Im Garten\" wählen",
+                gpsErrorUnavailable: "Standort konnte nicht ermittelt werden.\n\nPrüfe deine Internetverbindung und versuche es erneut,\noder wähle \"Zu Hause\" oder \"Im Garten\".",
+                gpsErrorTimeout: "Zeitüberschreitung: Es dauert zu lange.\n\nVersuche es erneut oder wähle \"Zu Hause\" oder \"Im Garten\".",
+                gpsErrorUnknown: "Unbekannter Fehler.\n\nWähle \"Zu Hause\" oder \"Im Garten\", um fortzufahren.",
+                gettingLocation: "📍 Standort wird ermittelt..."
+            },
+            fr: {
+                brandName: "COCKTAIL DANIEL SRL",
+                copyright: "© 2026 COCKTAIL DANIEL SRL - Tous droits réservés",
+                orderSuccess: "✓ Commande envoyée avec succès !",
+                ordersHistory: "📋 Historique des Commandes",
+                totalSpentLabel: "💰 Total dépensé",
+                payButton: "✅ Payer et clôturer le compte",
+                reviewButton: "⭐ Laisser un avis",
+                reviewTitle: "⭐ Votre avis",
+                reviewSubtitle: "Dites-nous ce que vous en pensez ! Sera envoyé au groupe Family.",
+                reviewRatingLabel: "Combien avez-vous aimé ?",
+                reviewCommentLabel: "💬 Votre commentaire :",
+                reviewCommentPlaceholder: "ex : Mojito fantastique, service rapide !",
+                cancel: "Annuler",
+                sendReview: "Envoyer l'avis ⭐",
+                welcomeTitle: "Bienvenue !",
+                welcomeSubtitle: "Comment vous appelez-vous ? Nécessaire pour identifier vos commandes.<br>Nous ne le demanderons <strong>qu'une seule fois</strong>.",
+                nameLabel: "👤 Votre nom :",
+                namePlaceholder: "ex : Marc",
+                startOrdering: "Commencer à commander 🍹",
+                completeOrder: "Finalisez votre commande",
+                cocktailLabel: "Cocktail :",
+                chooseVariant: "Choisissez la variante :",
+                tablePosition: "Table / Emplacement :",
+                locWhereIAm: "Où je suis",
+                locHome: "À la Maison",
+                locGarden: "Au Jardin",
+                preferredTime: "Heure préférée :",
+                timeNow: "Maintenant",
+                time10: "10 min",
+                time30: "30 min",
+                additionalNotes: "Notes supplémentaires (facultatif) :",
+                notesPlaceholder: "ex : Peu de glace, citron supplémentaire...",
+                priceToPay: "💰 Prix à payer à la livraison :",
+                confirmOrderBtn: "Confirmer la Commande",
+                orderNow: "Commander",
+                noOrders: "Aucune commande pour l'instant 🍹",
+                orderedLabel: "Commandé :",
+                orderSingular: "commande",
+                orderPlural: "commandes",
+                changeName: "Modifier votre nom :",
+                enterNameAlert: "Veuillez entrer votre nom pour continuer.",
+                selectStarAlert: "Veuillez sélectionner au moins une étoile.",
+                writeCommentAlert: "Veuillez écrire un commentaire pour votre avis.",
+                reviewSentMsg: "⭐ Avis envoyé ! Merci !",
+                paymentSentMsg: "✅ Paiement envoyé ! Compte clôturé.",
+                confirmPayment: "Confirmez-vous le paiement de {total} pour {count} commandes ?",
+                reviewCopiedAlert: "Avis copié ! Le groupe Family va s'ouvrir : collez le message dans le chat.",
+                gpsErrorTitle: "Impossible d'obtenir votre position GPS.\n\n",
+                gpsErrorDenied: "Vous avez refusé l'accès à la position.\n\nPour utiliser \"Où je suis\", vous devez :\n1. Autoriser l'accès à la position\n2. Ou choisir \"À la Maison\" ou \"Au Jardin\"",
+                gpsErrorUnavailable: "Impossible de déterminer la position.\n\nVérifiez votre connexion internet et réessayez,\nou choisissez \"À la Maison\" ou \"Au Jardin\".",
+                gpsErrorTimeout: "Délai dépassé : cela prend trop de temps.\n\nRéessayez ou choisissez \"À la Maison\" ou \"Au Jardin\".",
+                gpsErrorUnknown: "Erreur inconnue.\n\nChoisissez \"À la Maison\" ou \"Au Jardin\" pour continuer.",
+                gettingLocation: "📍 Localisation en cours..."
             }
         };
 
@@ -683,6 +852,96 @@
                     "Fresco": "Fresh",
                     "Tropicale": "Tropical"
                 }
+            },
+            es: {
+                descriptions: {
+                    "Rum, menta, lime, zucchero, soda": "Ron, menta, lima, azúcar, soda",
+                    "Tequila, triple sec, succo di lime": "Tequila, triple sec, zumo de lima",
+                    "Gin, Campari, vermouth rosso": "Ginebra, Campari, vermut rojo",
+                    "Aperol, prosecco, soda": "Aperol, prosecco, soda",
+                    "Gin, tonica, lime": "Ginebra, tónica, lima",
+                    "Gin, limone, soda": "Ginebra, limón, soda",
+                    "Prosecco, sambuco, menta, soda": "Prosecco, saúco, menta, soda",
+                    "Rum, cocco, ananas": "Ron, coco, piña",
+                    "Cachaça, lime, zucchero": "Cachaça, lima, azúcar"
+                },
+                variants: {
+                    "Classico": "Clásico",
+                    "Classica": "Clásica",
+                    "Dolce": "Dulce",
+                    "Fruttato": "Afrutado",
+                    "Fruttata": "Afrutada",
+                    "Frozen": "Frozen",
+                    "Piccante": "Picante",
+                    "Sbagliato": "Sbagliato",
+                    "Bianco": "Blanco",
+                    "Strong": "Fuerte",
+                    "Secco": "Seco",
+                    "Profumato": "Aromático",
+                    "Speziato": "Especiado",
+                    "Fresco": "Fresco",
+                    "Tropicale": "Tropical"
+                }
+            },
+            de: {
+                descriptions: {
+                    "Rum, menta, lime, zucchero, soda": "Rum, Minze, Limette, Zucker, Soda",
+                    "Tequila, triple sec, succo di lime": "Tequila, Triple Sec, Limettensaft",
+                    "Gin, Campari, vermouth rosso": "Gin, Campari, roter Wermut",
+                    "Aperol, prosecco, soda": "Aperol, Prosecco, Soda",
+                    "Gin, tonica, lime": "Gin, Tonic, Limette",
+                    "Gin, limone, soda": "Gin, Zitrone, Soda",
+                    "Prosecco, sambuco, menta, soda": "Prosecco, Holunderblüte, Minze, Soda",
+                    "Rum, cocco, ananas": "Rum, Kokos, Ananas",
+                    "Cachaça, lime, zucchero": "Cachaça, Limette, Zucker"
+                },
+                variants: {
+                    "Classico": "Klassisch",
+                    "Classica": "Klassisch",
+                    "Dolce": "Süß",
+                    "Fruttato": "Fruchtig",
+                    "Fruttata": "Fruchtig",
+                    "Frozen": "Frozen",
+                    "Piccante": "Scharf",
+                    "Sbagliato": "Sbagliato",
+                    "Bianco": "Weiß",
+                    "Strong": "Stark",
+                    "Secco": "Trocken",
+                    "Profumato": "Aromatisch",
+                    "Speziato": "Würzig",
+                    "Fresco": "Frisch",
+                    "Tropicale": "Tropisch"
+                }
+            },
+            fr: {
+                descriptions: {
+                    "Rum, menta, lime, zucchero, soda": "Rhum, menthe, citron vert, sucre, soda",
+                    "Tequila, triple sec, succo di lime": "Tequila, triple sec, jus de citron vert",
+                    "Gin, Campari, vermouth rosso": "Gin, Campari, vermouth rouge",
+                    "Aperol, prosecco, soda": "Aperol, prosecco, soda",
+                    "Gin, tonica, lime": "Gin, tonic, citron vert",
+                    "Gin, limone, soda": "Gin, citron, soda",
+                    "Prosecco, sambuco, menta, soda": "Prosecco, sureau, menthe, soda",
+                    "Rum, cocco, ananas": "Rhum, noix de coco, ananas",
+                    "Cachaça, lime, zucchero": "Cachaça, citron vert, sucre"
+                },
+                variants: {
+                    "Classico": "Classique",
+                    "Classica": "Classique",
+                    "Dolce": "Doux",
+                    "Fruttato": "Fruité",
+                    "Fruttata": "Fruitée",
+                    "Frozen": "Frozen",
+                    "Piccante": "Épicé",
+                    "Sbagliato": "Sbagliato",
+                    "Bianco": "Blanc",
+                    "Strong": "Fort",
+                    "Secco": "Sec",
+                    "Profumato": "Parfumé",
+                    "Speziato": "Épicé",
+                    "Fresco": "Frais",
+                    "Tropicale": "Tropical"
+                }
             }
         };
 
@@ -694,12 +953,14 @@
 
         function translateDescription(desc) {
             if (currentLang === 'it') return desc;
-            return (cocktailUiTranslations.en.descriptions[desc]) || desc;
+            const langData = cocktailUiTranslations[currentLang];
+            return (langData && langData.descriptions[desc]) || desc;
         }
 
         function translateVariant(variant) {
             if (currentLang === 'it') return variant;
-            return (cocktailUiTranslations.en.variants[variant]) || variant;
+            const langData = cocktailUiTranslations[currentLang];
+            return (langData && langData.variants[variant]) || variant;
         }
 
         function translateLocation(loc) {
@@ -736,6 +997,9 @@
 
             document.getElementById('langBtnIt').classList.toggle('active', currentLang === 'it');
             document.getElementById('langBtnEn').classList.toggle('active', currentLang === 'en');
+            document.getElementById('langBtnEs').classList.toggle('active', currentLang === 'es');
+            document.getElementById('langBtnDe').classList.toggle('active', currentLang === 'de');
+            document.getElementById('langBtnFr').classList.toggle('active', currentLang === 'fr');
         }
 
         // Change language
