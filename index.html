@@ -302,6 +302,23 @@
             color: #667eea;
         }
 
+        .order-pending {
+            background: #fff8e1;
+            border-left-color: #f5a623;
+        }
+
+        .pending-tag {
+            display: inline-block;
+            background: #f5a623;
+            color: white;
+            border-radius: 10px;
+            padding: 1px 8px;
+            font-size: 0.7em;
+            font-weight: bold;
+            margin-left: 6px;
+            vertical-align: middle;
+        }
+
         .pending-banner {
             background: rgba(255, 248, 225, 0.95);
             backdrop-filter: blur(10px);
@@ -503,6 +520,7 @@
                 <div style="font-size: 0.85em; color: rgba(255,255,255,0.85); margin-bottom: 4px;" data-i18n="totalSpentLabel">💰 Totale speso</div>
                 <div id="totalAmount" style="font-size: 1.8em; font-weight: bold; color: white;">0,00€</div>
                 <div id="totalCount" style="font-size: 0.8em; color: rgba(255,255,255,0.75); margin-top: 2px;"></div>
+                <div id="openAmountInfo" style="display:none; font-size: 0.85em; color: #ffe082; margin-top: 6px; font-weight: bold;"></div>
                 <button id="payButton" onclick="payAndClose()" style="margin-top: 12px; background: white; color: #667eea; border: none; border-radius: 8px; padding: 12px 24px; font-size: 15px; font-weight: bold; cursor: pointer; transition: opacity 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.2);" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'" data-i18n="payButton">✅ Paga e chiudi conto</button>
             </div>
         </div>
@@ -730,6 +748,8 @@
                 gpsErrorTimeout: "Timeout: ci sta mettendo troppo tempo.\n\nRiprova o scegli \"In Casa\" o \"In Giardino\".",
                 gpsErrorUnknown: "Errore sconosciuto.\n\nScegli \"In Casa\" o \"In Giardino\" per continuare.",
                 gettingLocation: "📍 Ottenendo posizione...",
+                pendingTag: "in attesa",
+                stillToPay: "Ancora da pagare:",
                 paymentRequestedMsg: "⏳ Richiesta inviata! In attesa di conferma.",
                 paymentConfirmedMsg: "✅ Pagamento confermato! Conto chiuso. Grazie!",
                 paymentClosedMsg: "✅ Pagamento confermato e conto chiuso.",
@@ -792,6 +812,8 @@
                 gpsErrorTimeout: "Timeout: it's taking too long.\n\nTry again or choose \"At Home\" or \"In the Garden\".",
                 gpsErrorUnknown: "Unknown error.\n\nChoose \"At Home\" or \"In the Garden\" to continue.",
                 gettingLocation: "📍 Getting location...",
+                pendingTag: "pending",
+                stillToPay: "Still to pay:",
                 paymentRequestedMsg: "⏳ Request sent! Awaiting confirmation.",
                 paymentConfirmedMsg: "✅ Payment confirmed! Bill closed. Thank you!",
                 paymentClosedMsg: "✅ Payment confirmed and bill closed.",
@@ -854,6 +876,8 @@
                 gpsErrorTimeout: "Tiempo agotado: está tardando demasiado.\n\nInténtalo de nuevo o elige \"En Casa\" o \"En el Jardín\".",
                 gpsErrorUnknown: "Error desconocido.\n\nElige \"En Casa\" o \"En el Jardín\" para continuar.",
                 gettingLocation: "📍 Obteniendo ubicación...",
+                pendingTag: "pendiente",
+                stillToPay: "Aún por pagar:",
                 paymentRequestedMsg: "⏳ ¡Solicitud enviada! Esperando confirmación.",
                 paymentConfirmedMsg: "✅ ¡Pago confirmado! Cuenta cerrada. ¡Gracias!",
                 paymentClosedMsg: "✅ Pago confirmado y cuenta cerrada.",
@@ -916,6 +940,8 @@
                 gpsErrorTimeout: "Zeitüberschreitung: Es dauert zu lange.\n\nVersuche es erneut oder wähle \"Zu Hause\" oder \"Im Garten\".",
                 gpsErrorUnknown: "Unbekannter Fehler.\n\nWähle \"Zu Hause\" oder \"Im Garten\", um fortzufahren.",
                 gettingLocation: "📍 Standort wird ermittelt...",
+                pendingTag: "ausstehend",
+                stillToPay: "Noch zu zahlen:",
                 paymentRequestedMsg: "⏳ Anfrage gesendet! Warte auf Bestätigung.",
                 paymentConfirmedMsg: "✅ Zahlung bestätigt! Rechnung geschlossen. Danke!",
                 paymentClosedMsg: "✅ Zahlung bestätigt und Rechnung geschlossen.",
@@ -978,6 +1004,8 @@
                 gpsErrorTimeout: "Délai dépassé : cela prend trop de temps.\n\nRéessayez ou choisissez \"À la Maison\" ou \"Au Jardin\".",
                 gpsErrorUnknown: "Erreur inconnue.\n\nChoisissez \"À la Maison\" ou \"Au Jardin\" pour continuer.",
                 gettingLocation: "📍 Localisation en cours...",
+                pendingTag: "en attente",
+                stillToPay: "Reste à payer :",
                 paymentRequestedMsg: "⏳ Demande envoyée ! En attente de confirmation.",
                 paymentConfirmedMsg: "✅ Paiement confirmé ! Compte clôturé. Merci !",
                 paymentClosedMsg: "✅ Paiement confirmé et compte clôturé.",
@@ -1188,6 +1216,7 @@
         const ORDERS_PER_PAGE = 3;       // Numero di ordini mostrati per pagina
         let pendingPayments = [];        // Richieste di pagamento in attesa (vista admin)
         let myPaymentPending = false;    // Il cliente ha una richiesta in attesa?
+        let myPendingOrderIds = [];      // ID degli ordini inclusi nella richiesta in attesa
         let customerName = localStorage.getItem('customerName') || '';
         const ADMIN_PHONE = '3515292930';
 
@@ -1363,23 +1392,30 @@
                 return;
             }
 
-            const total = orders.reduce((sum, order) => {
+            // La richiesta copre TUTTI gli ordini attualmente presenti (inclusi quelli
+            // di un'eventuale richiesta precedente, che viene così aggiornata).
+            // Gli ordini creati DOPO questa richiesta resteranno aperti da pagare.
+            const ordersToPay = orders.slice();
+            if (ordersToPay.length === 0) return;
+            const orderIdsToPay = ordersToPay.map(o => o.id);
+
+            const total = ordersToPay.reduce((sum, order) => {
                 const priceNum = parseFloat(order.price.replace(',', '.').replace('€', ''));
                 return sum + (isNaN(priceNum) ? 0 : priceNum);
             }, 0);
             const totalFormatted = total.toFixed(2).replace('.', ',') + '€';
 
-            const confirmMsg = t('confirmPayment').replace('{total}', totalFormatted).replace('{count}', orders.length);
+            const confirmMsg = t('confirmPayment').replace('{total}', totalFormatted).replace('{count}', ordersToPay.length);
             if (!confirm(confirmMsg)) return;
 
             // Registra la richiesta di pagamento nel cloud (in attesa di conferma admin)
-            await createPaymentRequest(total, totalFormatted);
+            await createPaymentRequest(total, totalFormatted, orderIdsToPay);
 
             // Build WhatsApp receipt message
             let message = `*RICHIESTA CHIUSURA CONTO*\n\n`;
             message += `*Cliente:* ${customerName}\n\n`;
             message += `*Riepilogo ordini:*\n`;
-            orders.forEach((order, i) => {
+            ordersToPay.forEach((order, i) => {
                 message += `${i + 1}. ${order.cocktail} (${order.variant}) - ${order.price}\n`;
             });
             message += `\n*TOTALE DA PAGARE: ${totalFormatted}*\n`;
@@ -1387,10 +1423,9 @@
             message += `\n>> In attesa di conferma pagamento`;
 
             const encodedMessage = encodeURIComponent(message);
-            const whatsappUrl = `https://wa.me/${ADMIN_PHONE}?text=${encodedMessage}`;
-            window.open(whatsappUrl, '_blank');
 
-            // Aggiorna la UI: conto in attesa di conferma
+            // Aggiorna la UI PRIMA di passare a WhatsApp: su mobile la navigazione
+            // verso l'app interrompe l'esecuzione del codice successivo.
             await checkMyPaymentStatus();
 
             const successMsg = document.getElementById('successMessage');
@@ -1399,6 +1434,29 @@
             setTimeout(() => {
                 successMsg.classList.remove('show');
             }, 3000);
+
+            openWhatsApp(ADMIN_PHONE, encodedMessage);
+        }
+
+        // =============================================
+        // APERTURA WHATSAPP
+        // Usa lo schema whatsapp:// per aprire direttamente l'app nativa.
+        // wa.me è invece una pagina web di reindirizzamento: aprendola in una
+        // nuova scheda il browser mostra "Continua alla chat" invece di passare
+        // all'app. Su desktop si usa wa.me come fallback.
+        // =============================================
+        function isMobileDevice() {
+            return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        }
+
+        function openWhatsApp(phone, encodedMessage) {
+            if (isMobileDevice()) {
+                // Navigazione nella stessa scheda: il sistema passa all'app WhatsApp
+                window.location.href = `whatsapp://send?phone=${phone}&text=${encodedMessage}`;
+            } else {
+                // Desktop: WhatsApp Web / app desktop tramite wa.me
+                window.open(`https://wa.me/${phone}?text=${encodedMessage}`, '_blank');
+            }
         }
 
         // =============================================
@@ -1406,7 +1464,8 @@
         // =============================================
 
         // Il cliente crea la richiesta (documento con id = userId)
-        async function createPaymentRequest(total, totalFormatted) {
+        // Salva gli ID degli ordini inclusi: solo QUELLI verranno chiusi alla conferma
+        async function createPaymentRequest(total, totalFormatted, orderIds) {
             if (!isApiConfigured() || !customerName) return;
             try {
                 await firestoreDb.collection('payments').doc(getUserId(customerName)).set({
@@ -1414,7 +1473,8 @@
                     customerName: customerName,
                     total: total,
                     totalFormatted: totalFormatted,
-                    orderCount: orders.length,
+                    orderCount: orderIds.length,
+                    orderIds: orderIds,
                     requestedAt: Date.now(),
                     requestedDate: new Date().toLocaleDateString('it-IT'),
                     requestedTime: new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }),
@@ -1433,15 +1493,18 @@
                 const doc = await firestoreDb.collection('payments').doc(getUserId(customerName)).get();
                 if (doc.exists) {
                     myPaymentPending = true;
+                    myPendingOrderIds = doc.data().orderIds || [];
                     document.getElementById('pendingAmount').textContent = doc.data().totalFormatted || '';
                     banner.style.display = 'block';
                 } else {
                     // Nessuna richiesta: se prima era in attesa, l'admin ha confermato → conto chiuso
                     if (myPaymentPending) {
                         myPaymentPending = false;
+                        myPendingOrderIds = [];
                         await loadOrdersFromCloud();
                         alert(t('paymentConfirmedMsg'));
                     }
+                    myPendingOrderIds = [];
                     banner.style.display = 'none';
                 }
                 renderOrders();
@@ -1497,12 +1560,15 @@
             if (!confirm(`Confermi di aver ricevuto ${payment.totalFormatted} da ${payment.customerName}?`)) return;
 
             try {
-                // Cancella tutti gli ordini di quel cliente
-                const snapshot = await firestoreDb.collection('orders')
-                    .where('userId', '==', userId)
-                    .get();
                 const batch = firestoreDb.batch();
-                snapshot.docs.forEach(doc => batch.delete(doc.ref));
+
+                // Cancella SOLO gli ordini inclusi nella richiesta di pagamento.
+                // Eventuali ordini aggiunti dopo la richiesta restano aperti da pagare.
+                const idsToDelete = payment.orderIds || [];
+                idsToDelete.forEach(orderId => {
+                    batch.delete(firestoreDb.collection('orders').doc(String(orderId)));
+                });
+
                 // Cancella la richiesta di pagamento
                 batch.delete(firestoreDb.collection('payments').doc(userId));
                 await batch.commit();
@@ -1818,9 +1884,6 @@
             saveOrders();
             await saveOrderToCloud(order);
 
-            // Send WhatsApp message
-            sendWhatsAppMessage(order, ADMIN_PHONE);
-
             // Show success message
             const successMsg = document.getElementById('successMessage');
             successMsg.textContent = t('orderSuccess');
@@ -1832,6 +1895,9 @@
             // Close modal and refresh orders
             closeModal();
             renderOrders();
+
+            // Passa a WhatsApp per ultimo: su mobile interrompe l'esecuzione
+            sendWhatsAppMessage(order, ADMIN_PHONE);
         }
 
         // Send WhatsApp message
@@ -1858,9 +1924,7 @@
             message += `\n>> Preparare e servire!`;
 
             const encodedMessage = encodeURIComponent(message);
-            const whatsappUrl = `https://wa.me/${phone}?text=${encodedMessage}`;
-            
-            window.open(whatsappUrl, '_blank');
+            openWhatsApp(phone, encodedMessage);
         }
 
         // Render orders
@@ -1874,21 +1938,39 @@
                 return;
             }
 
-            // Calculate total spent
-            const total = orders.reduce((sum, order) => {
-                const priceNum = parseFloat(order.price.replace(',', '.').replace('€', ''));
-                return sum + (isNaN(priceNum) ? 0 : priceNum);
-            }, 0);
-            
+            // Calcola il totale complessivo
+            const priceOf = (order) => {
+                const n = parseFloat(order.price.replace(',', '.').replace('€', ''));
+                return isNaN(n) ? 0 : n;
+            };
+            const total = orders.reduce((sum, order) => sum + priceOf(order), 0);
+
+            // Separa gli ordini già inclusi in una richiesta in attesa da quelli ancora aperti
+            const openOrders = orders.filter(o => !myPendingOrderIds.includes(o.id));
+            const openTotal = openOrders.reduce((sum, order) => sum + priceOf(order), 0);
+
             document.getElementById('totalAmount').textContent = total.toFixed(2).replace('.', ',') + '€';
             document.getElementById('totalCount').textContent = orders.length + ' ' + (orders.length === 1 ? t('orderSingular') : t('orderPlural'));
             totalSpentEl.style.display = 'block';
 
-            // Nascondi il pulsante di pagamento se c'è già una richiesta in attesa
-            // oppure se si è in modalità admin (l'admin conferma, non paga)
+            // Se ci sono ordini aggiunti dopo la richiesta, mostra quanto resta ancora da pagare
+            const openInfoEl = document.getElementById('openAmountInfo');
+            if (openInfoEl) {
+                if (myPaymentPending && openOrders.length > 0) {
+                    openInfoEl.textContent = t('stillToPay') + ' ' + openTotal.toFixed(2).replace('.', ',') + '€';
+                    openInfoEl.style.display = 'block';
+                } else {
+                    openInfoEl.style.display = 'none';
+                }
+            }
+
+            // Il pulsante di pagamento:
+            // - nascosto in modalità admin (l'admin conferma, non paga)
+            // - nascosto se tutti gli ordini sono già in una richiesta in attesa
+            // - visibile se ci sono nuovi ordini ancora da pagare
             const payBtn = document.getElementById('payButton');
             if (payBtn) {
-                payBtn.style.display = (myPaymentPending || isAdmin()) ? 'none' : 'inline-block';
+                payBtn.style.display = (isAdmin() || openOrders.length === 0) ? 'none' : 'inline-block';
             }
 
             // Paginazione sugli ordini (i più recenti per primi)
@@ -1901,15 +1983,19 @@
             const startIdx = (ordersPage - 1) * ORDERS_PER_PAGE;
             const pageOrders = orders.slice(startIdx, startIdx + ORDERS_PER_PAGE);
 
-            let html = pageOrders.map(order => `
-                <div class="order-item">
-                    <strong>${order.cocktail}</strong> - <em>${translateVariant(order.variant)}</em> - <strong style="color: #667eea;">${order.price}</strong><br>
+            let html = pageOrders.map(order => {
+                const isPending = myPendingOrderIds.includes(order.id);
+                return `
+                <div class="order-item${isPending ? ' order-pending' : ''}">
+                    <strong>${order.cocktail}</strong> - <em>${translateVariant(order.variant)}</em> - <strong style="color: #667eea;">${order.price}</strong>
+                    ${isPending ? `<span class="pending-tag">⏳ ${t('pendingTag')}</span>` : ''}<br>
                     👤 ${order.customerName || '-'}<br>
                     📍 ${translateLocation(order.location)} | ⏰ ${translateTime(order.time)}<br>
                     <small style="color: #666;">${t('orderedLabel')} ${order.orderDate} ${order.orderTime}</small>
                     ${order.notes ? `<br><small>📝 ${order.notes}</small>` : ''}
                 </div>
-            `).join('');
+            `;
+            }).join('');
 
             // Controlli di paginazione (solo se serve più di una pagina)
             if (totalPages > 1) {
@@ -1997,7 +2083,6 @@
             const encodedMessage = encodeURIComponent(message);
 
             // If group link is configured, use it; otherwise send to admin
-            let whatsappUrl;
             if (FAMILY_GROUP_LINK && !FAMILY_GROUP_LINK.includes('INCOLLA_QUI')) {
                 // For group links we can't pre-fill text, so we copy and open group
                 navigator.clipboard.writeText(message.replace(/\*/g, '')).then(() => {
@@ -2005,13 +2090,11 @@
                     window.open(FAMILY_GROUP_LINK, '_blank');
                 }).catch(() => {
                     // Fallback: send to admin number
-                    whatsappUrl = `https://wa.me/${ADMIN_PHONE}?text=${encodedMessage}`;
-                    window.open(whatsappUrl, '_blank');
+                    openWhatsApp(ADMIN_PHONE, encodedMessage);
                 });
             } else {
                 // Fallback: send to admin number
-                whatsappUrl = `https://wa.me/${ADMIN_PHONE}?text=${encodedMessage}`;
-                window.open(whatsappUrl, '_blank');
+                openWhatsApp(ADMIN_PHONE, encodedMessage);
             }
 
             closeReviewModal();
