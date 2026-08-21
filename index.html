@@ -908,6 +908,11 @@
             <button onclick="openReviewModal()" style="flex: 1; min-width: 150px; background: rgba(255,244,230,0.94); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: var(--dusk); border: none; border-radius: var(--radius); padding: 16px 20px; font-family: var(--font-body); font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: var(--shadow-card); transition: transform 0.3s ease, box-shadow 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''" data-i18n="reviewButton">⭐ Lascia una recensione</button>
             <button onclick="openReviewsPage()" style="flex: 1; min-width: 150px; background: rgba(255,244,230,0.94); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: var(--dusk); border: none; border-radius: var(--radius); padding: 16px 20px; font-family: var(--font-body); font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: var(--shadow-card); transition: transform 0.3s ease, box-shadow 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''" data-i18n="viewReviewsButton">💬 Leggi le recensioni</button>
         </div>
+
+        <!-- Share Button -->
+        <div style="margin-top: 10px;">
+            <button onclick="shareApp()" style="width: 100%; background: linear-gradient(135deg, var(--coral) 0%, var(--coral-deep) 100%); color: #fff; border: none; border-radius: var(--radius); padding: 16px 20px; font-family: var(--font-body); font-size: 15px; font-weight: 600; letter-spacing: 0.3px; cursor: pointer; box-shadow: 0 8px 22px rgba(224,73,44,0.4); transition: transform 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''" data-i18n="shareButton">📤 Invita un amico</button>
+        </div>
     </div>
 
     <!-- Reviews Page Modal (pubblica) -->
@@ -1205,6 +1210,10 @@
                 premiumEnable: "Abilita versione Premium",
                 premiumSurcharge: "Maggiorazione Premium",
                 viewReviewsButton: "💬 Leggi le recensioni",
+                shareButton: "📤 Invita un amico",
+                shareMessage: "🍹 Ordina il tuo cocktail su Cocktail Daniel! Scegli, ordina e te lo portiamo dove sei. 🌅",
+                linkCopied: "Link copiato negli appunti!",
+                copyLinkManually: "Copia questo link e condividilo:",
                 reviewsPageTitle: "💬 Recensioni",
                 noReviews: "Nessuna recensione ancora ⭐",
                 loadingReviews: "Caricamento recensioni...",
@@ -1290,6 +1299,10 @@
                 premiumEnable: "Enable Premium version",
                 premiumSurcharge: "Premium surcharge",
                 viewReviewsButton: "💬 Read reviews",
+                shareButton: "📤 Invite a friend",
+                shareMessage: "🍹 Order your cocktail on Cocktail Daniel! Pick one, order it, and we bring it to you. 🌅",
+                linkCopied: "Link copied to clipboard!",
+                copyLinkManually: "Copy this link and share it:",
                 reviewsPageTitle: "💬 Reviews",
                 noReviews: "No reviews yet ⭐",
                 loadingReviews: "Loading reviews...",
@@ -1375,6 +1388,10 @@
                 premiumEnable: "Activar versión Premium",
                 premiumSurcharge: "Recargo Premium",
                 viewReviewsButton: "💬 Leer reseñas",
+                shareButton: "📤 Invita a un amigo",
+                shareMessage: "🍹 ¡Pide tu cóctel en Cocktail Daniel! Elige, pide y te lo llevamos donde estés. 🌅",
+                linkCopied: "¡Enlace copiado al portapapeles!",
+                copyLinkManually: "Copia este enlace y compártelo:",
                 reviewsPageTitle: "💬 Reseñas",
                 noReviews: "Aún no hay reseñas ⭐",
                 loadingReviews: "Cargando reseñas...",
@@ -1460,6 +1477,10 @@
                 premiumEnable: "Premium-Version aktivieren",
                 premiumSurcharge: "Premium-Zuschlag",
                 viewReviewsButton: "💬 Bewertungen lesen",
+                shareButton: "📤 Freund einladen",
+                shareMessage: "🍹 Bestelle deinen Cocktail bei Cocktail Daniel! Aussuchen, bestellen, wir bringen ihn dir. 🌅",
+                linkCopied: "Link in die Zwischenablage kopiert!",
+                copyLinkManually: "Kopiere diesen Link und teile ihn:",
                 reviewsPageTitle: "💬 Bewertungen",
                 noReviews: "Noch keine Bewertungen ⭐",
                 loadingReviews: "Bewertungen werden geladen...",
@@ -1545,6 +1566,10 @@
                 premiumEnable: "Activer la version Premium",
                 premiumSurcharge: "Supplément Premium",
                 viewReviewsButton: "💬 Lire les avis",
+                shareButton: "📤 Inviter un ami",
+                shareMessage: "🍹 Commandez votre cocktail sur Cocktail Daniel ! Choisissez, commandez, on vous l'apporte. 🌅",
+                linkCopied: "Lien copié dans le presse-papiers !",
+                copyLinkManually: "Copiez ce lien et partagez-le :",
                 reviewsPageTitle: "💬 Avis",
                 noReviews: "Aucun avis pour l'instant ⭐",
                 loadingReviews: "Chargement des avis...",
@@ -1630,6 +1655,10 @@
                 premiumEnable: "Увімкнути Преміум-версію",
                 premiumSurcharge: "Преміум-доплата",
                 viewReviewsButton: "💬 Читати відгуки",
+                shareButton: "📤 Запросити друга",
+                shareMessage: "🍹 Замовляй свій коктейль у Cocktail Daniel! Обери, замов — і ми принесемо його тобі. 🌅",
+                linkCopied: "Посилання скопійовано!",
+                copyLinkManually: "Скопіюй це посилання та поділись:",
                 reviewsPageTitle: "💬 Відгуки",
                 noReviews: "Ще немає відгуків ⭐",
                 loadingReviews: "Завантаження відгуків...",
@@ -3125,6 +3154,53 @@
             const div = document.createElement('div');
             div.textContent = str;
             return div.innerHTML;
+        }
+
+        // =============================================
+        // CONDIVISIONE APP
+        // 1) Pannello di condivisione nativo del telefono (WhatsApp, Telegram, SMS...)
+        // 2) Su desktop o se non disponibile: WhatsApp
+        // 3) Ultima risorsa: copia il link negli appunti
+        // =============================================
+        const APP_URL = 'https://renato-clementi.github.io/Cocktail-Daniel/';
+
+        async function shareApp() {
+            const text = t('shareMessage');
+            const fullMessage = `${text}\n${APP_URL}`;
+
+            // 1) Condivisione nativa
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'Cocktail Daniel',
+                        text: text,
+                        url: APP_URL
+                    });
+                    return;
+                } catch (error) {
+                    // L'utente ha annullato: non serve alcun fallback
+                    if (error && error.name === 'AbortError') return;
+                }
+            }
+
+            // 2) WhatsApp (senza destinatario: l'utente sceglie il contatto)
+            const encoded = encodeURIComponent(fullMessage);
+            if (isMobileDevice()) {
+                window.location.href = `whatsapp://send?text=${encoded}`;
+                return;
+            }
+
+            // 3) Desktop: WhatsApp Web, con copia negli appunti come riserva
+            try {
+                window.open(`https://wa.me/?text=${encoded}`, '_blank');
+            } catch (error) {
+                try {
+                    await navigator.clipboard.writeText(fullMessage);
+                    alert(t('linkCopied'));
+                } catch (e) {
+                    prompt(t('copyLinkManually'), APP_URL);
+                }
+            }
         }
 
         async function sendReview() {
