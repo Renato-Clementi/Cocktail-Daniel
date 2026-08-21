@@ -302,6 +302,19 @@
             color: #667eea;
         }
 
+        .customer-group {
+            margin-bottom: 25px;
+        }
+
+        .customer-group-header {
+            font-size: 1.05em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
         .no-orders {
             text-align: center;
             color: #999;
@@ -1538,15 +1551,32 @@
             document.getElementById('totalCount').textContent = orders.length + ' ' + (orders.length === 1 ? t('orderSingular') : t('orderPlural'));
             totalSpentEl.style.display = 'block';
 
-            // Mostra gli ordini salvati (ultimi 50) - i dati restano in italiano, solo le etichette sono tradotte
-            ordersList.innerHTML = orders.slice(0, 50).map(order => `
-                <div class="order-item">
-                    <strong>${order.cocktail}</strong> - <em>${translateVariant(order.variant)}</em> - <strong style="color: #667eea;">${order.price}</strong><br>
-                    📍 ${translateLocation(order.location)} | ⏰ ${translateTime(order.time)}<br>
-                    <small style="color: #666;">${t('orderedLabel')} ${order.orderDate} ${order.orderTime}</small>
-                    ${order.notes ? `<br><small>📝 ${order.notes}</small>` : ''}
-                </div>
-            `).join('');
+            // Raggruppa gli ordini per nome cliente (l'array orders è già ordinato dal più recente)
+            // L'ordine dei gruppi segue il primo ordine incontrato per ciascun nome (cioè il più recente)
+            const groups = new Map();
+            orders.slice(0, 50).forEach(order => {
+                const name = order.customerName || '-';
+                if (!groups.has(name)) groups.set(name, []);
+                groups.get(name).push(order);
+            });
+
+            let html = '';
+            groups.forEach((customerOrders, name) => {
+                html += `
+                    <div class="customer-group">
+                        <div class="customer-group-header">👤 ${name}</div>
+                        ${customerOrders.map(order => `
+                            <div class="order-item">
+                                <strong>${order.cocktail}</strong> - <em>${translateVariant(order.variant)}</em> - <strong style="color: #667eea;">${order.price}</strong><br>
+                                📍 ${translateLocation(order.location)} | ⏰ ${translateTime(order.time)}<br>
+                                <small style="color: #666;">${t('orderedLabel')} ${order.orderDate} ${order.orderTime}</small>
+                                ${order.notes ? `<br><small>📝 ${order.notes}</small>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            });
+            ordersList.innerHTML = html;
         }
 
         // =============================================
