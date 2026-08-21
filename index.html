@@ -534,6 +534,131 @@
             margin: 0;
         }
 
+        .reviews-summary {
+            display: flex;
+            gap: 18px;
+            align-items: center;
+            background: #f5f5f5;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+
+        .reviews-avg-block {
+            text-align: center;
+            min-width: 90px;
+        }
+
+        .reviews-avg {
+            font-size: 2.4em;
+            font-weight: bold;
+            color: #667eea;
+            line-height: 1;
+        }
+
+        .reviews-avg-stars {
+            color: #f5a623;
+            font-size: 1.1em;
+            letter-spacing: 2px;
+        }
+
+        .reviews-count {
+            font-size: 0.75em;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .reviews-distribution {
+            flex: 1;
+            min-width: 160px;
+        }
+
+        .rating-bar-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .rating-bar-label {
+            font-size: 0.75em;
+            color: #666;
+            width: 24px;
+        }
+
+        .rating-bar {
+            flex: 1;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .rating-bar-fill {
+            height: 100%;
+            background: #f5a623;
+            border-radius: 4px;
+        }
+
+        .rating-bar-count {
+            font-size: 0.75em;
+            color: #666;
+            width: 22px;
+            text-align: right;
+        }
+
+        .review-item {
+            background: #f5f5f5;
+            border-left: 4px solid #f5a623;
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 12px;
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 6px;
+        }
+
+        .review-stars {
+            color: #f5a623;
+            letter-spacing: 1px;
+        }
+
+        .review-text {
+            color: #333;
+            font-size: 0.95em;
+            line-height: 1.5;
+            margin-bottom: 6px;
+            word-break: break-word;
+        }
+
+        .review-date {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75em;
+            color: #888;
+        }
+
+        .delete-review-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+            padding: 2px 6px;
+            opacity: 0.6;
+        }
+
+        .delete-review-btn:hover {
+            opacity: 1;
+        }
+
         .pagination {
             display: flex;
             justify-content: center;
@@ -665,9 +790,34 @@
             </div>
         </div>
 
-        <!-- Review Button -->
-        <div style="margin-top: 20px; text-align: center;">
-            <button onclick="openReviewModal()" style="background: rgba(255,255,255,0.92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: #333; border: none; border-radius: 12px; padding: 16px 30px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 8px 20px rgba(0,0,0,0.3); transition: transform 0.3s ease, box-shadow 0.3s ease; width: 100%;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 30px rgba(0,0,0,0.4)'" onmouseout="this.style.transform=''; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.3)'" data-i18n="reviewButton">⭐ Lascia una recensione</button>
+        <!-- Review Buttons -->
+        <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+            <button onclick="openReviewModal()" style="flex: 1; min-width: 150px; background: rgba(255,255,255,0.92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: #333; border: none; border-radius: 12px; padding: 16px 20px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 8px 20px rgba(0,0,0,0.3); transition: transform 0.3s ease, box-shadow 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''" data-i18n="reviewButton">⭐ Lascia una recensione</button>
+            <button onclick="openReviewsPage()" style="flex: 1; min-width: 150px; background: rgba(255,255,255,0.92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: #333; border: none; border-radius: 12px; padding: 16px 20px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 8px 20px rgba(0,0,0,0.3); transition: transform 0.3s ease, box-shadow 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''" data-i18n="viewReviewsButton">💬 Leggi le recensioni</button>
+        </div>
+    </div>
+
+    <!-- Reviews Page Modal (pubblica) -->
+    <div class="modal" id="reviewsModal">
+        <div class="modal-content">
+            <h2 data-i18n="reviewsPageTitle">💬 Recensioni</h2>
+
+            <div id="reviewsSummary" style="display:none;">
+                <div class="reviews-summary">
+                    <div class="reviews-avg-block">
+                        <div id="reviewsAvg" class="reviews-avg">0,0</div>
+                        <div id="reviewsAvgStars" class="reviews-avg-stars">☆☆☆☆☆</div>
+                        <div id="reviewsCount" class="reviews-count"></div>
+                    </div>
+                    <div id="reviewsDistribution" class="reviews-distribution"></div>
+                </div>
+            </div>
+
+            <div id="reviewsList"></div>
+
+            <div class="btn-group" style="margin-top:18px;">
+                <button class="btn btn-secondary" style="width:100%;" onclick="closeReviewsPage()" data-i18n="close">Chiudi</button>
+            </div>
         </div>
     </div>
 
@@ -940,7 +1090,15 @@
                 premiumLabel: "PREMIUM",
                 premiumDesc: "ingredienti selezionati",
                 premiumEnable: "Abilita versione Premium",
-                premiumSurcharge: "Maggiorazione Premium"
+                premiumSurcharge: "Maggiorazione Premium",
+                viewReviewsButton: "💬 Leggi le recensioni",
+                reviewsPageTitle: "💬 Recensioni",
+                noReviews: "Nessuna recensione ancora ⭐",
+                loadingReviews: "Caricamento recensioni...",
+                reviewSingular: "recensione",
+                reviewPlural: "recensioni",
+                confirmDeleteReview: "Eliminare questa recensione?",
+                close: "Chiudi"
             },
             en: {
                 brandName: "COCKTAIL DANIEL SRL",
@@ -1017,7 +1175,15 @@
                 premiumLabel: "PREMIUM",
                 premiumDesc: "selected ingredients",
                 premiumEnable: "Enable Premium version",
-                premiumSurcharge: "Premium surcharge"
+                premiumSurcharge: "Premium surcharge",
+                viewReviewsButton: "💬 Read reviews",
+                reviewsPageTitle: "💬 Reviews",
+                noReviews: "No reviews yet ⭐",
+                loadingReviews: "Loading reviews...",
+                reviewSingular: "review",
+                reviewPlural: "reviews",
+                confirmDeleteReview: "Delete this review?",
+                close: "Close"
             },
             es: {
                 brandName: "COCKTAIL DANIEL SRL",
@@ -1094,7 +1260,15 @@
                 premiumLabel: "PREMIUM",
                 premiumDesc: "ingredientes seleccionados",
                 premiumEnable: "Activar versión Premium",
-                premiumSurcharge: "Recargo Premium"
+                premiumSurcharge: "Recargo Premium",
+                viewReviewsButton: "💬 Leer reseñas",
+                reviewsPageTitle: "💬 Reseñas",
+                noReviews: "Aún no hay reseñas ⭐",
+                loadingReviews: "Cargando reseñas...",
+                reviewSingular: "reseña",
+                reviewPlural: "reseñas",
+                confirmDeleteReview: "¿Eliminar esta reseña?",
+                close: "Cerrar"
             },
             de: {
                 brandName: "COCKTAIL DANIEL SRL",
@@ -1171,7 +1345,15 @@
                 premiumLabel: "PREMIUM",
                 premiumDesc: "ausgewählte Zutaten",
                 premiumEnable: "Premium-Version aktivieren",
-                premiumSurcharge: "Premium-Zuschlag"
+                premiumSurcharge: "Premium-Zuschlag",
+                viewReviewsButton: "💬 Bewertungen lesen",
+                reviewsPageTitle: "💬 Bewertungen",
+                noReviews: "Noch keine Bewertungen ⭐",
+                loadingReviews: "Bewertungen werden geladen...",
+                reviewSingular: "Bewertung",
+                reviewPlural: "Bewertungen",
+                confirmDeleteReview: "Diese Bewertung löschen?",
+                close: "Schließen"
             },
             fr: {
                 brandName: "COCKTAIL DANIEL SRL",
@@ -1248,7 +1430,15 @@
                 premiumLabel: "PREMIUM",
                 premiumDesc: "ingrédients sélectionnés",
                 premiumEnable: "Activer la version Premium",
-                premiumSurcharge: "Supplément Premium"
+                premiumSurcharge: "Supplément Premium",
+                viewReviewsButton: "💬 Lire les avis",
+                reviewsPageTitle: "💬 Avis",
+                noReviews: "Aucun avis pour l'instant ⭐",
+                loadingReviews: "Chargement des avis...",
+                reviewSingular: "avis",
+                reviewPlural: "avis",
+                confirmDeleteReview: "Supprimer cet avis ?",
+                close: "Fermer"
             },
             uk: {
                 brandName: "COCKTAIL DANIEL SRL",
@@ -1325,7 +1515,15 @@
                 premiumLabel: "ПРЕМІУМ",
                 premiumDesc: "добірні інгредієнти",
                 premiumEnable: "Увімкнути Преміум-версію",
-                premiumSurcharge: "Преміум-доплата"
+                premiumSurcharge: "Преміум-доплата",
+                viewReviewsButton: "💬 Читати відгуки",
+                reviewsPageTitle: "💬 Відгуки",
+                noReviews: "Ще немає відгуків ⭐",
+                loadingReviews: "Завантаження відгуків...",
+                reviewSingular: "відгук",
+                reviewPlural: "відгуків",
+                confirmDeleteReview: "Видалити цей відгук?",
+                close: "Закрити"
             }
         };
 
@@ -2660,7 +2858,151 @@
             }
         }
 
-        function sendReview() {
+        // =============================================
+        // RECENSIONI PUBBLICHE
+        // Salvate su Firestore (collezione "reviews"), visibili a tutti.
+        // =============================================
+        let allReviews = [];
+        let reviewsPage = 1;
+        const REVIEWS_PER_PAGE = 5;
+
+        async function saveReviewToCloud(rating, text) {
+            if (!isApiConfigured()) return;
+            try {
+                const id = Date.now();
+                await firestoreDb.collection('reviews').doc(String(id)).set({
+                    id: id,
+                    userId: getUserId(customerName),
+                    customerName: customerName,
+                    rating: rating,
+                    text: text,
+                    date: new Date().toLocaleDateString('it-IT'),
+                    time: new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })
+                });
+            } catch (error) {
+                console.log('Errore salvataggio recensione:', error);
+            }
+        }
+
+        async function loadReviews() {
+            if (!isApiConfigured()) return;
+            try {
+                const snapshot = await firestoreDb.collection('reviews').get();
+                allReviews = snapshot.docs
+                    .map(doc => doc.data())
+                    .sort((a, b) => b.id - a.id); // più recenti prima
+                renderReviews();
+            } catch (error) {
+                console.log('Errore caricamento recensioni:', error);
+            }
+        }
+
+        async function openReviewsPage() {
+            reviewsPage = 1;
+            document.getElementById('reviewsModal').classList.add('active');
+            document.getElementById('reviewsList').innerHTML =
+                `<div class="no-orders">${t('loadingReviews')}</div>`;
+            await loadReviews();
+        }
+
+        function closeReviewsPage() {
+            document.getElementById('reviewsModal').classList.remove('active');
+        }
+
+        function goToReviewsPage(page) {
+            reviewsPage = page;
+            renderReviews();
+        }
+
+        // Elimina una recensione (solo admin)
+        async function deleteReview(reviewId) {
+            if (!isAdmin()) return;
+            if (!confirm(t('confirmDeleteReview'))) return;
+            try {
+                await firestoreDb.collection('reviews').doc(String(reviewId)).delete();
+                await loadReviews();
+            } catch (error) {
+                console.log('Errore eliminazione recensione:', error);
+            }
+        }
+
+        function renderReviews() {
+            const list = document.getElementById('reviewsList');
+            const summary = document.getElementById('reviewsSummary');
+
+            if (allReviews.length === 0) {
+                summary.style.display = 'none';
+                list.innerHTML = `<div class="no-orders">${t('noReviews')}</div>`;
+                return;
+            }
+
+            // Media e distribuzione delle valutazioni
+            const total = allReviews.reduce((s, r) => s + (r.rating || 0), 0);
+            const avg = total / allReviews.length;
+            document.getElementById('reviewsAvg').textContent = avg.toFixed(1).replace('.', ',');
+            document.getElementById('reviewsAvgStars').textContent =
+                '★'.repeat(Math.round(avg)) + '☆'.repeat(5 - Math.round(avg));
+            document.getElementById('reviewsCount').textContent =
+                allReviews.length + ' ' + (allReviews.length === 1 ? t('reviewSingular') : t('reviewPlural'));
+
+            const bars = [5, 4, 3, 2, 1].map(star => {
+                const count = allReviews.filter(r => r.rating === star).length;
+                const pct = Math.round((count / allReviews.length) * 100);
+                return `
+                    <div class="rating-bar-row">
+                        <span class="rating-bar-label">${star}★</span>
+                        <div class="rating-bar"><div class="rating-bar-fill" style="width:${pct}%"></div></div>
+                        <span class="rating-bar-count">${count}</span>
+                    </div>`;
+            }).join('');
+            document.getElementById('reviewsDistribution').innerHTML = bars;
+            summary.style.display = 'block';
+
+            // Paginazione
+            const totalPages = Math.max(1, Math.ceil(allReviews.length / REVIEWS_PER_PAGE));
+            if (reviewsPage > totalPages) reviewsPage = totalPages;
+            if (reviewsPage < 1) reviewsPage = 1;
+            const start = (reviewsPage - 1) * REVIEWS_PER_PAGE;
+            const pageReviews = allReviews.slice(start, start + REVIEWS_PER_PAGE);
+
+            let html = pageReviews.map(r => `
+                <div class="review-item">
+                    <div class="review-header">
+                        <strong>${r.customerName || '-'}</strong>
+                        <span class="review-stars">${'★'.repeat(r.rating || 0)}${'☆'.repeat(5 - (r.rating || 0))}</span>
+                    </div>
+                    <div class="review-text">${escapeHtml(r.text || '')}</div>
+                    <div class="review-date">
+                        ${r.date || ''} ${r.time || ''}
+                        ${isAdmin() ? `<button class="delete-review-btn" onclick="deleteReview(${r.id})">🗑️</button>` : ''}
+                    </div>
+                </div>
+            `).join('');
+
+            if (totalPages > 1) {
+                let pageButtons = '';
+                for (let p = 1; p <= totalPages; p++) {
+                    pageButtons += `<button class="page-btn ${p === reviewsPage ? 'active' : ''}" onclick="goToReviewsPage(${p})">${p}</button>`;
+                }
+                html += `
+                    <div class="pagination">
+                        <button class="page-btn nav" onclick="goToReviewsPage(${reviewsPage - 1})" ${reviewsPage === 1 ? 'disabled' : ''}>‹</button>
+                        ${pageButtons}
+                        <button class="page-btn nav" onclick="goToReviewsPage(${reviewsPage + 1})" ${reviewsPage === totalPages ? 'disabled' : ''}>›</button>
+                    </div>`;
+            }
+
+            list.innerHTML = html;
+        }
+
+        // Evita che il testo delle recensioni possa iniettare HTML
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        async function sendReview() {
             const reviewText = document.getElementById('reviewText').value.trim();
 
             if (selectedRating === 0) {
@@ -2672,6 +3014,9 @@
                 document.getElementById('reviewText').focus();
                 return;
             }
+
+            // Salva la recensione su Firebase (visibile a tutti nella pagina recensioni)
+            await saveReviewToCloud(selectedRating, reviewText);
 
             let message = `⭐ *RECENSIONE COCKTAIL DANIEL*\n\n`;
             message += `👤 *Da:* ${customerName}\n`;
