@@ -1412,15 +1412,15 @@
             await createPaymentRequest(total, totalFormatted, orderIdsToPay);
 
             // Build WhatsApp receipt message
-            let message = `*RICHIESTA CHIUSURA CONTO*\n\n`;
-            message += `*Cliente:* ${customerName}\n\n`;
-            message += `*Riepilogo ordini:*\n`;
+            let message = `💳 *RICHIESTA CHIUSURA CONTO*\n\n`;
+            message += `👤 *Cliente:* ${customerName}\n\n`;
+            message += `📋 *Riepilogo ordini:*\n`;
             ordersToPay.forEach((order, i) => {
                 message += `${i + 1}. ${order.cocktail} (${order.variant}) - ${order.price}\n`;
             });
-            message += `\n*TOTALE DA PAGARE: ${totalFormatted}*\n`;
-            message += `${new Date().toLocaleDateString('it-IT')} ore ${new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}\n`;
-            message += `\n>> In attesa di conferma pagamento`;
+            message += `\n💰 *TOTALE DA PAGARE: ${totalFormatted}*\n`;
+            message += `📅 ${new Date().toLocaleDateString('it-IT')} ore ${new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}\n`;
+            message += `\n⏳ In attesa di conferma pagamento`;
 
             const encodedMessage = encodeURIComponent(message);
 
@@ -1902,26 +1902,26 @@
 
         // Send WhatsApp message
         function sendWhatsAppMessage(order, phone) {
-            let message = `*NUOVO ORDINE COCKTAIL*\n\n`;
-            message += `*Cliente:* ${order.customerName}\n`;
-            message += `*Cocktail:* ${order.cocktail} - ${order.variant}\n`;
-            message += `*Posizione:* ${order.location}\n`;
+            let message = `🍹 *NUOVO ORDINE COCKTAIL*\n\n`;
+            message += `👤 *Cliente:* ${order.customerName}\n`;
+            message += `📋 *Cocktail:* ${order.cocktail} - ${order.variant}\n`;
+            message += `📍 *Posizione:* ${order.location}\n`;
             
             // Add GPS coordinates if available
             if (order.gps) {
                 const lat = order.gps.latitude.toFixed(6);
                 const lng = order.gps.longitude.toFixed(6);
-                message += `*Coordinate GPS:*\n`;
+                message += `🌍 *Coordinate GPS:*\n`;
                 message += `https://www.google.com/maps?q=${lat},${lng}\n`;
             }
             
-            message += `*Da servire:* ${order.time}\n`;
-            message += `*Ordinato alle:* ${order.orderTime}\n`;
-            message += `*Prezzo:* ${order.price}\n`;
+            message += `⏰ *Da servire:* ${order.time}\n`;
+            message += `🕐 *Ordinato alle:* ${order.orderTime}\n`;
+            message += `💰 *Prezzo:* ${order.price}\n`;
             if (order.notes) {
-                message += `*Note:* ${order.notes}\n`;
+                message += `📝 *Note:* ${order.notes}\n`;
             }
-            message += `\n>> Preparare e servire!`;
+            message += `\n✅ Preparare e servire!`;
 
             const encodedMessage = encodeURIComponent(message);
             openWhatsApp(phone, encodedMessage);
@@ -2074,11 +2074,11 @@
                 return;
             }
 
-            let message = `*RECENSIONE COCKTAIL DANIEL*\n\n`;
-            message += `*Da:* ${customerName}\n`;
-            message += `*Voto:* ${selectedRating}/5\n\n`;
-            message += `"${reviewText}"\n\n`;
-            message += `${new Date().toLocaleDateString('it-IT')} ore ${new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}`;
+            let message = `⭐ *RECENSIONE COCKTAIL DANIEL*\n\n`;
+            message += `👤 *Da:* ${customerName}\n`;
+            message += `${'⭐'.repeat(selectedRating)} (${selectedRating}/5)\n\n`;
+            message += `💬 "${reviewText}"\n\n`;
+            message += `📅 ${new Date().toLocaleDateString('it-IT')} ore ${new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}`;
 
             const encodedMessage = encodeURIComponent(message);
 
