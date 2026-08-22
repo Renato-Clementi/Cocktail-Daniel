@@ -4929,7 +4929,7 @@
 
             // Una categoria richiudibile che contiene le sue schede
             const buildSection = (key, icon, list, allowPremium) => `
-                <div class="price-section" id="section-${key}">
+                <div class="price-section collapsed" id="section-${key}">
                     <button type="button" class="price-section-toggle" onclick="togglePriceSection('${key}')">
                         <span>${icon} ${t(key)}</span>
                         <span class="ps-count">${list.length}</span>
