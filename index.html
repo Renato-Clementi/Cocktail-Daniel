@@ -208,10 +208,13 @@
             font-size: 0.68em;
             line-height: 1.35;
             margin-bottom: 10px;
-            height: 32px;
+            /* Quattro righe: alcune traduzioni sono più lunghe dell'italiano
+               (es. "Rhum, menthe, citron vert, sucre, soda") e su schermi
+               stretti venivano troncate anche con tre. */
+            min-height: 48px;
             overflow: hidden;
             display: -webkit-box;
-            -webkit-line-clamp: 2;
+            -webkit-line-clamp: 4;
             -webkit-box-orient: vertical;
         }
 
@@ -1275,6 +1278,212 @@
 
         .category-tab:active { transform: scale(0.96); }
 
+        /* =============================================
+           SERVIZIO CHIUSO
+           ============================================= */
+        .service-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 2900;
+            background: linear-gradient(135deg, #B03A2E 0%, #8E2C22 100%);
+            color: #fff;
+            font-family: var(--font-body);
+            font-size: 0.78em;
+            font-weight: 600;
+            text-align: center;
+            padding: 9px 14px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.35);
+            animation: slideDownIn 0.3s var(--ease-out) both;
+        }
+
+        /* Se c'è anche l'avviso offline, questo scende sotto */
+        .offline-banner { top: 0; }
+        .offline-banner ~ .service-banner { top: 34px; }
+
+        .closed-ribbon {
+            background: rgba(176, 58, 46, 0.94);
+        }
+
+        /* Pannello admin: stato e orari */
+        .service-admin {
+            background: rgba(46, 196, 182, 0.10);
+            border: 2px solid var(--lagoon);
+            border-radius: var(--radius-sm);
+            padding: 15px;
+            margin: 18px 0;
+        }
+
+        .service-switch-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        .svc-btn {
+            flex: 1;
+            padding: 10px 6px;
+            border: 2px solid var(--sand-deep);
+            border-radius: var(--radius-sm);
+            background: #fff;
+            color: var(--dusk);
+            font-family: var(--font-body);
+            font-size: 0.78em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .svc-btn.active {
+            border-color: var(--lagoon);
+            background: var(--lagoon);
+            color: #fff;
+        }
+
+        .svc-btn:active { transform: scale(0.96); }
+
+        .svc-state {
+            text-align: center;
+            font-size: 0.8em;
+            font-weight: 700;
+            padding: 6px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 12px;
+        }
+
+        .svc-open   { background: rgba(46,196,182,0.18); color: #14776E; }
+        .svc-closed { background: rgba(176,58,46,0.14);  color: #B03A2E; }
+
+        .service-hours { border-top: 1px dashed var(--sand-deep); padding-top: 10px; }
+
+        .hours-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 6px;
+        }
+
+        .hours-row-off { opacity: 0.45; }
+        .hours-row-off input[type="time"] { pointer-events: none; }
+
+        .hours-day {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.82em;
+            color: var(--dusk);
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .hours-day input { width: auto; margin: 0; }
+
+        .hours-row input[type="time"] {
+            width: 86px;
+            padding: 6px;
+            border: 2px solid var(--sand-deep);
+            border-radius: 6px;
+            font-family: var(--font-body);
+            font-size: 13px;
+            margin: 0;
+        }
+
+        .hours-sep { color: var(--dusk-soft); }
+
+        /* Schermi molto stretti (320px): tre colonne lasciano pochissimo
+           spazio per card, quindi si passa a due. */
+        @media (max-width: 360px) {
+            .cocktail-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* =============================================
+           CHIUSURA MODALI
+           La X resta ancorata in alto mentre il contenuto scorre:
+           nelle finestre lunghe (listino) non serve più arrivare in fondo.
+           ============================================= */
+        .modal-close {
+            position: sticky;
+            top: -28px;              /* compensa il padding del contenitore */
+            float: right;
+            z-index: 10;
+            width: 34px;
+            height: 34px;
+            margin: -14px -10px 0 0;
+            border: none;
+            border-radius: 50%;
+            background: var(--sand-deep);
+            color: var(--dusk);
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(27,58,92,0.2);
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .modal-close:hover  { background: var(--coral); color: #fff; }
+        .modal-close:active { transform: scale(0.9); }
+
+        /* =============================================
+           RIFIUTO ORDINI (admin)
+           ============================================= */
+        .order-actions {
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px dashed var(--sand-deep);
+        }
+
+        .reject-btn {
+            background: transparent;
+            color: #B03A2E;
+            border: 2px solid rgba(176, 58, 46, 0.4);
+            border-radius: var(--radius-sm);
+            padding: 7px 14px;
+            font-family: var(--font-body);
+            font-size: 0.78em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .reject-btn:hover  { background: #B03A2E; color: #fff; border-color: #B03A2E; }
+        .reject-btn:active { transform: scale(0.95); }
+
+        .reject-info {
+            background: rgba(176, 58, 46, 0.10);
+            border-left: 4px solid #B03A2E;
+            border-radius: var(--radius-sm);
+            padding: 10px 12px;
+            font-weight: 600;
+            color: var(--dusk);
+            font-size: 0.9em;
+            margin-bottom: 12px;
+        }
+
+        .reject-reason {
+            display: block;
+            width: 100%;
+            text-align: left;
+            background: #fff;
+            color: var(--dusk);
+            border: 2px solid var(--sand-deep);
+            border-radius: var(--radius-sm);
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            font-family: var(--font-body);
+            font-size: 0.88em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .reject-reason:hover  { border-color: #B03A2E; background: rgba(176,58,46,0.06); }
+        .reject-reason:active { transform: scale(0.98); }
+
         .pagination {
             display: flex;
             justify-content: center;
@@ -1370,6 +1579,11 @@
         </button>
     </div>
 
+    <!-- Avviso servizio chiuso -->
+    <div id="serviceBanner" class="service-banner" style="display:none;">
+        <span id="serviceBannerText"></span>
+    </div>
+
     <!-- Indicatore di stato connessione -->
     <div id="offlineBanner" class="offline-banner" style="display:none;">
         <span data-i18n="offlineNotice">📡 Sei offline — gli ordini verranno inviati al ritorno della connessione</span>
@@ -1462,8 +1676,33 @@
     </div>
 
     <!-- Reviews Page Modal (pubblica) -->
+    <!-- Modale rifiuto ordine (admin) -->
+    <div class="modal" id="rejectModal">
+        <div class="modal-content" style="max-width:420px;">
+            <button class="modal-close" onclick="closeRejectModal()" aria-label="Chiudi">✕</button>
+            <h2 data-i18n="rejectTitle">🚫 Rifiuta ordine</h2>
+            <div id="rejectOrderInfo" class="reject-info"></div>
+            <p style="color:var(--dusk-soft); font-size:0.85em; margin-bottom:14px;" data-i18n="rejectSubtitle">Scegli il motivo: il cliente lo vedrà nell'avviso.</p>
+
+            <button class="reject-reason" onclick="rejectWithReason('rejectReasonOutOfStock')" data-i18n="rejectReasonOutOfStock">Ingrediente finito</button>
+            <button class="reject-reason" onclick="rejectWithReason('rejectReasonClosing')" data-i18n="rejectReasonClosing">Servizio in chiusura</button>
+            <button class="reject-reason" onclick="rejectWithReason('rejectReasonLocation')" data-i18n="rejectReasonLocation">Posizione non raggiungibile</button>
+
+            <div class="form-group" style="margin-top:14px;">
+                <label data-i18n="rejectCustomLabel">Oppure scrivi un motivo:</label>
+                <input type="text" id="rejectCustomReason" data-i18n-placeholder="rejectCustomPlaceholder" placeholder="es: torniamo tra 10 minuti">
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="closeRejectModal()" data-i18n="cancel">Annulla</button>
+                <button class="btn btn-primary" onclick="rejectWithCustomReason()" data-i18n="rejectConfirm">Rifiuta</button>
+            </div>
+        </div>
+    </div>
+
     <div class="modal" id="reviewsModal">
         <div class="modal-content">
+            <button class="modal-close" onclick="closeReviewsPage()" aria-label="Chiudi">✕</button>
             <h2 data-i18n="reviewsPageTitle">💬 Recensioni</h2>
 
             <div id="reviewsSummary" style="display:none;">
@@ -1488,10 +1727,25 @@
     <!-- Price List Modal (solo admin) -->
     <div class="modal" id="priceListModal">
         <div class="modal-content">
+            <button class="modal-close" onclick="closePriceList()" aria-label="Chiudi">✕</button>
             <h2 data-i18n="priceListTitle">💵 Listino prezzi</h2>
             <p style="color:#666; font-size:0.85em; margin-bottom:18px;" data-i18n="priceListSubtitle">Modifica i prezzi base per ogni variante e segnala le offerte speciali.</p>
 
             <div id="priceListForm"></div>
+
+            <!-- Gestione servizio -->
+            <div class="service-admin">
+                <div style="font-weight:600; margin-bottom:12px; color:var(--dusk);" data-i18n="serviceTitle">🕐 Stato del servizio</div>
+
+                <div class="service-switch-row">
+                    <button type="button" id="svcAuto" class="svc-btn" onclick="setServiceOverride(null)" data-i18n="svcAuto">🕐 Orari</button>
+                    <button type="button" id="svcOpen" class="svc-btn" onclick="setServiceOverride(true)" data-i18n="svcOpen">🟢 Aperto</button>
+                    <button type="button" id="svcClosed" class="svc-btn" onclick="setServiceOverride(false)" data-i18n="svcClosed">🔴 Chiuso</button>
+                </div>
+                <div id="svcCurrentState" class="svc-state"></div>
+
+                <div id="serviceHours" class="service-hours"></div>
+            </div>
 
             <div style="background:#f0f7ff; border:2px solid var(--coral); border-radius:10px; padding:15px; margin:18px 0;">
                 <div style="font-weight:600; margin-bottom:10px; color:#333;" data-i18n="surchargeTitle">⏱️ Supplementi orario</div>
@@ -1519,6 +1773,7 @@
     <!-- Review Modal -->
     <div class="modal" id="reviewModal">
         <div class="modal-content" style="text-align: center;">
+            <button class="modal-close" onclick="closeReviewModal()" aria-label="Chiudi">✕</button>
             <h2 style="margin-bottom: 5px;" data-i18n="reviewTitle">⭐ La tua recensione</h2>
             <p style="color: #666; margin-bottom: 20px; font-size: 0.9em;" data-i18n="reviewSubtitle">Dicci cosa ne pensi! La tua recensione sarà visibile a tutti.</p>
             
@@ -1562,6 +1817,7 @@
     <!-- Order Modal -->
     <div class="modal" id="orderModal">
         <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()" aria-label="Chiudi">✕</button>
             <h2 data-i18n="completeOrder">Completa il tuo ordine</h2>
             <div class="form-group">
                 <label data-i18n="cocktailLabel">Cocktail:</label>
@@ -1961,7 +2217,41 @@
                 specialOffer: "OFFERTA",
 
                 soldOutLabel: "ESAURITO",
-                soldOutButton: "Non disponibile",
+
+                rejectOrder: "Rifiuta",
+                rejectTitle: "🚫 Rifiuta ordine",
+                rejectSubtitle: "Scegli il motivo: il cliente lo vedrà nell’avviso.",
+                rejectReasonOutOfStock: "Ingrediente finito",
+                rejectReasonClosing: "Servizio in chiusura",
+                rejectReasonLocation: "Posizione non raggiungibile",
+                rejectReasonOther: "Non disponibile al momento",
+                rejectCustomLabel: "Oppure scrivi un motivo:",
+                rejectCustomPlaceholder: "es: torniamo tra 10 minuti",
+                rejectConfirm: "Rifiuta",
+                orderRejectedMsg: "🚫 Ordine rifiutato: {name}",
+                orderRejectedNotice: "🚫 Un tuo ordine è stato rifiutato:",
+                rejectNeedsCloud: "Serve la connessione per rifiutare un ordine.",
+                rejectError: "Errore durante il rifiuto. Riprova.",
+                serviceClosed: "🔴 Servizio chiuso",
+                serviceClosedUntil: "🔴 Servizio chiuso — riapriamo alle {time}",
+                closedLabel: "CHIUSO",
+                closedButton: "Servizio chiuso",
+                serviceTitle: "🕐 Stato del servizio",
+                svcAuto: "🕐 Orari",
+                svcOpen: "🟢 Aperto",
+                svcClosed: "🔴 Chiuso",
+                svcStateOpen: "I clienti possono ordinare",
+                svcStateClosed: "I clienti non possono ordinare",
+                tomorrowAt: "domani alle {time}",
+                daySun: "Domenica",
+                dayMon: "Lunedì",
+                dayTue: "Martedì",
+                dayWed: "Mercoledì",
+                dayThu: "Giovedì",
+                dayFri: "Venerdì",
+                daySat: "Sabato",
+                dannyClosed: "Siamo chiusi al momento, ma dai pure un’occhiata al menu 🌙",
+                dannyClosedUntil: "Siamo chiusi: riapriamo alle {time}. Intanto scegli con calma 🌙",                soldOutButton: "Non disponibile",
                 soldOutEnable: "Segna come esaurito",
                 soldOutAlert: "{name} è esaurito al momento. Scegli un altro prodotto!",                fromPrice: "da",
                 premiumLabel: "PREMIUM",
@@ -2089,7 +2379,41 @@
                 specialOffer: "SPECIAL",
 
                 soldOutLabel: "SOLD OUT",
-                soldOutButton: "Unavailable",
+
+                rejectOrder: "Reject",
+                rejectTitle: "🚫 Reject order",
+                rejectSubtitle: "Pick a reason: the customer will see it in the notice.",
+                rejectReasonOutOfStock: "Ingredient out of stock",
+                rejectReasonClosing: "Service closing",
+                rejectReasonLocation: "Location unreachable",
+                rejectReasonOther: "Not available right now",
+                rejectCustomLabel: "Or write a reason:",
+                rejectCustomPlaceholder: "e.g: back in 10 minutes",
+                rejectConfirm: "Reject",
+                orderRejectedMsg: "🚫 Order rejected: {name}",
+                orderRejectedNotice: "🚫 One of your orders was rejected:",
+                rejectNeedsCloud: "A connection is required to reject an order.",
+                rejectError: "Error while rejecting. Please try again.",
+                serviceClosed: "🔴 Service closed",
+                serviceClosedUntil: "🔴 Service closed — we reopen at {time}",
+                closedLabel: "CLOSED",
+                closedButton: "Service closed",
+                serviceTitle: "🕐 Service status",
+                svcAuto: "🕐 Schedule",
+                svcOpen: "🟢 Open",
+                svcClosed: "🔴 Closed",
+                svcStateOpen: "Customers can order",
+                svcStateClosed: "Customers cannot order",
+                tomorrowAt: "tomorrow at {time}",
+                daySun: "Sunday",
+                dayMon: "Monday",
+                dayTue: "Tuesday",
+                dayWed: "Wednesday",
+                dayThu: "Thursday",
+                dayFri: "Friday",
+                daySat: "Saturday",
+                dannyClosed: "We are closed right now, but feel free to browse the menu 🌙",
+                dannyClosedUntil: "We are closed: reopening at {time}. Take your time choosing 🌙",                soldOutButton: "Unavailable",
                 soldOutEnable: "Mark as sold out",
                 soldOutAlert: "{name} is sold out right now. Please pick something else!",                fromPrice: "from",
                 premiumLabel: "PREMIUM",
@@ -2217,7 +2541,41 @@
                 specialOffer: "OFERTA",
 
                 soldOutLabel: "AGOTADO",
-                soldOutButton: "No disponible",
+
+                rejectOrder: "Rechazar",
+                rejectTitle: "🚫 Rechazar pedido",
+                rejectSubtitle: "Elige el motivo: el cliente lo verá en el aviso.",
+                rejectReasonOutOfStock: "Ingrediente agotado",
+                rejectReasonClosing: "Servicio cerrando",
+                rejectReasonLocation: "Ubicación inaccesible",
+                rejectReasonOther: "No disponible ahora",
+                rejectCustomLabel: "O escribe un motivo:",
+                rejectCustomPlaceholder: "ej.: volvemos en 10 minutos",
+                rejectConfirm: "Rechazar",
+                orderRejectedMsg: "🚫 Pedido rechazado: {name}",
+                orderRejectedNotice: "🚫 Uno de tus pedidos ha sido rechazado:",
+                rejectNeedsCloud: "Se necesita conexión para rechazar un pedido.",
+                rejectError: "Error al rechazar. Inténtalo de nuevo.",
+                serviceClosed: "🔴 Servicio cerrado",
+                serviceClosedUntil: "🔴 Servicio cerrado — abrimos a las {time}",
+                closedLabel: "CERRADO",
+                closedButton: "Servicio cerrado",
+                serviceTitle: "🕐 Estado del servicio",
+                svcAuto: "🕐 Horario",
+                svcOpen: "🟢 Abierto",
+                svcClosed: "🔴 Cerrado",
+                svcStateOpen: "Los clientes pueden pedir",
+                svcStateClosed: "Los clientes no pueden pedir",
+                tomorrowAt: "mañana a las {time}",
+                daySun: "Domingo",
+                dayMon: "Lunes",
+                dayTue: "Martes",
+                dayWed: "Miércoles",
+                dayThu: "Jueves",
+                dayFri: "Viernes",
+                daySat: "Sábado",
+                dannyClosed: "Ahora estamos cerrados, pero puedes echar un vistazo al menú 🌙",
+                dannyClosedUntil: "Estamos cerrados: abrimos a las {time}. Mientras, elige con calma 🌙",                soldOutButton: "No disponible",
                 soldOutEnable: "Marcar como agotado",
                 soldOutAlert: "{name} está agotado en este momento. ¡Elige otro producto!",                fromPrice: "desde",
                 premiumLabel: "PREMIUM",
@@ -2345,7 +2703,41 @@
                 specialOffer: "ANGEBOT",
 
                 soldOutLabel: "AUSVERKAUFT",
-                soldOutButton: "Nicht verfügbar",
+
+                rejectOrder: "Ablehnen",
+                rejectTitle: "🚫 Bestellung ablehnen",
+                rejectSubtitle: "Grund wählen: der Kunde sieht ihn im Hinweis.",
+                rejectReasonOutOfStock: "Zutat ausgegangen",
+                rejectReasonClosing: "Service schließt",
+                rejectReasonLocation: "Standort nicht erreichbar",
+                rejectReasonOther: "Derzeit nicht verfügbar",
+                rejectCustomLabel: "Oder Grund eingeben:",
+                rejectCustomPlaceholder: "z.B.: in 10 Minuten zurück",
+                rejectConfirm: "Ablehnen",
+                orderRejectedMsg: "🚫 Bestellung abgelehnt: {name}",
+                orderRejectedNotice: "🚫 Eine deiner Bestellungen wurde abgelehnt:",
+                rejectNeedsCloud: "Für das Ablehnen ist eine Verbindung nötig.",
+                rejectError: "Fehler beim Ablehnen. Bitte erneut versuchen.",
+                serviceClosed: "🔴 Service geschlossen",
+                serviceClosedUntil: "🔴 Geschlossen — wir öffnen um {time}",
+                closedLabel: "GESCHLOSSEN",
+                closedButton: "Geschlossen",
+                serviceTitle: "🕐 Service-Status",
+                svcAuto: "🕐 Zeiten",
+                svcOpen: "🟢 Offen",
+                svcClosed: "🔴 Zu",
+                svcStateOpen: "Kunden können bestellen",
+                svcStateClosed: "Kunden können nicht bestellen",
+                tomorrowAt: "morgen um {time}",
+                daySun: "Sonntag",
+                dayMon: "Montag",
+                dayTue: "Dienstag",
+                dayWed: "Mittwoch",
+                dayThu: "Donnerstag",
+                dayFri: "Freitag",
+                daySat: "Samstag",
+                dannyClosed: "Wir haben gerade geschlossen, schau dich aber gern in der Karte um 🌙",
+                dannyClosedUntil: "Wir haben geschlossen: wir öffnen um {time}. Sieh dich in Ruhe um 🌙",                soldOutButton: "Nicht verfügbar",
                 soldOutEnable: "Als ausverkauft markieren",
                 soldOutAlert: "{name} ist gerade ausverkauft. Bitte wähle etwas anderes!",                fromPrice: "ab",
                 premiumLabel: "PREMIUM",
@@ -2473,7 +2865,41 @@
                 specialOffer: "PROMO",
 
                 soldOutLabel: "ÉPUISÉ",
-                soldOutButton: "Indisponible",
+
+                rejectOrder: "Refuser",
+                rejectTitle: "🚫 Refuser la commande",
+                rejectSubtitle: "Choisissez le motif : le client le verra dans l’avis.",
+                rejectReasonOutOfStock: "Ingrédient épuisé",
+                rejectReasonClosing: "Service en fermeture",
+                rejectReasonLocation: "Position inaccessible",
+                rejectReasonOther: "Indisponible pour le moment",
+                rejectCustomLabel: "Ou écrivez un motif :",
+                rejectCustomPlaceholder: "ex : de retour dans 10 minutes",
+                rejectConfirm: "Refuser",
+                orderRejectedMsg: "🚫 Commande refusée : {name}",
+                orderRejectedNotice: "🚫 Une de vos commandes a été refusée :",
+                rejectNeedsCloud: "Une connexion est nécessaire pour refuser une commande.",
+                rejectError: "Erreur lors du refus. Réessayez.",
+                serviceClosed: "🔴 Service fermé",
+                serviceClosedUntil: "🔴 Service fermé — réouverture à {time}",
+                closedLabel: "FERMÉ",
+                closedButton: "Service fermé",
+                serviceTitle: "🕐 État du service",
+                svcAuto: "🕐 Horaires",
+                svcOpen: "🟢 Ouvert",
+                svcClosed: "🔴 Fermé",
+                svcStateOpen: "Les clients peuvent commander",
+                svcStateClosed: "Les clients ne peuvent pas commander",
+                tomorrowAt: "demain à {time}",
+                daySun: "Dimanche",
+                dayMon: "Lundi",
+                dayTue: "Mardi",
+                dayWed: "Mercredi",
+                dayThu: "Jeudi",
+                dayFri: "Vendredi",
+                daySat: "Samedi",
+                dannyClosed: "Nous sommes fermés pour le moment, mais parcourez le menu 🌙",
+                dannyClosedUntil: "Nous sommes fermés : réouverture à {time}. Choisissez tranquillement 🌙",                soldOutButton: "Indisponible",
                 soldOutEnable: "Marquer comme épuisé",
                 soldOutAlert: "{name} est épuisé pour le moment. Choisissez autre chose !",                fromPrice: "à partir de",
                 premiumLabel: "PREMIUM",
@@ -2601,7 +3027,41 @@
                 specialOffer: "АКЦІЯ",
 
                 soldOutLabel: "ЗАКІНЧИВСЯ",
-                soldOutButton: "Недоступно",
+
+                rejectOrder: "Відхилити",
+                rejectTitle: "🚫 Відхилити замовлення",
+                rejectSubtitle: "Оберіть причину: клієнт побачить її у сповіщенні.",
+                rejectReasonOutOfStock: "Інгредієнт закінчився",
+                rejectReasonClosing: "Сервіс зачиняється",
+                rejectReasonLocation: "Місце недосяжне",
+                rejectReasonOther: "Наразі недоступно",
+                rejectCustomLabel: "Або напишіть причину:",
+                rejectCustomPlaceholder: "напр.: повернемось за 10 хвилин",
+                rejectConfirm: "Відхилити",
+                orderRejectedMsg: "🚫 Замовлення відхилено: {name}",
+                orderRejectedNotice: "🚫 Одне з ваших замовлень відхилено:",
+                rejectNeedsCloud: "Для відхилення потрібне з’єднання.",
+                rejectError: "Помилка під час відхилення. Спробуйте ще раз.",
+                serviceClosed: "🔴 Сервіс зачинено",
+                serviceClosedUntil: "🔴 Зачинено — відкриваємось о {time}",
+                closedLabel: "ЗАЧИНЕНО",
+                closedButton: "Зачинено",
+                serviceTitle: "🕐 Стан сервісу",
+                svcAuto: "🕐 Розклад",
+                svcOpen: "🟢 Відкрито",
+                svcClosed: "🔴 Зачинено",
+                svcStateOpen: "Клієнти можуть замовляти",
+                svcStateClosed: "Клієнти не можуть замовляти",
+                tomorrowAt: "завтра о {time}",
+                daySun: "Неділя",
+                dayMon: "Понеділок",
+                dayTue: "Вівторок",
+                dayWed: "Середа",
+                dayThu: "Четвер",
+                dayFri: "П’ятниця",
+                daySat: "Субота",
+                dannyClosed: "Зараз ми зачинені, але перегляньте меню 🌙",
+                dannyClosedUntil: "Ми зачинені: відкриваємось о {time}. Тим часом обирайте 🌙",                soldOutButton: "Недоступно",
                 soldOutEnable: "Позначити як закінчений",
                 soldOutAlert: "{name} наразі закінчився. Оберіть щось інше!",                fromPrice: "від",
                 premiumLabel: "ПРЕМІУМ",
@@ -2728,7 +3188,41 @@
                 priceListSavedLocal: "⚠️ Lista guardada apenas localmente (nuvem indisponível).",
                 specialOffer: "PROMOÇÃO",
                 soldOutLabel: "ESGOTADO",
-                soldOutButton: "Indisponível",
+
+                rejectOrder: "Recusar",
+                rejectTitle: "🚫 Recusar pedido",
+                rejectSubtitle: "Escolha o motivo: o cliente vê-lo-á no aviso.",
+                rejectReasonOutOfStock: "Ingrediente esgotado",
+                rejectReasonClosing: "Serviço a fechar",
+                rejectReasonLocation: "Localização inacessível",
+                rejectReasonOther: "Indisponível neste momento",
+                rejectCustomLabel: "Ou escreva um motivo:",
+                rejectCustomPlaceholder: "ex.: voltamos daqui a 10 minutos",
+                rejectConfirm: "Recusar",
+                orderRejectedMsg: "🚫 Pedido recusado: {name}",
+                orderRejectedNotice: "🚫 Um dos seus pedidos foi recusado:",
+                rejectNeedsCloud: "É necessária ligação para recusar um pedido.",
+                rejectError: "Erro ao recusar. Tente novamente.",
+                serviceClosed: "🔴 Serviço fechado",
+                serviceClosedUntil: "🔴 Serviço fechado — reabrimos às {time}",
+                closedLabel: "FECHADO",
+                closedButton: "Serviço fechado",
+                serviceTitle: "🕐 Estado do serviço",
+                svcAuto: "🕐 Horários",
+                svcOpen: "🟢 Aberto",
+                svcClosed: "🔴 Fechado",
+                svcStateOpen: "Os clientes podem pedir",
+                svcStateClosed: "Os clientes não podem pedir",
+                tomorrowAt: "amanhã às {time}",
+                daySun: "Domingo",
+                dayMon: "Segunda",
+                dayTue: "Terça",
+                dayWed: "Quarta",
+                dayThu: "Quinta",
+                dayFri: "Sexta",
+                daySat: "Sábado",
+                dannyClosed: "Estamos fechados neste momento, mas veja o menu à vontade 🌙",
+                dannyClosedUntil: "Estamos fechados: reabrimos às {time}. Escolha com calma 🌙",                soldOutButton: "Indisponível",
                 soldOutEnable: "Marcar como esgotado",
                 soldOutAlert: "{name} está esgotado neste momento. Escolha outro produto!",
                 fromPrice: "desde",
@@ -3513,7 +4007,23 @@
             });
             return {
                 items: items,
-                timeSurcharge: { 'Subito': 1.00, '10 minuti': 0.50, '30 minuti': 0 }
+                timeSurcharge: { 'Subito': 1.00, '10 minuti': 0.50, '30 minuti': 0 },
+                // Stato del servizio.
+                // manualOverride: null = seguono gli orari, true = forzato aperto,
+                // false = forzato chiuso (chiusura anticipata, giorno di riposo...)
+                service: {
+                    manualOverride: null,
+                    hours: {
+                        // 0 = domenica ... 6 = sabato
+                        0: { open: '10:00', close: '24:00', closed: false },
+                        1: { open: '10:00', close: '24:00', closed: false },
+                        2: { open: '10:00', close: '24:00', closed: false },
+                        3: { open: '10:00', close: '24:00', closed: false },
+                        4: { open: '10:00', close: '24:00', closed: false },
+                        5: { open: '10:00', close: '01:00', closed: false },
+                        6: { open: '10:00', close: '01:00', closed: false }
+                    }
+                }
             };
         }
 
@@ -3641,6 +4151,12 @@
                         });
                     }
                     if (data.timeSurcharge) merged.timeSurcharge = data.timeSurcharge;
+                    if (data.service) {
+                        merged.service = {
+                            manualOverride: (data.service.manualOverride === undefined) ? null : data.service.manualOverride,
+                            hours: data.service.hours || merged.service.hours
+                        };
+                    }
 
                     // Aggiorna l'interfaccia solo se qualcosa è davvero cambiato:
                     // altrimenti le card si rianimerebbero a ogni controllo.
@@ -3651,6 +4167,7 @@
                     if (changed) {
                         renderCocktails();
                         updatePriceDisplay();
+                        updateServiceBanner();
                     }
                 }
             } catch (error) {
@@ -3669,6 +4186,100 @@
                 console.log('Errore salvataggio listino:', error);
                 return false;
             }
+        }
+
+        // =============================================
+        // STATO DEL SERVIZIO
+        // L'interruttore manuale ha la precedenza sugli orari:
+        // serve per chiusure anticipate o aperture straordinarie.
+        // =============================================
+        function getServiceConfig() {
+            return (pricing.service) || { manualOverride: null, hours: {} };
+        }
+
+        function minutesOf(hhmm) {
+            const [h, m] = String(hhmm || '0:00').split(':').map(Number);
+            return (h || 0) * 60 + (m || 0);
+        }
+
+        // Orario di oggi secondo la programmazione
+        function todaySchedule() {
+            const cfg = getServiceConfig();
+            const day = new Date().getDay();
+            return (cfg.hours && cfg.hours[day]) || { open: '10:00', close: '24:00', closed: false };
+        }
+
+        // Il servizio è aperto in base al solo orario programmato?
+        function isOpenBySchedule() {
+            const sched = todaySchedule();
+            if (sched.closed) return false;
+
+            const now = new Date();
+            const nowMin = now.getHours() * 60 + now.getMinutes();
+            const openMin = minutesOf(sched.open);
+            let closeMin = minutesOf(sched.close);
+
+            // Chiusura dopo mezzanotte (es. 10:00 → 01:00):
+            // l'intervallo scavalca il giorno, va gestito a parte.
+            if (closeMin <= openMin) {
+                return nowMin >= openMin || nowMin < closeMin;
+            }
+            return nowMin >= openMin && nowMin < closeMin;
+        }
+
+        // Stato effettivo: l'override manuale vince sugli orari
+        function isServiceOpen() {
+            const cfg = getServiceConfig();
+            if (cfg.manualOverride === true) return true;
+            if (cfg.manualOverride === false) return false;
+            return isOpenBySchedule();
+        }
+
+        // Prossimo orario di apertura, da mostrare al cliente
+        function nextOpeningText() {
+            const cfg = getServiceConfig();
+            if (cfg.manualOverride === false) return '';  // chiusura straordinaria: nessun orario certo
+
+            const now = new Date();
+            for (let i = 0; i < 8; i++) {
+                const d = new Date(now.getTime() + i * 86400000);
+                const sched = (cfg.hours && cfg.hours[d.getDay()]) || null;
+                if (!sched || sched.closed) continue;
+                if (i === 0 && minutesOf(sched.open) <= now.getHours() * 60 + now.getMinutes()) continue;
+                if (i === 0) return sched.open;
+                if (i === 1) return t('tomorrowAt').replace('{time}', sched.open);
+                const days = [t('daySun'), t('dayMon'), t('dayTue'), t('dayWed'), t('dayThu'), t('dayFri'), t('daySat')];
+                return days[d.getDay()] + ' ' + sched.open;
+            }
+            return '';
+        }
+
+        // Aggiorna la fascia di avviso in cima all'app
+        function updateServiceBanner() {
+            const banner = document.getElementById('serviceBanner');
+            if (!banner) return;
+
+            if (isServiceOpen()) {
+                banner.style.display = 'none';
+            } else {
+                const next = nextOpeningText();
+                document.getElementById('serviceBannerText').textContent = next
+                    ? t('serviceClosedUntil').replace('{time}', next)
+                    : t('serviceClosed');
+                banner.style.display = 'block';
+            }
+            updateLayoutOffset();
+            renderCocktails();
+        }
+
+        // Le fasce fisse in cima non devono coprire il contenuto
+        function updateLayoutOffset() {
+            const offline = document.getElementById('offlineBanner');
+            const service = document.getElementById('serviceBanner');
+            let top = 20;
+            if (offline && offline.style.display !== 'none') top += 34;
+            if (service && service.style.display !== 'none') top += 34;
+            document.body.style.paddingTop = top + 'px';
         }
 
         let currentLang = localStorage.getItem('appLanguage') || 'it';
@@ -3874,7 +4485,17 @@
                     query = query.where('userId', '==', getUserId(customerName));
                 }
                 const snapshot = await query.get();
-                const cloudOrders = snapshot.docs.map(doc => doc.data());
+                const allCloudOrders = snapshot.docs.map(doc => doc.data());
+
+                // Ordini rifiutati: vanno esclusi dalla lista e dal totale.
+                // Il cliente riceve l'avviso col motivo; l'admin li ha già
+                // fatti sparire dalla propria vista al momento del rifiuto.
+                const rejected = allCloudOrders.filter(o => o.rejected);
+                const cloudOrders = allCloudOrders.filter(o => !o.rejected);
+
+                if (rejected.length && !isAdmin()) {
+                    handleRejectedOrders(rejected);
+                }
 
                 // Gli ordini creati offline non sono ancora sul cloud:
                 // vanno conservati, altrimenti sparirebbero dalla lista.
@@ -4220,6 +4841,11 @@
             document.getElementById('surcharge10').value = (ts['10 minuti'] ?? 0.5).toFixed(2);
             document.getElementById('surcharge30').value = (ts['30 minuti'] ?? 0).toFixed(2);
 
+            // Pannello servizio
+            pendingServiceOverride = getServiceConfig().manualOverride ?? null;
+            renderServiceHours();
+            refreshServiceButtons();
+
             document.getElementById('priceListModal').classList.add('active');
         }
 
@@ -4285,12 +4911,30 @@
                 '30 minuti': num('surcharge30', 0)
             };
 
+            // Stato e orari del servizio
+            const hours = {};
+            for (let d = 0; d < 7; d++) {
+                const openEl = document.querySelector(`input[data-day-open="${d}"]`);
+                const closeEl = document.querySelector(`input[data-day-close="${d}"]`);
+                const offEl = document.querySelector(`input[data-day-closed="${d}"]`);
+                hours[d] = {
+                    open: openEl ? openEl.value : '10:00',
+                    close: closeEl ? closeEl.value : '23:59',
+                    closed: offEl ? offEl.checked : false
+                };
+            }
+            updated.service = {
+                manualOverride: (pendingServiceOverride === undefined) ? null : pendingServiceOverride,
+                hours: hours
+            };
+
             pricing = updated;
             const ok = await savePricing();
 
             closePriceList();
             renderCocktails();
             updatePriceDisplay();
+            updateServiceBanner();
 
             const successMsg = document.getElementById('successMessage');
             successMsg.textContent = ok ? t('priceListSaved') : t('priceListSavedLocal');
@@ -4322,7 +4966,8 @@
             const grid = document.getElementById('cocktailGrid');
             grid.innerHTML = getCatalogItems().map(item => {
                 const baseName = item.name;
-                const soldOut = isSoldOut(baseName);
+                const closed = !isServiceOpen();
+                const soldOut = isSoldOut(baseName) || closed;
                 // Su un prodotto esaurito l'offerta non ha senso: non si può ordinare
                 const special = !soldOut && !item.premium && isSpecial(baseName);
                 const basePrices = pricing.items[baseName]?.prices || [0.50];
@@ -4333,7 +4978,9 @@
                 if (soldOut) cardClass += ' cocktail-soldout';
 
                 const badge = soldOut
-                    ? `<div class="soldout-ribbon">${t('soldOutLabel')}</div>`
+                    ? (isSoldOut(baseName)
+                        ? `<div class="soldout-ribbon">${t('soldOutLabel')}</div>`
+                        : `<div class="soldout-ribbon closed-ribbon">${t('closedLabel')}</div>`)
                     : (item.premium
                         ? `<div class="premium-badge">⭐ ${t('premiumLabel')}</div>`
                         : (special ? `<div class="special-badge">🔥 ${t('specialOffer')}</div>` : ''));
@@ -4351,7 +4998,7 @@
                         <div class="cocktail-price">${t('fromPrice')} ${formatPrice(fromPrice)}</div>
                     </div>
                     ${soldOut
-                        ? `<button class="order-btn order-btn-disabled" disabled>${t('soldOutButton')}</button>`
+                        ? `<button class="order-btn order-btn-disabled" disabled>${isSoldOut(baseName) ? t('soldOutButton') : t('closedButton')}</button>`
                         : `<button class="order-btn" onclick="event.stopPropagation(); openOrderModal('${item.displayName}')">${t('orderNow')}</button>`}
                 </div>`;
             }).join('');
@@ -4362,6 +5009,13 @@
             // cocktailName può essere "Mojito" o "Mojito Premium"
             const cocktail = findProduct(cocktailName);
             if (!cocktail) return;
+
+            // Protezione: a servizio chiuso non si ordina
+            if (!isServiceOpen()) {
+                const next = nextOpeningText();
+                alert(next ? t('serviceClosedUntil').replace('{time}', next) : t('serviceClosed'));
+                return;
+            }
 
             // Protezione: un prodotto esaurito non è ordinabile
             if (isSoldOut(cocktailName)) {
@@ -4531,6 +5185,15 @@
         // Confirm order
         async function confirmOrder() {
             const notes = document.getElementById('orderNotes').value.trim();
+
+            // Il servizio potrebbe aver chiuso mentre il modale era aperto
+            if (!isServiceOpen()) {
+                const next = nextOpeningText();
+                alert(next ? t('serviceClosedUntil').replace('{time}', next) : t('serviceClosed'));
+                closeModal();
+                renderCocktails();
+                return;
+            }
 
             // Il prodotto potrebbe essere finito mentre il modale era aperto
             if (isSoldOut(selectedCocktail)) {
@@ -4711,6 +5374,9 @@
             let html = pageOrders.map(order => {
                 const isPending = myPendingOrderIds.includes(order.id);
                 const needsSync = isPendingSync(order.id);
+                // L'admin può rifiutare, ma non un ordine già incluso in una
+                // richiesta di pagamento in attesa: il conto è già stato chiesto.
+                const canReject = isAdmin() && !needsSync;
                 return `
                 <div class="order-item${isPending ? ' order-pending' : ''}">
                     <strong>${order.cocktail}</strong> - <em>${translateVariant(order.variant)}</em> - <strong style="color: var(--coral);">${order.price}</strong>
@@ -4720,6 +5386,7 @@
                     📍 ${translateLocation(order.location)} | ⏰ ${translateTime(order.time)}<br>
                     <small style="color: var(--dusk-soft);">${t('orderedLabel')} ${order.orderDate} ${order.orderTime}</small>
                     ${order.notes ? `<br><small>📝 ${order.notes}</small>` : ''}
+                    ${canReject ? `<div class="order-actions"><button class="reject-btn" onclick="openRejectModal(${order.id})">🚫 ${t('rejectOrder')}</button></div>` : ''}
                 </div>
             `;
             }).join('');
@@ -5038,10 +5705,9 @@
         function updateOfflineBanner() {
             const banner = document.getElementById('offlineBanner');
             if (!banner) return;
-            const offline = !isOnline();
-            banner.style.display = offline ? 'block' : 'none';
-            // Lascia spazio al banner in cima alla pagina
-            document.body.style.paddingTop = offline ? '48px' : '20px';
+            banner.style.display = isOnline() ? 'none' : 'block';
+            // Le due fasce possono coesistere: l'offset lo calcola una sola funzione
+            updateLayoutOffset();
         }
 
         window.addEventListener('online', () => {
@@ -5158,6 +5824,16 @@
 
             if (!isOnline()) {
                 tips.push({ id: 'offline', text: t('dannyOffline'), priority: 100 });
+            }
+
+            // A servizio chiuso il consiglio è uno solo: quando si riapre
+            if (!isServiceOpen()) {
+                const next = nextOpeningText();
+                return {
+                    id: 'service_closed',
+                    priority: 110,
+                    text: next ? t('dannyClosedUntil').replace('{time}', next) : t('dannyClosed')
+                };
             }
 
             if (myOrders.length === 0) {
@@ -5447,6 +6123,147 @@
             resetDannyIdle(9000); // primo intervento dopo 9 secondi di quiete
         }
 
+        // =============================================
+        // PANNELLO SERVIZIO (admin)
+        // =============================================
+        let pendingServiceOverride; // valore scelto nel pannello, salvato col listino
+
+        function setServiceOverride(value) {
+            pendingServiceOverride = value;
+            refreshServiceButtons();
+        }
+
+        function refreshServiceButtons() {
+            const map = { 'svcAuto': null, 'svcOpen': true, 'svcClosed': false };
+            Object.keys(map).forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.toggle('active', pendingServiceOverride === map[id]);
+            });
+
+            // Anteprima di come apparirà ai clienti
+            const stateEl = document.getElementById('svcCurrentState');
+            if (stateEl) {
+                let open;
+                if (pendingServiceOverride === true) open = true;
+                else if (pendingServiceOverride === false) open = false;
+                else open = isOpenBySchedule();
+                stateEl.textContent = open ? t('svcStateOpen') : t('svcStateClosed');
+                stateEl.className = 'svc-state ' + (open ? 'svc-open' : 'svc-closed');
+            }
+        }
+
+        function renderServiceHours() {
+            const box = document.getElementById('serviceHours');
+            if (!box) return;
+            const cfg = getServiceConfig();
+            const dayKeys = ['daySun','dayMon','dayTue','dayWed','dayThu','dayFri','daySat'];
+            // Si parte da lunedì: più naturale della domenica
+            const order = [1, 2, 3, 4, 5, 6, 0];
+
+            box.innerHTML = order.map(d => {
+                const h = (cfg.hours && cfg.hours[d]) || { open: '10:00', close: '24:00', closed: false };
+                return `
+                    <div class="hours-row${h.closed ? ' hours-row-off' : ''}" id="hoursRow-${d}">
+                        <label class="hours-day">
+                            <input type="checkbox" data-day-closed="${d}" ${h.closed ? 'checked' : ''}
+                                   onchange="document.getElementById('hoursRow-${d}').classList.toggle('hours-row-off', this.checked)">
+                            <span>${t(dayKeys[d])}</span>
+                        </label>
+                        <input type="time" data-day-open="${d}" value="${h.open}">
+                        <span class="hours-sep">–</span>
+                        <input type="time" data-day-close="${d}" value="${h.close === '24:00' ? '23:59' : h.close}">
+                    </div>`;
+            }).join('');
+        }
+
+        // =============================================
+        // RIFIUTO ORDINI (admin)
+        // L'ordine viene marcato come rifiutato sul cloud. Il cliente
+        // riceve l'avviso col motivo alla prima sincronizzazione, poi
+        // l'ordine sparisce. Nel frattempo è già escluso dal totale.
+        // =============================================
+        let rejectingOrderId = null;
+
+        function openRejectModal(orderId) {
+            if (!isAdmin()) return;
+            rejectingOrderId = orderId;
+            const order = orders.find(o => o.id === orderId);
+            if (!order) return;
+
+            document.getElementById('rejectOrderInfo').textContent =
+                `${order.cocktail} · ${order.customerName || '-'} · ${order.price}`;
+            document.getElementById('rejectCustomReason').value = '';
+            document.getElementById('rejectModal').classList.add('active');
+        }
+
+        function closeRejectModal() {
+            document.getElementById('rejectModal').classList.remove('active');
+            rejectingOrderId = null;
+        }
+
+        // Rifiuta con un motivo predefinito
+        function rejectWithReason(reasonKey) {
+            doRejectOrder(t(reasonKey));
+        }
+
+        // Rifiuta con il motivo scritto a mano
+        function rejectWithCustomReason() {
+            const txt = document.getElementById('rejectCustomReason').value.trim();
+            doRejectOrder(txt || t('rejectReasonOther'));
+        }
+
+        async function doRejectOrder(reason) {
+            const orderId = rejectingOrderId;
+            if (!orderId || !isAdmin()) return;
+
+            const order = orders.find(o => o.id === orderId);
+            closeRejectModal();
+            if (!order) return;
+
+            if (!cloudReady()) {
+                alert(t('rejectNeedsCloud'));
+                return;
+            }
+
+            try {
+                await firestoreDb.collection('orders').doc(String(orderId)).update({
+                    rejected: true,
+                    rejectedReason: reason,
+                    rejectedAt: Date.now()
+                });
+
+                // Sparisce subito dalla vista dell'admin
+                orders = orders.filter(o => o.id !== orderId);
+                saveOrders();
+                renderOrders();
+
+                const successMsg = document.getElementById('successMessage');
+                successMsg.textContent = t('orderRejectedMsg').replace('{name}', order.cocktail);
+                successMsg.classList.add('show');
+                setTimeout(() => successMsg.classList.remove('show'), 3000);
+            } catch (error) {
+                console.log('Errore rifiuto ordine:', error);
+                alert(t('rejectError'));
+            }
+        }
+
+        // Avvisa il cliente degli ordini rifiutati, poi li elimina
+        async function handleRejectedOrders(rejectedOrders) {
+            if (!rejectedOrders.length) return;
+
+            const names = rejectedOrders.map(o => `• ${o.cocktail} — ${o.rejectedReason || ''}`).join('\n');
+            alert(t('orderRejectedNotice') + '\n\n' + names);
+
+            // Una volta avvisato il cliente, l'ordine non serve più
+            for (const o of rejectedOrders) {
+                try {
+                    await firestoreDb.collection('orders').doc(String(o.id)).delete();
+                } catch (error) {
+                    console.log('Errore rimozione ordine rifiutato:', error);
+                }
+            }
+        }
+
         async function sendReview() {
             const reviewText = document.getElementById('reviewText').value.trim();
 
@@ -5485,6 +6302,9 @@
                 } else {
                     checkMyPaymentStatus();
                 }
+                // Ricarica gli ordini: è così che il cliente scopre
+                // se Daniel ne ha rifiutato uno.
+                loadOrdersFromCloud();
             };
             poll();
             setInterval(poll, 15000); // ogni 15 secondi
@@ -5499,6 +6319,9 @@
             };
             poll();
             setInterval(poll, 60000); // ogni minuto
+            // L'orario cambia anche senza modifiche al listino:
+            // il banner va rivalutato comunque ogni minuto.
+            setInterval(updateServiceBanner, 60000);
 
             // Aggiorna anche quando l'utente riapre l'app
             document.addEventListener('visibilitychange', () => {
@@ -5510,6 +6333,7 @@
         // Initialize
         applyTranslations();
         updateOfflineBanner();   // Mostra subito lo stato della connessione
+        updateServiceBanner();   // Mostra subito se il servizio è chiuso
         updateCategoryTabs();    // Evidenzia la categoria salvata
         renderCocktails();
         renderOrders();
@@ -5519,11 +6343,32 @@
         syncPendingOrders(); // Invia gli ordini rimasti in coda da sessioni offline
         initDanny();         // Attiva il barista virtuale
 
-        // Close modal on outside click
-        document.getElementById('orderModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeModal();
-            }
+        // =============================================
+        // CHIUSURA MODALI: tocco fuori + tasto Esc
+        // Il modale di benvenuto è escluso: il nome è obbligatorio.
+        // =============================================
+        const MODAL_CLOSERS = {
+            orderModal: closeModal,
+            reviewModal: closeReviewModal,
+            reviewsModal: closeReviewsPage,
+            priceListModal: closePriceList,
+            rejectModal: closeRejectModal
+        };
+
+        Object.keys(MODAL_CLOSERS).forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.addEventListener('click', function (e) {
+                // Solo se il tocco è sullo sfondo, non sul contenuto
+                if (e.target === this) MODAL_CLOSERS[id]();
+            });
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key !== 'Escape') return;
+            const open = Object.keys(MODAL_CLOSERS)
+                .find(id => document.getElementById(id)?.classList.contains('active'));
+            if (open) MODAL_CLOSERS[open]();
         });
     </script>
 </body>
