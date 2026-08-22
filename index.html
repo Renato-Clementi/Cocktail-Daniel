@@ -1157,26 +1157,33 @@
 
         .category-tabs {
             display: flex;
-            gap: 8px;
+            gap: 5px;
             margin-bottom: 18px;
             background: rgba(255, 244, 230, 0.25);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
             border-radius: var(--radius);
             padding: 5px;
+            /* Con più di tre categorie la fila scorre invece di comprimersi */
+            overflow-x: auto;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
         }
 
+        .category-tabs::-webkit-scrollbar { display: none; }
+
         .category-tab {
-            flex: 1;
-            padding: 11px 8px;
+            flex: 1 0 auto;
+            padding: 11px 14px;
             border: none;
             border-radius: var(--radius-sm);
             background: transparent;
             color: #fff;
             font-family: var(--font-body);
-            font-size: 0.92em;
+            font-size: 0.85em;
             font-weight: 600;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.2px;
+            white-space: nowrap;
             cursor: pointer;
             text-shadow: 0 1px 4px rgba(27,58,92,0.5);
             transition: background 0.25s var(--ease-out), color 0.25s ease, transform 0.2s ease;
@@ -1240,17 +1247,24 @@
         .lang-switcher {
             display: flex;
             justify-content: center;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
             gap: 6px;
             margin-bottom: 10px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 2px;
         }
 
+        .lang-switcher::-webkit-scrollbar { display: none; }
+
         .lang-btn {
+            flex: 0 0 auto;
             background: rgba(255,255,255,0.2);
             border: 2px solid rgba(255,255,255,0.4);
             border-radius: var(--radius-sm);
-            padding: 4px 8px;
-            font-size: 1.2em;
+            padding: 3px 6px;
+            font-size: 1.05em;
             cursor: pointer;
             transition: all 0.2s ease;
             line-height: 1;
@@ -1289,6 +1303,7 @@
             <button class="lang-btn" id="langBtnDe" onclick="setLanguage('de')" title="Deutsch">🇩🇪</button>
             <button class="lang-btn" id="langBtnFr" onclick="setLanguage('fr')" title="Français">🇫🇷</button>
             <button class="lang-btn" id="langBtnUk" onclick="setLanguage('uk')" title="Українська">🇺🇦</button>
+            <button class="lang-btn" id="langBtnPt" onclick="setLanguage('pt')" title="Português">🇵🇹</button>
         </div>
         <h1>🍹 <span data-i18n="brandName">COCKTAIL DANIEL SRL</span></h1>
         <div class="copyright" data-i18n="copyright">© 2026 COCKTAIL DANIEL SRL - Tutti i diritti riservati</div>
@@ -1327,6 +1342,12 @@
             </button>
             <button class="category-tab" id="tabSnacks" onclick="setCategory('snacks')">
                 🍿 <span data-i18n="tabSnacks">Snack</span>
+            </button>
+            <button class="category-tab" id="tabSoftdrinks" onclick="setCategory('softdrinks')">
+                🥤 <span data-i18n="tabSoftdrinks">Soft drink</span>
+            </button>
+            <button class="category-tab" id="tabDesserts" onclick="setCategory('desserts')">
+                🍰 <span data-i18n="tabDesserts">Dolci</span>
             </button>
         </div>
 
@@ -1569,6 +1590,12 @@
                 icon: "🍋", 
                 description: "Cachaça, lime, zucchero",
                 variants: ["Classica", "Dolce", "Fruttata"]
+            },
+            { 
+                name: "Sangria", 
+                icon: "🍷", 
+                description: "Vino rosso, frutta, spezie",
+                variants: ["Classica", "Bianca", "Analcolica"]
             }
         ];
 
@@ -1633,24 +1660,143 @@
             }
         ];
 
+        // =============================================
+        // SOFT DRINK (analcolici)
+        // Come gli snack: nessuna versione Premium.
+        // =============================================
+        const softdrinks = [
+            {
+                name: "Coca Cola",
+                icon: "🥤",
+                description: "Servita fredda",
+                variants: ["Classica", "Zero", "Lattina"]
+            },
+            {
+                name: "Aranciata",
+                icon: "🍊",
+                description: "Agrumi italiani",
+                variants: ["Classica", "Amara", "San Pellegrino"]
+            },
+            {
+                name: "Limonata",
+                icon: "🍋",
+                description: "Limoni spremuti",
+                variants: ["Classica", "Alla menta", "Frizzante"]
+            },
+            {
+                name: "Acqua",
+                icon: "💧",
+                description: "Acqua di sorgente",
+                variants: ["Naturale", "Frizzante", "Da 1L"]
+            },
+            {
+                name: "Succo di Frutta",
+                icon: "🧃",
+                description: "Frutta al 100%",
+                variants: ["Pesca", "Ananas", "ACE"]
+            },
+            {
+                name: "Tè Freddo",
+                icon: "🫖",
+                description: "Infuso e servito con ghiaccio",
+                variants: ["Limone", "Pesca", "Verde"]
+            },
+            {
+                name: "Acqua di Cocco",
+                icon: "🥥",
+                description: "Dissetante e naturale",
+                variants: ["Naturale", "Con ananas"]
+            },
+            {
+                name: "Energy Drink",
+                icon: "⚡",
+                description: "Carica immediata",
+                variants: ["Classico", "Sugar free"]
+            }
+        ];
+
+        // =============================================
+        // DOLCI
+        // La torta della Nonna Giovanna apre la lista: è la specialità
+        // della casa, fatta in casa.
+        // =============================================
+        const desserts = [
+            {
+                name: "Torta della Nonna Giovanna",
+                icon: "🥧",
+                description: "La ricetta di famiglia, fatta in casa",
+                variants: ["Fetta", "Con panna", "Torta intera"]
+            },
+            {
+                name: "Gelato",
+                icon: "🍨",
+                description: "Gelato artigianale",
+                variants: ["1 gusto", "2 gusti", "Coppa grande"]
+            },
+            {
+                name: "Tiramisù",
+                icon: "🍰",
+                description: "Mascarpone, caffè, cacao",
+                variants: ["Classico", "Al pistacchio", "Alle fragole"]
+            },
+            {
+                name: "Panna Cotta",
+                icon: "🍮",
+                description: "Cremosa, con topping",
+                variants: ["Frutti di bosco", "Caramello", "Cioccolato"]
+            },
+            {
+                name: "Brownie",
+                icon: "🍫",
+                description: "Cioccolato fondente",
+                variants: ["Classico", "Con gelato", "Con nocciole"]
+            },
+            {
+                name: "Macedonia",
+                icon: "🍉",
+                description: "Frutta fresca di stagione",
+                variants: ["Classica", "Con gelato", "Tropicale"]
+            },
+            {
+                name: "Bomboloni",
+                icon: "🍩",
+                description: "Soffici e appena fritti",
+                variants: ["Crema", "Cioccolato", "Nutella"]
+            },
+            {
+                name: "Granita",
+                icon: "🍧",
+                description: "Ghiaccio tritato e sciroppo",
+                variants: ["Limone", "Caffè", "Mandorla"]
+            }
+        ];
+
         // Catalogo completo: serve alle funzioni che devono ritrovare
         // un prodotto per nome, senza sapere a quale categoria appartiene.
-        const allProducts = cocktails.concat(snacks);
+        const allProducts = cocktails.concat(snacks, softdrinks, desserts);
 
         function findProduct(name) {
             return allProducts.find(p => p.name === baseNameOf(name));
         }
 
-        function isSnack(name) {
+        // Solo i cocktail possono avere la versione Premium
+        function isCocktail(name) {
             const base = baseNameOf(name);
-            return snacks.some(s => s.name === base);
+            return cocktails.some(c => c.name === base);
         }
 
         // Categoria attualmente visualizzata nel catalogo
         let currentCategory = localStorage.getItem('currentCategory') || 'cocktails';
 
+        const CATEGORIES = {
+            cocktails: cocktails,
+            snacks: snacks,
+            softdrinks: softdrinks,
+            desserts: desserts
+        };
+
         function currentProducts() {
-            return currentCategory === 'snacks' ? snacks : cocktails;
+            return CATEGORIES[currentCategory] || cocktails;
         }
 
         // =============================================
@@ -1698,6 +1844,8 @@
 
                 tabCocktails: "Cocktail",
                 tabSnacks: "Snack",                noOrders: "Nessun ordine ancora 🍹",
+                tabSoftdrinks: "Soft drink",
+                tabDesserts: "Dolci",
                 orderedLabel: "Ordinato:",
                 orderSingular: "ordine",
                 orderPlural: "ordini",
@@ -1812,6 +1960,8 @@
 
                 tabCocktails: "Cocktails",
                 tabSnacks: "Snacks",                noOrders: "No orders yet 🍹",
+                tabSoftdrinks: "Soft drinks",
+                tabDesserts: "Desserts",
                 orderedLabel: "Ordered:",
                 orderSingular: "order",
                 orderPlural: "orders",
@@ -1926,6 +2076,8 @@
 
                 tabCocktails: "Cócteles",
                 tabSnacks: "Aperitivos",                noOrders: "Aún no hay pedidos 🍹",
+                tabSoftdrinks: "Refrescos",
+                tabDesserts: "Postres",
                 orderedLabel: "Pedido:",
                 orderSingular: "pedido",
                 orderPlural: "pedidos",
@@ -2040,6 +2192,8 @@
 
                 tabCocktails: "Cocktails",
                 tabSnacks: "Snacks",                noOrders: "Noch keine Bestellungen 🍹",
+                tabSoftdrinks: "Softdrinks",
+                tabDesserts: "Desserts",
                 orderedLabel: "Bestellt:",
                 orderSingular: "Bestellung",
                 orderPlural: "Bestellungen",
@@ -2154,6 +2308,8 @@
 
                 tabCocktails: "Cocktails",
                 tabSnacks: "Snacks",                noOrders: "Aucune commande pour l'instant 🍹",
+                tabSoftdrinks: "Boissons",
+                tabDesserts: "Desserts",
                 orderedLabel: "Commandé :",
                 orderSingular: "commande",
                 orderPlural: "commandes",
@@ -2268,6 +2424,8 @@
 
                 tabCocktails: "Коктейлі",
                 tabSnacks: "Закуски",                noOrders: "Ще немає замовлень 🍹",
+                tabSoftdrinks: "Напої",
+                tabDesserts: "Десерти",
                 orderedLabel: "Замовлено:",
                 orderSingular: "замовлення",
                 orderPlural: "замовлень",
@@ -2342,6 +2500,122 @@
                 reviewPlural: "відгуків",
                 confirmDeleteReview: "Видалити цей відгук?",
                 close: "Закрити"
+            },
+            pt: {
+                brandName: "COCKTAIL DANIEL SRL",
+                copyright: "© 2026 COCKTAIL DANIEL SRL - Todos os direitos reservados",
+                orderSuccess: "✓ Pedido enviado com sucesso!",
+                ordersHistory: "📋 Histórico de Pedidos",
+                totalSpentLabel: "💰 Total gasto",
+                payButton: "✅ Pagar e fechar a conta",
+                reviewButton: "⭐ Deixar uma avaliação",
+                reviewTitle: "⭐ A sua avaliação",
+                reviewSubtitle: "Diga-nos o que achou! A sua avaliação será visível para todos.",
+                reviewRatingLabel: "Quanto gostou?",
+                reviewCommentLabel: "💬 O seu comentário:",
+                reviewCommentPlaceholder: "ex.: Mojito fantástico, serviço rápido!",
+                cancel: "Cancelar",
+                sendReview: "Enviar avaliação ⭐",
+                welcomeTitle: "Bem-vindo!",
+                welcomeSubtitle: "Como se chama? Precisamos para identificar os seus pedidos.<br>Só perguntamos <strong>desta vez</strong>.",
+                nameLabel: "👤 O seu nome:",
+                namePlaceholder: "ex.: Marco",
+                startOrdering: "Começar a pedir 🍹",
+                completeOrder: "Complete o seu pedido",
+                cocktailLabel: "Cocktail:",
+                chooseVariant: "Escolha a variante:",
+                tablePosition: "Mesa / Localização:",
+                locWhereIAm: "Onde estou",
+                locHome: "Em Casa",
+                locGarden: "No Jardim",
+                preferredTime: "Hora preferida:",
+                timeNow: "Já",
+                time10: "10 min",
+                time30: "30 min",
+                additionalNotes: "Notas adicionais (opcional):",
+                notesPlaceholder: "ex.: Pouco gelo, limão extra...",
+                priceToPay: "💰 Preço a pagar na entrega:",
+                confirmOrderBtn: "Confirmar Pedido",
+                orderNow: "Pedir",
+                tabCocktails: "Cocktails",
+                tabSnacks: "Snacks",
+                noOrders: "Ainda não há pedidos 🍹",
+                tabSoftdrinks: "Bebidas",
+                tabDesserts: "Sobremesas",
+                orderedLabel: "Pedido:",
+                orderSingular: "pedido",
+                orderPlural: "pedidos",
+                changeName: "Alterar o seu nome:",
+                enterNameAlert: "Por favor, introduza o seu nome para continuar.",
+                selectStarAlert: "Por favor, selecione pelo menos uma estrela.",
+                writeCommentAlert: "Por favor, escreva um comentário para a sua avaliação.",
+                reviewSentMsg: "⭐ Avaliação enviada! Obrigado!",
+                paymentSentMsg: "✅ Pagamento enviado! Conta fechada.",
+                confirmPayment: "Confirma o pagamento de {total} por {count} pedidos?",
+                gpsErrorTitle: "Não foi possível obter a sua localização GPS.\n\n",
+                gpsErrorDenied: "Recusou o acesso à localização.\n\nPara usar \"Onde estou\" deve:\n1. Permitir o acesso à localização\n2. Ou escolher \"Em Casa\" ou \"No Jardim\"",
+                gpsErrorUnavailable: "Não foi possível determinar a localização.\n\nVerifique a ligação à internet e tente novamente,\nou escolha \"Em Casa\" ou \"No Jardim\".",
+                gpsErrorTimeout: "Tempo esgotado: está a demorar demasiado.\n\nTente novamente ou escolha \"Em Casa\" ou \"No Jardim\".",
+                gpsErrorUnknown: "Erro desconhecido.\n\nEscolha \"Em Casa\" ou \"No Jardim\" para continuar.",
+                gettingLocation: "📍 A obter localização...",
+                pendingTag: "pendente",
+                stillToPay: "Ainda a pagar:",
+                paymentRequestedMsg: "⏳ Pedido enviado! A aguardar confirmação.",
+                paymentConfirmedMsg: "✅ Pagamento confirmado! Conta fechada. Obrigado!",
+                paymentClosedMsg: "✅ Pagamento confirmado e conta fechada.",
+                pendingTitle: "Pagamento a aguardar confirmação",
+                pendingText: "O Daniel tem de confirmar que recebeu o pagamento.",
+                paymentRequests: "Pedidos de pagamento",
+                confirmReceived: "✓ Confirmo a receção",
+                priceListBtn: "💵 Preços",
+                priceListTitle: "💵 Lista de preços",
+                priceListSubtitle: "Altere os preços base de cada variante e assinale as promoções.",
+                surchargeTitle: "⏱️ Suplementos de horário",
+                savePriceList: "Guardar preços",
+                priceListSaved: "✅ Lista de preços guardada e publicada!",
+                priceListSavedLocal: "⚠️ Lista guardada apenas localmente (nuvem indisponível).",
+                specialOffer: "PROMOÇÃO",
+                soldOutLabel: "ESGOTADO",
+                soldOutButton: "Indisponível",
+                soldOutEnable: "Marcar como esgotado",
+                soldOutAlert: "{name} está esgotado neste momento. Escolha outro produto!",
+                fromPrice: "desde",
+                premiumLabel: "PREMIUM",
+                premiumDesc: "ingredientes selecionados",
+                premiumEnable: "Ativar versão Premium",
+                premiumSurcharge: "Suplemento Premium",
+                viewReviewsButton: "💬 Ler as avaliações",
+                shareButton: "📤 Convidar um amigo",
+                offlineNotice: "📡 Está offline — os pedidos serão enviados quando a ligação voltar",
+                updateAvailable: "✨ Nova versão disponível",
+                dannyWelcome: "Olá! Sou o Danny 🍹 Toque num cocktail para o pedir: levo-lho onde estiver.",
+                dannySpecial: "Hoje {name} está em promoção! 🔥",
+                dannyPremium: "Já provou o {name} Premium? Ingredientes selecionados ⭐",
+                dannySecondRound: "A segunda rodada? Recomendo um {name} 🍸",
+                dannyCloseBill: "Tem {count} pedidos em aberto. Pode fechar a conta quando quiser 💳",
+                dannyAskReview: "Gostou? Deixe uma avaliação, ajuda-nos muito ⭐",
+                dannyShare: "Um amigo com sede? Convide-o com um toque 📤",
+                dannyOffline: "Está offline, mas pode pedir na mesma: envio assim que a rede voltar 📡",
+                dannyGeneric: "Precisa de ajuda? Escolha um cocktail e nós tratamos do resto 🍹",
+                dannySeeMenu: "Ver o menu",
+                dannyOrderIt: "Pedir agora",
+                dannyTryIt: "Experimentar",
+                dannyCloseBillAction: "Ir para a conta",
+                dannyReviewAction: "Escrever avaliação",
+                dannyShareAction: "Convidar um amigo",
+                updateNow: "Atualizar",
+                syncTag: "por enviar",
+                ordersSynced: "📡 {count} pedidos sincronizados!",
+                shareMessage: "🍹 Peça o seu cocktail no Cocktail Daniel! Escolha, peça e levamos-lho onde estiver. 🌅",
+                linkCopied: "Link copiado para a área de transferência!",
+                copyLinkManually: "Copie este link e partilhe-o:",
+                reviewsPageTitle: "💬 Avaliações",
+                noReviews: "Ainda não há avaliações ⭐",
+                loadingReviews: "A carregar avaliações...",
+                reviewSingular: "avaliação",
+                reviewPlural: "avaliações",
+                confirmDeleteReview: "Eliminar esta avaliação?",
+                close: "Fechar"
             }
         };
 
@@ -2367,7 +2641,24 @@
                     "Tortilla chips e salsa": "Tortilla chips with salsa",
                     "Frutta di stagione tagliata": "Sliced seasonal fruit",
                     "Mini pizze appena sfornate": "Freshly baked mini pizzas",
-                    "Popcorn appena fatti": "Freshly popped popcorn"
+                    "Popcorn appena fatti": "Freshly popped popcorn",
+                    "Servita fredda": "Served cold",
+                    "Agrumi italiani": "Italian citrus",
+                    "Limoni spremuti": "Squeezed lemons",
+                    "Acqua di sorgente": "Spring water",
+                    "Frutta al 100%": "100% fruit",
+                    "Infuso e servito con ghiaccio": "Brewed and served over ice",
+                    "Dissetante e naturale": "Refreshing and natural",
+                    "Carica immediata": "Instant boost",
+                    "Vino rosso, frutta, spezie": "Red wine, fruit, spices",
+                    "La ricetta di famiglia, fatta in casa": "The family recipe, homemade",
+                    "Gelato artigianale": "Artisan ice cream",
+                    "Mascarpone, caffè, cacao": "Mascarpone, coffee, cocoa",
+                    "Cremosa, con topping": "Creamy, with topping",
+                    "Cioccolato fondente": "Dark chocolate",
+                    "Frutta fresca di stagione": "Fresh seasonal fruit",
+                    "Soffici e appena fritti": "Soft and freshly fried",
+                    "Ghiaccio tritato e sciroppo": "Crushed ice with syrup"
                 },
                 variants: {
                     "Classico": "Classic",
@@ -2407,7 +2698,41 @@
                     "Wurstel": "Hot dog",
                     "Salati": "Salted",
                     "Dolci": "Sweet",
-                    "Al burro": "Buttered"
+                    "Al burro": "Buttered",
+                    "Zero": "Zero",
+                    "Lattina": "Can",
+                    "Amara": "Bitter",
+                    "San Pellegrino": "San Pellegrino",
+                    "Alla menta": "With mint",
+                    "Frizzante": "Sparkling",
+                    "Naturale": "Still",
+                    "Da 1L": "1L bottle",
+                    "Pesca": "Peach",
+                    "ACE": "ACE",
+                    "Limone": "Lemon",
+                    "Verde": "Green",
+                    "Con ananas": "With pineapple",
+                    "Classico": "Classic",
+                    "Sugar free": "Sugar free",
+                    "Bianca": "White",
+                    "Analcolica": "Alcohol-free",
+                    "Fetta": "Slice",
+                    "Con panna": "With cream",
+                    "Torta intera": "Whole cake",
+                    "1 gusto": "1 scoop",
+                    "2 gusti": "2 scoops",
+                    "Coppa grande": "Large cup",
+                    "Al pistacchio": "Pistachio",
+                    "Alle fragole": "Strawberry",
+                    "Frutti di bosco": "Berries",
+                    "Caramello": "Caramel",
+                    "Cioccolato": "Chocolate",
+                    "Con gelato": "With ice cream",
+                    "Con nocciole": "With hazelnuts",
+                    "Crema": "Custard",
+                    "Nutella": "Nutella",
+                    "Caffè": "Coffee",
+                    "Mandorla": "Almond"
                 }
             },
             es: {
@@ -2429,7 +2754,24 @@
                     "Tortilla chips e salsa": "Nachos con salsa",
                     "Frutta di stagione tagliata": "Fruta de temporada cortada",
                     "Mini pizze appena sfornate": "Mini pizzas recién horneadas",
-                    "Popcorn appena fatti": "Palomitas recién hechas"
+                    "Popcorn appena fatti": "Palomitas recién hechas",
+                    "Servita fredda": "Servida fría",
+                    "Agrumi italiani": "Cítricos italianos",
+                    "Limoni spremuti": "Limones exprimidos",
+                    "Acqua di sorgente": "Agua de manantial",
+                    "Frutta al 100%": "100% fruta",
+                    "Infuso e servito con ghiaccio": "Infusionado y servido con hielo",
+                    "Dissetante e naturale": "Refrescante y natural",
+                    "Carica immediata": "Energía inmediata",
+                    "Vino rosso, frutta, spezie": "Vino tinto, fruta, especias",
+                    "La ricetta di famiglia, fatta in casa": "La receta de la familia, casera",
+                    "Gelato artigianale": "Helado artesanal",
+                    "Mascarpone, caffè, cacao": "Mascarpone, café, cacao",
+                    "Cremosa, con topping": "Cremosa, con cobertura",
+                    "Cioccolato fondente": "Chocolate negro",
+                    "Frutta fresca di stagione": "Fruta fresca de temporada",
+                    "Soffici e appena fritti": "Esponjosos y recién fritos",
+                    "Ghiaccio tritato e sciroppo": "Hielo picado con sirope"
                 },
                 variants: {
                     "Classico": "Clásico",
@@ -2469,7 +2811,41 @@
                     "Wurstel": "Salchicha",
                     "Salati": "Saladas",
                     "Dolci": "Dulces",
-                    "Al burro": "Con mantequilla"
+                    "Al burro": "Con mantequilla",
+                    "Zero": "Zero",
+                    "Lattina": "Lata",
+                    "Amara": "Amarga",
+                    "San Pellegrino": "San Pellegrino",
+                    "Alla menta": "Con menta",
+                    "Frizzante": "Con gas",
+                    "Naturale": "Sin gas",
+                    "Da 1L": "Botella 1L",
+                    "Pesca": "Melocotón",
+                    "ACE": "ACE",
+                    "Limone": "Limón",
+                    "Verde": "Verde",
+                    "Con ananas": "Con piña",
+                    "Classico": "Clásico",
+                    "Sugar free": "Sin azúcar",
+                    "Bianca": "Blanca",
+                    "Analcolica": "Sin alcohol",
+                    "Fetta": "Porción",
+                    "Con panna": "Con nata",
+                    "Torta intera": "Tarta entera",
+                    "1 gusto": "1 bola",
+                    "2 gusti": "2 bolas",
+                    "Coppa grande": "Copa grande",
+                    "Al pistacchio": "De pistacho",
+                    "Alle fragole": "De fresa",
+                    "Frutti di bosco": "Frutos rojos",
+                    "Caramello": "Caramelo",
+                    "Cioccolato": "Chocolate",
+                    "Con gelato": "Con helado",
+                    "Con nocciole": "Con avellanas",
+                    "Crema": "Crema",
+                    "Nutella": "Nutella",
+                    "Caffè": "Café",
+                    "Mandorla": "Almendra"
                 }
             },
             de: {
@@ -2491,7 +2867,24 @@
                     "Tortilla chips e salsa": "Tortilla-Chips mit Salsa",
                     "Frutta di stagione tagliata": "Geschnittenes Saisonobst",
                     "Mini pizze appena sfornate": "Frisch gebackene Mini-Pizzen",
-                    "Popcorn appena fatti": "Frisch gemachtes Popcorn"
+                    "Popcorn appena fatti": "Frisch gemachtes Popcorn",
+                    "Servita fredda": "Kalt serviert",
+                    "Agrumi italiani": "Italienische Zitrusfrüchte",
+                    "Limoni spremuti": "Frisch gepresste Zitronen",
+                    "Acqua di sorgente": "Quellwasser",
+                    "Frutta al 100%": "100% Frucht",
+                    "Infuso e servito con ghiaccio": "Aufgebrüht und auf Eis serviert",
+                    "Dissetante e naturale": "Erfrischend und natürlich",
+                    "Carica immediata": "Sofortiger Energieschub",
+                    "Vino rosso, frutta, spezie": "Rotwein, Früchte, Gewürze",
+                    "La ricetta di famiglia, fatta in casa": "Das Familienrezept, hausgemacht",
+                    "Gelato artigianale": "Hausgemachtes Eis",
+                    "Mascarpone, caffè, cacao": "Mascarpone, Kaffee, Kakao",
+                    "Cremosa, con topping": "Cremig, mit Topping",
+                    "Cioccolato fondente": "Zartbitterschokolade",
+                    "Frutta fresca di stagione": "Frisches Obst der Saison",
+                    "Soffici e appena fritti": "Weich und frisch frittiert",
+                    "Ghiaccio tritato e sciroppo": "Crushed Ice mit Sirup"
                 },
                 variants: {
                     "Classico": "Klassisch",
@@ -2531,7 +2924,41 @@
                     "Wurstel": "Würstchen",
                     "Salati": "Gesalzen",
                     "Dolci": "Süß",
-                    "Al burro": "Mit Butter"
+                    "Al burro": "Mit Butter",
+                    "Zero": "Zero",
+                    "Lattina": "Dose",
+                    "Amara": "Bitter",
+                    "San Pellegrino": "San Pellegrino",
+                    "Alla menta": "Mit Minze",
+                    "Frizzante": "Mit Kohlensäure",
+                    "Naturale": "Still",
+                    "Da 1L": "1L Flasche",
+                    "Pesca": "Pfirsich",
+                    "ACE": "ACE",
+                    "Limone": "Zitrone",
+                    "Verde": "Grün",
+                    "Con ananas": "Mit Ananas",
+                    "Classico": "Klassisch",
+                    "Sugar free": "Zuckerfrei",
+                    "Bianca": "Weiß",
+                    "Analcolica": "Alkoholfrei",
+                    "Fetta": "Stück",
+                    "Con panna": "Mit Sahne",
+                    "Torta intera": "Ganze Torte",
+                    "1 gusto": "1 Kugel",
+                    "2 gusti": "2 Kugeln",
+                    "Coppa grande": "Großer Becher",
+                    "Al pistacchio": "Pistazie",
+                    "Alle fragole": "Erdbeere",
+                    "Frutti di bosco": "Waldbeeren",
+                    "Caramello": "Karamell",
+                    "Cioccolato": "Schokolade",
+                    "Con gelato": "Mit Eis",
+                    "Con nocciole": "Mit Haselnüssen",
+                    "Crema": "Vanillecreme",
+                    "Nutella": "Nutella",
+                    "Caffè": "Kaffee",
+                    "Mandorla": "Mandel"
                 }
             },
             fr: {
@@ -2553,7 +2980,24 @@
                     "Tortilla chips e salsa": "Chips tortilla et salsa",
                     "Frutta di stagione tagliata": "Fruits de saison coupés",
                     "Mini pizze appena sfornate": "Mini-pizzas fraîchement cuites",
-                    "Popcorn appena fatti": "Popcorn fraîchement éclaté"
+                    "Popcorn appena fatti": "Popcorn fraîchement éclaté",
+                    "Servita fredda": "Servie fraîche",
+                    "Agrumi italiani": "Agrumes italiens",
+                    "Limoni spremuti": "Citrons pressés",
+                    "Acqua di sorgente": "Eau de source",
+                    "Frutta al 100%": "100% fruit",
+                    "Infuso e servito con ghiaccio": "Infusé et servi glacé",
+                    "Dissetante e naturale": "Désaltérant et naturel",
+                    "Carica immediata": "Coup de fouet immédiat",
+                    "Vino rosso, frutta, spezie": "Vin rouge, fruits, épices",
+                    "La ricetta di famiglia, fatta in casa": "La recette de famille, maison",
+                    "Gelato artigianale": "Glace artisanale",
+                    "Mascarpone, caffè, cacao": "Mascarpone, café, cacao",
+                    "Cremosa, con topping": "Crémeuse, avec nappage",
+                    "Cioccolato fondente": "Chocolat noir",
+                    "Frutta fresca di stagione": "Fruits frais de saison",
+                    "Soffici e appena fritti": "Moelleux et frits minute",
+                    "Ghiaccio tritato e sciroppo": "Glace pilée et sirop"
                 },
                 variants: {
                     "Classico": "Classique",
@@ -2593,7 +3037,41 @@
                     "Wurstel": "Saucisse",
                     "Salati": "Salé",
                     "Dolci": "Sucré",
-                    "Al burro": "Au beurre"
+                    "Al burro": "Au beurre",
+                    "Zero": "Zéro",
+                    "Lattina": "Canette",
+                    "Amara": "Amère",
+                    "San Pellegrino": "San Pellegrino",
+                    "Alla menta": "À la menthe",
+                    "Frizzante": "Pétillante",
+                    "Naturale": "Plate",
+                    "Da 1L": "Bouteille 1L",
+                    "Pesca": "Pêche",
+                    "ACE": "ACE",
+                    "Limone": "Citron",
+                    "Verde": "Vert",
+                    "Con ananas": "À l'ananas",
+                    "Classico": "Classique",
+                    "Sugar free": "Sans sucre",
+                    "Bianca": "Blanche",
+                    "Analcolica": "Sans alcool",
+                    "Fetta": "Part",
+                    "Con panna": "Avec crème",
+                    "Torta intera": "Gâteau entier",
+                    "1 gusto": "1 boule",
+                    "2 gusti": "2 boules",
+                    "Coppa grande": "Grande coupe",
+                    "Al pistacchio": "Pistache",
+                    "Alle fragole": "Fraise",
+                    "Frutti di bosco": "Fruits rouges",
+                    "Caramello": "Caramel",
+                    "Cioccolato": "Chocolat",
+                    "Con gelato": "Avec glace",
+                    "Con nocciole": "Aux noisettes",
+                    "Crema": "Crème",
+                    "Nutella": "Nutella",
+                    "Caffè": "Café",
+                    "Mandorla": "Amande"
                 }
             },
             uk: {
@@ -2615,7 +3093,24 @@
                     "Tortilla chips e salsa": "Тортилья-чіпси із сальсою",
                     "Frutta di stagione tagliata": "Нарізані сезонні фрукти",
                     "Mini pizze appena sfornate": "Свіжоспечені міні-піци",
-                    "Popcorn appena fatti": "Свіжий попкорн"
+                    "Popcorn appena fatti": "Свіжий попкорн",
+                    "Servita fredda": "Подається холодною",
+                    "Agrumi italiani": "Італійські цитруси",
+                    "Limoni spremuti": "Свіжовичавлені лимони",
+                    "Acqua di sorgente": "Джерельна вода",
+                    "Frutta al 100%": "100% фрукти",
+                    "Infuso e servito con ghiaccio": "Заварений та з льодом",
+                    "Dissetante e naturale": "Освіжає, натуральний",
+                    "Carica immediata": "Миттєвий заряд",
+                    "Vino rosso, frutta, spezie": "Червоне вино, фрукти, спеції",
+                    "La ricetta di famiglia, fatta in casa": "Родинний рецепт, домашній",
+                    "Gelato artigianale": "Домашнє морозиво",
+                    "Mascarpone, caffè, cacao": "Маскарпоне, кава, какао",
+                    "Cremosa, con topping": "Вершкова, з топінгом",
+                    "Cioccolato fondente": "Чорний шоколад",
+                    "Frutta fresca di stagione": "Свіжі сезонні фрукти",
+                    "Soffici e appena fritti": "М'які, щойно смажені",
+                    "Ghiaccio tritato e sciroppo": "Подрібнений лід із сиропом"
                 },
                 variants: {
                     "Classico": "Класичний",
@@ -2655,7 +3150,153 @@
                     "Wurstel": "Сосиска",
                     "Salati": "Солоний",
                     "Dolci": "Солодкий",
-                    "Al burro": "З маслом"
+                    "Al burro": "З маслом",
+                    "Zero": "Zero",
+                    "Lattina": "Банка",
+                    "Amara": "Гірка",
+                    "San Pellegrino": "San Pellegrino",
+                    "Alla menta": "З м'ятою",
+                    "Frizzante": "Газована",
+                    "Naturale": "Негазована",
+                    "Da 1L": "Пляшка 1Л",
+                    "Pesca": "Персик",
+                    "ACE": "ACE",
+                    "Limone": "Лимон",
+                    "Verde": "Зелений",
+                    "Con ananas": "З ананасом",
+                    "Classico": "Класичний",
+                    "Sugar free": "Без цукру",
+                    "Bianca": "Біла",
+                    "Analcolica": "Безалкогольна",
+                    "Fetta": "Шматок",
+                    "Con panna": "З вершками",
+                    "Torta intera": "Цілий торт",
+                    "1 gusto": "1 кулька",
+                    "2 gusti": "2 кульки",
+                    "Coppa grande": "Велика порція",
+                    "Al pistacchio": "Фісташка",
+                    "Alle fragole": "Полуниця",
+                    "Frutti di bosco": "Лісові ягоди",
+                    "Caramello": "Карамель",
+                    "Cioccolato": "Шоколад",
+                    "Con gelato": "З морозивом",
+                    "Con nocciole": "З фундуком",
+                    "Crema": "Заварний крем",
+                    "Nutella": "Нутелла",
+                    "Caffè": "Кава",
+                    "Mandorla": "Мигдаль"
+                }
+            },
+            pt: {
+                descriptions: {
+                    "Rum, menta, lime, zucchero, soda": "Rum, hortelã, lima, açúcar, soda",
+                    "Tequila, triple sec, succo di lime": "Tequila, triple sec, sumo de lima",
+                    "Gin, Campari, vermouth rosso": "Gin, Campari, vermute tinto",
+                    "Aperol, prosecco, soda": "Aperol, prosecco, soda",
+                    "Gin, tonica, lime": "Gin, tónica, lima",
+                    "Gin, limone, soda": "Gin, limão, soda",
+                    "Prosecco, sambuco, menta, soda": "Prosecco, sabugueiro, hortelã, soda",
+                    "Rum, cocco, ananas": "Rum, coco, ananás",
+                    "Cachaça, lime, zucchero": "Cachaça, lima, açúcar",
+                    "Tostate e croccanti": "Torradas e crocantes",
+                    "Croccanti, servite calde": "Crocantes, servidas quentes",
+                    "Olive marinate": "Azeitonas marinadas",
+                    "Selezione di formaggi locali": "Seleção de queijos locais",
+                    "Pane tostato e condimenti": "Pão torrado com coberturas",
+                    "Tortilla chips e salsa": "Tortilha com molho salsa",
+                    "Frutta di stagione tagliata": "Fruta da época cortada",
+                    "Mini pizze appena sfornate": "Mini pizzas acabadas de sair do forno",
+                    "Popcorn appena fatti": "Pipocas acabadas de fazer",
+                    "Servita fredda": "Servida fresca",
+                    "Agrumi italiani": "Citrinos italianos",
+                    "Limoni spremuti": "Limões espremidos",
+                    "Acqua di sorgente": "Água de nascente",
+                    "Frutta al 100%": "100% fruta",
+                    "Infuso e servito con ghiaccio": "Infusão servida com gelo",
+                    "Dissetante e naturale": "Refrescante e natural",
+                    "Carica immediata": "Energia imediata",
+                    "Vino rosso, frutta, spezie": "Vinho tinto, fruta, especiarias",
+                    "La ricetta di famiglia, fatta in casa": "A receita de família, caseira",
+                    "Gelato artigianale": "Gelado artesanal",
+                    "Mascarpone, caffè, cacao": "Mascarpone, café, cacau",
+                    "Cremosa, con topping": "Cremosa, com cobertura",
+                    "Cioccolato fondente": "Chocolate negro",
+                    "Frutta fresca di stagione": "Fruta fresca da época",
+                    "Soffici e appena fritti": "Fofos e acabados de fritar",
+                    "Ghiaccio tritato e sciroppo": "Gelo picado com xarope"
+                },
+                variants: {
+                    "Classico": "Clássico",
+                    "Classica": "Clássica",
+                    "Dolce": "Doce",
+                    "Fruttato": "Frutado",
+                    "Fruttata": "Frutada",
+                    "Frozen": "Frozen",
+                    "Piccante": "Picante",
+                    "Sbagliato": "Sbagliato",
+                    "Bianco": "Branco",
+                    "Strong": "Forte",
+                    "Secco": "Seco",
+                    "Profumato": "Aromático",
+                    "Speziato": "Especiado",
+                    "Fresco": "Fresco",
+                    "Tropicale": "Tropical",
+                    "Salate": "Salgadas",
+                    "Al miele": "Com mel",
+                    "Piccanti": "Picantes",
+                    "Classiche": "Clássicas",
+                    "Paprika": "Paprica",
+                    "Sale marino": "Sal marinho",
+                    "Verdi": "Verdes",
+                    "Nere": "Pretas",
+                    "Miste": "Mistas",
+                    "Piccolo": "Pequena",
+                    "Medio": "Média",
+                    "Grande": "Grande",
+                    "Pomodoro": "Tomate",
+                    "Olive": "Azeitonas",
+                    "Con formaggio": "Com queijo",
+                    "Anguria": "Melancia",
+                    "Mista tropicale": "Mistura tropical",
+                    "Ananas": "Ananás",
+                    "Margherita": "Margarita",
+                    "Wurstel": "Salsicha",
+                    "Salati": "Salgadas",
+                    "Dolci": "Doces",
+                    "Al burro": "Com manteiga",
+                    "Zero": "Zero",
+                    "Lattina": "Lata",
+                    "Amara": "Amarga",
+                    "San Pellegrino": "San Pellegrino",
+                    "Alla menta": "Com hortelã",
+                    "Frizzante": "Com gás",
+                    "Naturale": "Sem gás",
+                    "Da 1L": "Garrafa 1L",
+                    "Pesca": "Pêssego",
+                    "ACE": "ACE",
+                    "Limone": "Limão",
+                    "Verde": "Verde",
+                    "Con ananas": "Com ananás",
+                    "Sugar free": "Sem açúcar",
+                    "Bianca": "Branca",
+                    "Analcolica": "Sem álcool",
+                    "Fetta": "Fatia",
+                    "Con panna": "Com natas",
+                    "Torta intera": "Bolo inteiro",
+                    "1 gusto": "1 bola",
+                    "2 gusti": "2 bolas",
+                    "Coppa grande": "Taça grande",
+                    "Al pistacchio": "De pistácio",
+                    "Alle fragole": "De morango",
+                    "Frutti di bosco": "Frutos vermelhos",
+                    "Caramello": "Caramelo",
+                    "Cioccolato": "Chocolate",
+                    "Con gelato": "Com gelado",
+                    "Con nocciole": "Com avelãs",
+                    "Crema": "Creme",
+                    "Nutella": "Nutella",
+                    "Caffè": "Café",
+                    "Mandorla": "Amêndoa"
                 }
             }
         };
@@ -2680,6 +3321,26 @@
             snacks.forEach(s => {
                 items[s.name] = {
                     prices: [2.00, 3.00, 4.00].slice(0, s.variants.length),
+                    special: false,
+                    soldOut: false,
+                    premium: false,
+                    premiumSurcharge: 0
+                };
+            });
+            // I soft drink hanno una fascia di prezzo propria
+            softdrinks.forEach(d => {
+                items[d.name] = {
+                    prices: [1.50, 2.00, 2.50].slice(0, d.variants.length),
+                    special: false,
+                    soldOut: false,
+                    premium: false,
+                    premiumSurcharge: 0
+                };
+            });
+            // I dolci hanno una fascia di prezzo propria
+            desserts.forEach(d => {
+                items[d.name] = {
+                    prices: [3.00, 4.00, 5.00].slice(0, d.variants.length),
                     special: false,
                     soldOut: false,
                     premium: false,
@@ -2780,7 +3441,7 @@
             currentProducts().forEach(c => {
                 list.push({ ...c, displayName: c.name, premium: false });
                 // La versione Premium esiste solo per i cocktail
-                if (!isSnack(c.name) && isPremiumEnabled(c.name)) {
+                if (isCocktail(c.name) && isPremiumEnabled(c.name)) {
                     list.push({
                         ...c,
                         displayName: c.name + PREMIUM_SUFFIX,
@@ -2902,6 +3563,7 @@
             document.getElementById('langBtnDe').classList.toggle('active', currentLang === 'de');
             document.getElementById('langBtnFr').classList.toggle('active', currentLang === 'fr');
             document.getElementById('langBtnUk').classList.toggle('active', currentLang === 'uk');
+            document.getElementById('langBtnPt').classList.toggle('active', currentLang === 'pt');
         }
 
         // Change language
@@ -3383,7 +4045,11 @@
                 `<div class="price-section-title">🍹 ${t('tabCocktails')}</div>` +
                 cocktails.map(c => buildCard(c, true)).join('') +
                 `<div class="price-section-title">🍿 ${t('tabSnacks')}</div>` +
-                snacks.map(s => buildCard(s, false)).join('');
+                snacks.map(s => buildCard(s, false)).join('') +
+                `<div class="price-section-title">🥤 ${t('tabSoftdrinks')}</div>` +
+                softdrinks.map(d => buildCard(d, false)).join('') +
+                `<div class="price-section-title">🍰 ${t('tabDesserts')}</div>` +
+                desserts.map(d => buildCard(d, false)).join('');
 
             const ts = pricing.timeSurcharge || {};
             document.getElementById('surchargeNow').value = (ts['Subito'] ?? 1).toFixed(2);
@@ -3477,10 +4143,14 @@
         }
 
         function updateCategoryTabs() {
-            document.getElementById('tabCocktails')
-                .classList.toggle('active', currentCategory === 'cocktails');
-            document.getElementById('tabSnacks')
-                .classList.toggle('active', currentCategory === 'snacks');
+            // Evidenzia la scheda attiva e la porta in vista se fuori schermo
+            Object.keys(CATEGORIES).forEach(cat => {
+                const id = 'tab' + cat.charAt(0).toUpperCase() + cat.slice(1);
+                const el = document.getElementById(id);
+                if (el) el.classList.toggle('active', currentCategory === cat);
+            });
+            const active = document.querySelector('.category-tab.active');
+            if (active) active.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
         }
 
         // Render cocktails
