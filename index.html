@@ -152,6 +152,7 @@
             background: radial-gradient(circle at 50% 40%, #FFD9A0 0%, var(--sand-gold) 45%, var(--coral) 100%);
             opacity: 0.42;
             pointer-events: none;
+            animation: sunBreathe 5.5s ease-in-out infinite;
         }
 
         .cocktail-card::after {
@@ -238,6 +239,134 @@
             opacity: 0.9;
         }
 
+        /* =============================================
+           ANIMAZIONI
+           Curve morbide, durate brevi (<300ms): l'app deve
+           sembrare reattiva, non lenta.
+           ============================================= */
+        :root {
+            --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+            --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: translateY(24px) scale(0.96); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes overlayIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        @keyframes slideDownIn {
+            from { opacity: 0; transform: translateY(-18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes starPop {
+            0%   { transform: scale(1); }
+            45%  { transform: scale(1.35); }
+            100% { transform: scale(1); }
+        }
+
+        /* Il sole "respira": luce che oscilla piano */
+        @keyframes sunBreathe {
+            0%, 100% { opacity: 0.38; transform: translateX(-50%) scale(1); }
+            50%      { opacity: 0.52; transform: translateX(-50%) scale(1.07); }
+        }
+
+        /* Il badge offerta pulsa per farsi notare */
+        @keyframes offerPulse {
+            0%, 100% { transform: translateX(-50%) scale(1); box-shadow: 0 2px 8px rgba(27,58,92,0.3); }
+            50%      { transform: translateX(-50%) scale(1.06); box-shadow: 0 3px 14px rgba(245,166,35,0.65); }
+        }
+
+        @keyframes shimmer {
+            from { background-position: -180% 0; }
+            to   { background-position: 180% 0; }
+        }
+
+        /* Feedback al tocco: senza questo su mobile non si capisce
+           se il tap è stato registrato. */
+        .order-btn:active,
+        .btn:active,
+        .variant-btn:active,
+        .page-btn:active,
+        .lang-btn:active,
+        .confirm-payment-btn:active,
+        .update-banner button:active {
+            transform: scale(0.95);
+            transition-duration: 0.06s;
+        }
+
+        .cocktail-card:active {
+            transform: scale(0.97);
+            transition-duration: 0.08s;
+        }
+
+        /* Le card entrano a cascata quando si apre il catalogo */
+        .cocktail-card {
+            animation: fadeSlideUp 0.42s var(--ease-out) both;
+        }
+
+        .cocktail-card:nth-child(1) { animation-delay: 0.00s; }
+        .cocktail-card:nth-child(2) { animation-delay: 0.04s; }
+        .cocktail-card:nth-child(3) { animation-delay: 0.08s; }
+        .cocktail-card:nth-child(4) { animation-delay: 0.12s; }
+        .cocktail-card:nth-child(5) { animation-delay: 0.16s; }
+        .cocktail-card:nth-child(6) { animation-delay: 0.20s; }
+        .cocktail-card:nth-child(7) { animation-delay: 0.24s; }
+        .cocktail-card:nth-child(8) { animation-delay: 0.28s; }
+        .cocktail-card:nth-child(9) { animation-delay: 0.32s; }
+        .cocktail-card:nth-child(n+10) { animation-delay: 0.36s; }
+
+        /* I soli respirano sfasati, altrimenti pulserebbero all'unisono
+           e l'effetto diventerebbe meccanico. */
+        .cocktail-card:nth-child(3n+1)::before { animation-delay: 0s; }
+        .cocktail-card:nth-child(3n+2)::before { animation-delay: -1.8s; }
+        .cocktail-card:nth-child(3n)::before   { animation-delay: -3.6s; }
+
+        /* Gli ordini nello storico entrano dolcemente */
+        .order-item, .review-item, .payment-request {
+            animation: fadeSlideUp 0.35s var(--ease-out) both;
+        }
+
+        /* Il messaggio di conferma scivola dall'alto */
+        .success-message.show {
+            display: block;
+            animation: slideDownIn 0.32s var(--ease-out) both;
+        }
+
+        /* Banner di stato */
+        .offline-banner { animation: slideDownIn 0.3s var(--ease-out) both; }
+        .update-banner  { animation: fadeSlideUp 0.35s var(--ease-out) both; }
+
+        /* Le stelle rimbalzano quando le selezioni */
+        #starRating span {
+            display: inline-block;
+            transition: transform 0.18s var(--ease-bounce), color 0.18s ease;
+        }
+
+        #starRating span:hover { transform: scale(1.18); }
+        #starRating span.pop   { animation: starPop 0.32s var(--ease-bounce); }
+
+        /* Chi ha attivato la riduzione del movimento nelle impostazioni
+           del telefono (emicrania, vertigini) non vede animazioni. */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -253,6 +382,11 @@
 
         .modal.active {
             display: flex;
+            animation: overlayIn 0.2s ease both;
+        }
+
+        .modal.active .modal-content {
+            animation: modalIn 0.32s var(--ease-out) both;
         }
 
         .modal-content {
@@ -526,6 +660,7 @@
             white-space: nowrap;
             z-index: 2;
             box-shadow: 0 2px 8px rgba(27, 58, 92, 0.3);
+            animation: offerPulse 2.4s ease-in-out infinite;
         }
 
         .cocktail-price {
@@ -620,7 +755,8 @@
             top: 8px;
             left: 50%;
             transform: translateX(-50%);
-            background: linear-gradient(135deg, #D4AF37 0%, var(--palm) 100%);
+            background: linear-gradient(100deg, #D4AF37 0%, #F6E27A 45%, #D4AF37 55%, var(--palm) 100%);
+            background-size: 220% 100%;
             color: white;
             font-family: var(--font-body);
             font-size: 0.62em;
@@ -631,6 +767,7 @@
             white-space: nowrap;
             z-index: 2;
             box-shadow: 0 2px 8px rgba(27, 58, 92, 0.3);
+            animation: shimmer 3.5s linear infinite;
         }
 
         .premium-section {
@@ -718,8 +855,14 @@
 
         .rating-bar-fill {
             height: 100%;
-            background: #f5a623;
+            background: var(--sand-gold);
             border-radius: 4px;
+            animation: barGrow 0.7s var(--ease-out) both;
+        }
+
+        @keyframes barGrow {
+            from { transform: scaleX(0); transform-origin: left; }
+            to   { transform: scaleX(1); transform-origin: left; }
         }
 
         .rating-bar-count {
@@ -3102,6 +3245,15 @@
         function setRating(stars) {
             selectedRating = stars;
             updateStars(stars);
+
+            // Le stelle selezionate rimbalzano a cascata
+            const spans = document.getElementById('starRating').children;
+            for (let i = 0; i < stars; i++) {
+                const el = spans[i];
+                el.classList.remove('pop');
+                void el.offsetWidth; // forza il riavvio dell'animazione
+                setTimeout(() => el.classList.add('pop'), i * 55);
+            }
         }
 
         function hoverRating(stars) {
@@ -3116,7 +3268,7 @@
             const spans = document.getElementById('starRating').children;
             for (let i = 0; i < spans.length; i++) {
                 spans[i].textContent = i < count ? '★' : '☆';
-                spans[i].style.color = i < count ? '#f5a623' : '#ccc';
+                spans[i].style.color = i < count ? 'var(--sand-gold)' : 'var(--sand-deep)';
             }
         }
 
