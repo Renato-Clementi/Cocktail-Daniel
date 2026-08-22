@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>COCKTAIL DANIEL SRL</title>
+
+    <!-- PWA: installabile con icona sulla home e funzionante offline -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#FF6B4A">
+    <meta name="description" content="Ordina il tuo cocktail e te lo portiamo dove sei.">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Cocktail Daniel">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -771,6 +780,66 @@
             opacity: 1;
         }
 
+        .offline-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 3000;
+            background: linear-gradient(135deg, var(--dusk) 0%, #2C5578 100%);
+            color: #fff;
+            font-family: var(--font-body);
+            font-size: 0.78em;
+            font-weight: 500;
+            text-align: center;
+            padding: 9px 14px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.35);
+        }
+
+        .sync-tag {
+            display: inline-block;
+            background: var(--dusk-soft);
+            color: #fff;
+            border-radius: 999px;
+            padding: 1px 8px;
+            font-size: 0.7em;
+            font-weight: 700;
+            margin-left: 6px;
+            vertical-align: middle;
+        }
+
+        .update-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            background: linear-gradient(135deg, var(--lagoon) 0%, #1FA396 100%);
+            color: #fff;
+            font-family: var(--font-body);
+            font-size: 0.82em;
+            font-weight: 500;
+            padding: 12px 16px;
+            box-shadow: 0 -3px 14px rgba(0,0,0,0.3);
+        }
+
+        .update-banner button {
+            background: #fff;
+            color: #1FA396;
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 7px 16px;
+            font-family: var(--font-body);
+            font-size: 0.95em;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
         .pagination {
             display: flex;
             justify-content: center;
@@ -846,6 +915,11 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
+    <!-- Indicatore di stato connessione -->
+    <div id="offlineBanner" class="offline-banner" style="display:none;">
+        <span data-i18n="offlineNotice">📡 Sei offline — gli ordini verranno inviati al ritorno della connessione</span>
+    </div>
+
     <div class="container">
         <div class="lang-switcher">
             <button class="lang-btn" id="langBtnIt" onclick="setLanguage('it')" title="Italiano">🇮🇹</button>
@@ -1210,7 +1284,12 @@
                 premiumSurcharge: "Maggiorazione Premium",
                 viewReviewsButton: "💬 Leggi le recensioni",
                 shareButton: "📤 Invita un amico",
-                shareMessage: "🍹 Ordina il tuo cocktail su Cocktail Daniel! Scegli, ordina e te lo portiamo dove sei. 🌅",
+
+                offlineNotice: "📡 Sei offline — gli ordini verranno inviati al ritorno della connessione",
+
+                updateAvailable: "✨ Nuova versione disponibile",
+                updateNow: "Aggiorna",                syncTag: "da inviare",
+                ordersSynced: "📡 {count} ordini sincronizzati!",                shareMessage: "🍹 Ordina il tuo cocktail su Cocktail Daniel! Scegli, ordina e te lo portiamo dove sei. 🌅",
                 linkCopied: "Link copiato negli appunti!",
                 copyLinkManually: "Copia questo link e condividilo:",
                 reviewsPageTitle: "💬 Recensioni",
@@ -1298,7 +1377,12 @@
                 premiumSurcharge: "Premium surcharge",
                 viewReviewsButton: "💬 Read reviews",
                 shareButton: "📤 Invite a friend",
-                shareMessage: "🍹 Order your cocktail on Cocktail Daniel! Pick one, order it, and we bring it to you. 🌅",
+
+                offlineNotice: "📡 You are offline — orders will be sent when the connection returns",
+
+                updateAvailable: "✨ New version available",
+                updateNow: "Update",                syncTag: "to send",
+                ordersSynced: "📡 {count} orders synced!",                shareMessage: "🍹 Order your cocktail on Cocktail Daniel! Pick one, order it, and we bring it to you. 🌅",
                 linkCopied: "Link copied to clipboard!",
                 copyLinkManually: "Copy this link and share it:",
                 reviewsPageTitle: "💬 Reviews",
@@ -1386,7 +1470,12 @@
                 premiumSurcharge: "Recargo Premium",
                 viewReviewsButton: "💬 Leer reseñas",
                 shareButton: "📤 Invita a un amigo",
-                shareMessage: "🍹 ¡Pide tu cóctel en Cocktail Daniel! Elige, pide y te lo llevamos donde estés. 🌅",
+
+                offlineNotice: "📡 Estás sin conexión — los pedidos se enviarán al volver la conexión",
+
+                updateAvailable: "✨ Nueva versión disponible",
+                updateNow: "Actualizar",                syncTag: "por enviar",
+                ordersSynced: "📡 ¡{count} pedidos sincronizados!",                shareMessage: "🍹 ¡Pide tu cóctel en Cocktail Daniel! Elige, pide y te lo llevamos donde estés. 🌅",
                 linkCopied: "¡Enlace copiado al portapapeles!",
                 copyLinkManually: "Copia este enlace y compártelo:",
                 reviewsPageTitle: "💬 Reseñas",
@@ -1474,7 +1563,12 @@
                 premiumSurcharge: "Premium-Zuschlag",
                 viewReviewsButton: "💬 Bewertungen lesen",
                 shareButton: "📤 Freund einladen",
-                shareMessage: "🍹 Bestelle deinen Cocktail bei Cocktail Daniel! Aussuchen, bestellen, wir bringen ihn dir. 🌅",
+
+                offlineNotice: "📡 Du bist offline — Bestellungen werden gesendet, sobald die Verbindung zurück ist",
+
+                updateAvailable: "✨ Neue Version verfügbar",
+                updateNow: "Aktualisieren",                syncTag: "zu senden",
+                ordersSynced: "📡 {count} Bestellungen synchronisiert!",                shareMessage: "🍹 Bestelle deinen Cocktail bei Cocktail Daniel! Aussuchen, bestellen, wir bringen ihn dir. 🌅",
                 linkCopied: "Link in die Zwischenablage kopiert!",
                 copyLinkManually: "Kopiere diesen Link und teile ihn:",
                 reviewsPageTitle: "💬 Bewertungen",
@@ -1562,7 +1656,12 @@
                 premiumSurcharge: "Supplément Premium",
                 viewReviewsButton: "💬 Lire les avis",
                 shareButton: "📤 Inviter un ami",
-                shareMessage: "🍹 Commandez votre cocktail sur Cocktail Daniel ! Choisissez, commandez, on vous l'apporte. 🌅",
+
+                offlineNotice: "📡 Vous êtes hors ligne — les commandes seront envoyées au retour de la connexion",
+
+                updateAvailable: "✨ Nouvelle version disponible",
+                updateNow: "Mettre à jour",                syncTag: "à envoyer",
+                ordersSynced: "📡 {count} commandes synchronisées !",                shareMessage: "🍹 Commandez votre cocktail sur Cocktail Daniel ! Choisissez, commandez, on vous l'apporte. 🌅",
                 linkCopied: "Lien copié dans le presse-papiers !",
                 copyLinkManually: "Copiez ce lien et partagez-le :",
                 reviewsPageTitle: "💬 Avis",
@@ -1650,7 +1749,12 @@
                 premiumSurcharge: "Преміум-доплата",
                 viewReviewsButton: "💬 Читати відгуки",
                 shareButton: "📤 Запросити друга",
-                shareMessage: "🍹 Замовляй свій коктейль у Cocktail Daniel! Обери, замов — і ми принесемо його тобі. 🌅",
+
+                offlineNotice: "📡 Ви офлайн — замовлення надішлються після відновлення зв'язку",
+
+                updateAvailable: "✨ Доступна нова версія",
+                updateNow: "Оновити",                syncTag: "до надсилання",
+                ordersSynced: "📡 Синхронізовано замовлень: {count}!",                shareMessage: "🍹 Замовляй свій коктейль у Cocktail Daniel! Обери, замов — і ми принесемо його тобі. 🌅",
                 linkCopied: "Посилання скопійовано!",
                 copyLinkManually: "Скопіюй це посилання та поділись:",
                 reviewsPageTitle: "💬 Відгуки",
@@ -2179,9 +2283,17 @@
                     query = query.where('userId', '==', getUserId(customerName));
                 }
                 const snapshot = await query.get();
-                // Ordinamento lato client (evita di dover creare un indice composto su Firestore)
-                orders = snapshot.docs
-                    .map(doc => doc.data())
+                const cloudOrders = snapshot.docs.map(doc => doc.data());
+
+                // Gli ordini creati offline non sono ancora sul cloud:
+                // vanno conservati, altrimenti sparirebbero dalla lista.
+                const cloudIds = new Set(cloudOrders.map(o => o.id));
+                const queuedOrders = getPendingQueue().filter(o => {
+                    if (cloudIds.has(o.id)) return false;
+                    return isAdmin() || o.userId === getUserId(customerName);
+                });
+
+                orders = cloudOrders.concat(queuedOrders)
                     .sort((a, b) => b.id - a.id);
                 localStorage.setItem('cocktailOrders', JSON.stringify(orders));
                 renderOrders();
@@ -2192,11 +2304,17 @@
 
         // Save single order to Firestore
         async function saveOrderToCloud(order) {
-            if (!cloudReady()) return;
+            // Se il cloud non è disponibile o manca la rete, l'ordine finisce
+            // in coda e verrà inviato appena la connessione torna.
+            if (!cloudReady() || !isOnline()) {
+                queueOrderForSync(order);
+                return;
+            }
             try {
                 await firestoreDb.collection('orders').doc(String(order.id)).set(order);
             } catch (error) {
-                console.log('Errore salvataggio cloud:', error);
+                console.log('Salvataggio cloud fallito, ordine messo in coda:', error);
+                queueOrderForSync(order);
             }
         }
 
@@ -2930,13 +3048,15 @@
 
             let html = pageOrders.map(order => {
                 const isPending = myPendingOrderIds.includes(order.id);
+                const needsSync = isPendingSync(order.id);
                 return `
                 <div class="order-item${isPending ? ' order-pending' : ''}">
                     <strong>${order.cocktail}</strong> - <em>${translateVariant(order.variant)}</em> - <strong style="color: var(--coral);">${order.price}</strong>
-                    ${isPending ? `<span class="pending-tag">⏳ ${t('pendingTag')}</span>` : ''}<br>
+                    ${isPending ? `<span class="pending-tag">⏳ ${t('pendingTag')}</span>` : ''}
+                    ${needsSync ? `<span class="sync-tag">📡 ${t('syncTag')}</span>` : ''}<br>
                     👤 ${order.customerName || '-'}<br>
                     📍 ${translateLocation(order.location)} | ⏰ ${translateTime(order.time)}<br>
-                    <small style="color: #666;">${t('orderedLabel')} ${order.orderDate} ${order.orderTime}</small>
+                    <small style="color: var(--dusk-soft);">${t('orderedLabel')} ${order.orderDate} ${order.orderTime}</small>
                     ${order.notes ? `<br><small>📝 ${order.notes}</small>` : ''}
                 </div>
             `;
@@ -3191,6 +3311,127 @@
             }
         }
 
+        // =============================================
+        // PWA — INSTALLAZIONE E FUNZIONAMENTO OFFLINE
+        // =============================================
+
+        // Registra il service worker che tiene l'app in cache
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(reg => {
+                        // Controlla se esiste una versione nuova:
+                        // all'avvio, al ritorno in primo piano e ogni 30 minuti.
+                        const check = () => {
+                            reg.update().catch(() => {});
+                            if (navigator.serviceWorker.controller) {
+                                navigator.serviceWorker.controller.postMessage({ type: 'CHECK_UPDATE' });
+                            }
+                        };
+                        check();
+                        document.addEventListener('visibilitychange', () => {
+                            if (!document.hidden) check();
+                        });
+                        setInterval(check, 30 * 60 * 1000);
+                    })
+                    .catch(err => console.log('Service worker non registrato:', err));
+
+                // Il service worker segnala che l'app è stata aggiornata
+                navigator.serviceWorker.addEventListener('message', event => {
+                    if (event.data && event.data.type === 'APP_UPDATED') {
+                        showUpdateBanner();
+                    }
+                });
+            });
+        }
+
+        // Avvisa che c'è una versione nuova, senza ricaricare a sorpresa
+        // (l'utente potrebbe essere a metà di un ordine).
+        function showUpdateBanner() {
+            if (document.getElementById('updateBanner')) return;
+            const bar = document.createElement('div');
+            bar.id = 'updateBanner';
+            bar.className = 'update-banner';
+            bar.innerHTML = `
+                <span>${t('updateAvailable')}</span>
+                <button onclick="location.reload()">${t('updateNow')}</button>
+            `;
+            document.body.appendChild(bar);
+        }
+
+        // --- Stato della connessione ---
+        function isOnline() {
+            return navigator.onLine !== false;
+        }
+
+        function updateOfflineBanner() {
+            const banner = document.getElementById('offlineBanner');
+            if (!banner) return;
+            const offline = !isOnline();
+            banner.style.display = offline ? 'block' : 'none';
+            // Lascia spazio al banner in cima alla pagina
+            document.body.style.paddingTop = offline ? '48px' : '20px';
+        }
+
+        window.addEventListener('online', () => {
+            updateOfflineBanner();
+            syncPendingOrders();
+        });
+        window.addEventListener('offline', updateOfflineBanner);
+
+        // --- Coda degli ordini creati offline ---
+        // Gli ordini non sincronizzati restano qui finché la rete non torna.
+        function getPendingQueue() {
+            try {
+                return JSON.parse(localStorage.getItem('pendingSyncOrders') || '[]');
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function setPendingQueue(queue) {
+            localStorage.setItem('pendingSyncOrders', JSON.stringify(queue));
+        }
+
+        function queueOrderForSync(order) {
+            const queue = getPendingQueue();
+            if (!queue.some(o => o.id === order.id)) {
+                queue.push(order);
+                setPendingQueue(queue);
+            }
+        }
+
+        function isPendingSync(orderId) {
+            return getPendingQueue().some(o => o.id === orderId);
+        }
+
+        // Invia al cloud gli ordini rimasti in coda
+        async function syncPendingOrders() {
+            if (!cloudReady() || !isOnline()) return;
+
+            const queue = getPendingQueue();
+            if (queue.length === 0) return;
+
+            const stillPending = [];
+            for (const order of queue) {
+                try {
+                    await firestoreDb.collection('orders').doc(String(order.id)).set(order);
+                } catch (error) {
+                    stillPending.push(order); // riproveremo più tardi
+                }
+            }
+            setPendingQueue(stillPending);
+
+            const synced = queue.length - stillPending.length;
+            if (synced > 0) {
+                renderOrders();
+                const successMsg = document.getElementById('successMessage');
+                successMsg.textContent = t('ordersSynced').replace('{count}', synced);
+                successMsg.classList.add('show');
+                setTimeout(() => successMsg.classList.remove('show'), 3000);
+            }
+        }
+
         async function sendReview() {
             const reviewText = document.getElementById('reviewText').value.trim();
 
@@ -3236,11 +3477,13 @@
 
         // Initialize
         applyTranslations();
+        updateOfflineBanner();   // Mostra subito lo stato della connessione
         renderCocktails();
         renderOrders();
         checkRegistration(); // Mostra il popup nome oppure carica gli ordini dell'utente dal cloud
         startPaymentPolling();
         loadPricing();       // Carica il listino aggiornato dal cloud
+        syncPendingOrders(); // Invia gli ordini rimasti in coda da sessioni offline
 
         // Close modal on outside click
         document.getElementById('orderModal').addEventListener('click', function(e) {
