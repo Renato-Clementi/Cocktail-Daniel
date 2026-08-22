@@ -683,10 +683,12 @@
         .price-card {
             background: #fff;
             border-radius: var(--radius-sm);
-            padding: 14px;
-            margin-bottom: 14px;
+            padding: 4px 12px;
+            margin-bottom: 7px;
             border-left: 4px solid var(--coral);
         }
+
+        .price-card.expanded { padding-bottom: 12px; }
 
         .price-card-header {
             display: flex;
@@ -1224,16 +1226,80 @@
             background: #f0f0f0;
         }
 
-        .price-section-title {
+        /* =============================================
+           LISTINO A FISARMONICA
+           ============================================= */
+        .price-section { margin-bottom: 14px; }
+
+        .price-section-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            padding: 12px 14px;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, var(--dusk) 0%, #2C5578 100%);
+            color: #fff;
             font-family: var(--font-display);
-            font-size: 1em;
-            color: var(--dusk);
-            margin: 18px 0 12px;
-            padding-bottom: 6px;
-            border-bottom: 2px solid var(--sand-deep);
+            font-size: 0.95em;
+            font-weight: 400;
+            text-align: left;
+            cursor: pointer;
         }
 
-        .price-section-title:first-child { margin-top: 0; }
+        .price-section-toggle:active { transform: scale(0.99); }
+
+        .ps-count {
+            margin-left: auto;
+            background: rgba(255,255,255,0.22);
+            border-radius: 999px;
+            padding: 1px 9px;
+            font-family: var(--font-mono);
+            font-size: 0.75em;
+        }
+
+        .price-section-body { padding-top: 10px; }
+
+        .price-section.collapsed .price-section-body { display: none; }
+        .price-section.collapsed .pc-chevron { transform: rotate(-90deg); }
+
+        .pc-chevron {
+            display: inline-block;
+            transition: transform 0.25s var(--ease-out);
+            font-size: 0.9em;
+        }
+
+        /* Riga richiudibile del singolo prodotto */
+        .price-card-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            padding: 10px 4px;
+            border: none;
+            background: transparent;
+            color: var(--dusk);
+            font-family: var(--font-body);
+            font-size: 0.92em;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .pc-name { flex: 1; }
+
+        .pc-summary {
+            font-family: var(--font-mono);
+            font-size: 0.78em;
+            color: var(--coral-deep);
+            white-space: nowrap;
+        }
+
+        /* Chiusa di default: si apre al tocco */
+        .price-card-body { display: none; padding-top: 4px; }
+        .price-card.expanded .price-card-body { display: block; }
+        .price-card.expanded .pc-chevron { transform: rotate(180deg); }
+        .price-card:not(.expanded) .pc-chevron { transform: rotate(0deg); }
 
         .category-tabs {
             display: flex;
@@ -4771,6 +4837,22 @@
         // =============================================
         // PAGINA LISTINO (solo admin)
         // =============================================
+        // =============================================
+        // LISTINO A FISARMONICA
+        // Le categorie partono aperte, i singoli prodotti chiusi.
+        // I campi restano sempre nel DOM: chiudere una scheda nasconde
+        // i valori ma non li perde.
+        // =============================================
+        function toggleProductCard(safeId) {
+            const card = document.getElementById('card-' + safeId);
+            if (card) card.classList.toggle('expanded');
+        }
+
+        function togglePriceSection(key) {
+            const section = document.getElementById('section-' + key);
+            if (section) section.classList.toggle('collapsed');
+        }
+
         function openPriceList() {
             if (!isAdmin()) return;
 
@@ -4778,8 +4860,13 @@
 
             // Genera la scheda di un prodotto. La sezione Premium compare
             // solo per i cocktail: sugli snack non ha senso.
+            // Scheda di un prodotto, richiudibile.
+            // I campi restano nel DOM anche da chiusi: così il salvataggio
+            // li raccoglie tutti senza bisogno di riaprire le schede.
             const buildCard = (c, allowPremium) => {
                 const item = pricing.items[c.name] || { prices: [], special: false, premium: false, premiumSurcharge: 2 };
+                const safeId = c.name.replace(/\s+/g, '_');
+
                 const rows = c.variants.map((v, i) => `
                     <div class="price-row">
                         <span class="price-variant">${translateVariant(v)}</span>
@@ -4797,7 +4884,7 @@
                                        onchange="togglePremiumInput('${c.name}', this.checked)">
                                 <span>⭐ ${t('premiumEnable')}</span>
                             </label>
-                            <div class="price-row" id="premiumRow-${c.name.replace(/\s+/g,'_')}" style="${item.premium ? '' : 'display:none;'}">
+                            <div class="price-row" id="premiumRow-${safeId}" style="${item.premium ? '' : 'display:none;'}">
                                 <span class="price-variant">${t('premiumSurcharge')}</span>
                                 <input type="number" step="0.10" min="0"
                                        data-premium-surcharge="${c.name}"
@@ -4806,35 +4893,58 @@
                             </div>
                         </div>` : '';
 
+                // Riassunto sulla riga chiusa: fascia di prezzo e stato,
+                // per individuare il prodotto senza doverlo aprire.
+                const prices = (item.prices || []).filter(p => typeof p === 'number');
+                const range = prices.length
+                    ? (Math.min(...prices) === Math.max(...prices)
+                        ? formatPrice(Math.min(...prices))
+                        : formatPrice(Math.min(...prices)) + '–' + formatPrice(Math.max(...prices)))
+                    : '';
+                const flags = (item.special ? ' 🔥' : '') + (item.soldOut ? ' 🚫' : '') + (item.premium ? ' ⭐' : '');
+
                 return `
-                    <div class="price-card${item.soldOut ? ' price-card-soldout' : ''}">
-                        <div class="price-card-header">
-                            <span>${c.icon} <strong>${c.name}</strong></span>
+                    <div class="price-card${item.soldOut ? ' price-card-soldout' : ''}" id="card-${safeId}">
+                        <button type="button" class="price-card-toggle" onclick="toggleProductCard('${safeId}')">
+                            <span class="pc-name">${c.icon} <strong>${c.name}</strong></span>
+                            <span class="pc-summary">${range}${flags}</span>
+                            <span class="pc-chevron">▾</span>
+                        </button>
+                        <div class="price-card-body" id="body-${safeId}">
                             <label class="special-toggle">
                                 <input type="checkbox" data-special="${c.name}" ${item.special ? 'checked' : ''}>
                                 <span>🔥 ${t('specialOffer')}</span>
                             </label>
+                            <label class="soldout-toggle">
+                                <input type="checkbox" data-soldout="${c.name}" ${item.soldOut ? 'checked' : ''}
+                                       onchange="document.getElementById('card-${safeId}').classList.toggle('price-card-soldout', this.checked)">
+                                <span>🚫 ${t('soldOutEnable')}</span>
+                            </label>
+                            ${rows}
+                            ${premiumBlock}
                         </div>
-                        <label class="soldout-toggle">
-                            <input type="checkbox" data-soldout="${c.name}" ${item.soldOut ? 'checked' : ''}
-                                   onchange="this.closest('.price-card').classList.toggle('price-card-soldout', this.checked)">
-                            <span>🚫 ${t('soldOutEnable')}</span>
-                        </label>
-                        ${rows}
-                        ${premiumBlock}
                     </div>
                 `;
             };
 
+            // Una categoria richiudibile che contiene le sue schede
+            const buildSection = (key, icon, list, allowPremium) => `
+                <div class="price-section" id="section-${key}">
+                    <button type="button" class="price-section-toggle" onclick="togglePriceSection('${key}')">
+                        <span>${icon} ${t(key)}</span>
+                        <span class="ps-count">${list.length}</span>
+                        <span class="pc-chevron">▾</span>
+                    </button>
+                    <div class="price-section-body" id="sectionBody-${key}">
+                        ${list.map(p => buildCard(p, allowPremium)).join('')}
+                    </div>
+                </div>`;
+
             form.innerHTML =
-                `<div class="price-section-title">🍹 ${t('tabCocktails')}</div>` +
-                cocktails.map(c => buildCard(c, true)).join('') +
-                `<div class="price-section-title">🍿 ${t('tabSnacks')}</div>` +
-                snacks.map(s => buildCard(s, false)).join('') +
-                `<div class="price-section-title">🥤 ${t('tabSoftdrinks')}</div>` +
-                softdrinks.map(d => buildCard(d, false)).join('') +
-                `<div class="price-section-title">🍰 ${t('tabDesserts')}</div>` +
-                desserts.map(d => buildCard(d, false)).join('');
+                buildSection('tabCocktails', '🍹', cocktails, true) +
+                buildSection('tabSnacks', '🍿', snacks, false) +
+                buildSection('tabSoftdrinks', '🥤', softdrinks, false) +
+                buildSection('tabDesserts', '🍰', desserts, false);
 
             const ts = pricing.timeSurcharge || {};
             document.getElementById('surchargeNow').value = (ts['Subito'] ?? 1).toFixed(2);
