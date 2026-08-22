@@ -2390,10 +2390,17 @@
                         });
                     }
                     if (data.timeSurcharge) merged.timeSurcharge = data.timeSurcharge;
+
+                    // Aggiorna l'interfaccia solo se qualcosa è davvero cambiato:
+                    // altrimenti le card si rianimerebbero a ogni controllo.
+                    const changed = JSON.stringify(merged) !== JSON.stringify(pricing);
                     pricing = merged;
                     localStorage.setItem('cocktailPricing', JSON.stringify(pricing));
-                    renderCocktails();
-                    updatePriceDisplay();
+
+                    if (changed) {
+                        renderCocktails();
+                        updatePriceDisplay();
+                    }
                 }
             } catch (error) {
                 console.log('Listino non disponibile, uso valori locali:', error);
@@ -4004,6 +4011,23 @@
             setInterval(poll, 15000); // ogni 15 secondi
         }
 
+        // Ricarica periodicamente il listino: se l'admin cambia un prezzo
+        // o attiva un'offerta, gli altri dispositivi se ne accorgono da soli.
+        function startPricingPolling() {
+            const poll = () => {
+                if (!isOnline()) return;
+                loadPricing();
+            };
+            poll();
+            setInterval(poll, 60000); // ogni minuto
+
+            // Aggiorna anche quando l'utente riapre l'app
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) poll();
+            });
+            window.addEventListener('online', poll);
+        }
+
         // Initialize
         applyTranslations();
         updateOfflineBanner();   // Mostra subito lo stato della connessione
@@ -4011,7 +4035,7 @@
         renderOrders();
         checkRegistration(); // Mostra il popup nome oppure carica gli ordini dell'utente dal cloud
         startPaymentPolling();
-        loadPricing();       // Carica il listino aggiornato dal cloud
+        startPricingPolling(); // Tiene il listino allineato con quello dell'admin
         syncPendingOrders(); // Invia gli ordini rimasti in coda da sessioni offline
         initDanny();         // Attiva il barista virtuale
 
