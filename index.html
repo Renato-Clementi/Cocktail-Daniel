@@ -27,7 +27,7 @@
             --sand-gold: #F5A623;      /* oro sabbia — offerte */
             --lagoon: #2EC4B6;         /* turchese laguna — accenti */
             --dusk: #1B3A5C;           /* blu crepuscolo — testo */
-            --dusk-soft: #4A6B85;      /* blu tenue — testo secondario */
+            --dusk-soft: #3D5A73;      /* blu tenue — testo secondario */
             --sand: #FFF4E6;           /* sabbia — fondo card */
             --sand-deep: #F7E4CC;      /* sabbia bagnata — bordi/fondi */
             --palm: #B8860B;           /* oro scuro — premium */
@@ -122,9 +122,12 @@
         }
 
         .cocktail-card {
-            background: rgba(255, 244, 230, 0.94);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background: rgba(255, 244, 230, 0.72);
+            backdrop-filter: blur(20px) saturate(1.15);
+            -webkit-backdrop-filter: blur(20px) saturate(1.15);
+            /* Con il fondo più trasparente serve un bordo chiaro
+               per staccare la card dalla foto sottostante. */
+            border: 1px solid rgba(255, 255, 255, 0.45);
             border-radius: var(--radius);
             padding: 0 15px 15px;
             box-shadow: var(--shadow-card);
@@ -518,9 +521,10 @@
         }
 
         .orders-section {
-            background: rgba(255, 244, 230, 0.94);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background: rgba(255, 244, 230, 0.72);
+            backdrop-filter: blur(20px) saturate(1.15);
+            -webkit-backdrop-filter: blur(20px) saturate(1.15);
+            border: 1px solid rgba(255, 255, 255, 0.45);
             border-radius: var(--radius);
             padding: 25px;
             box-shadow: var(--shadow-card);
@@ -535,7 +539,7 @@
         }
 
         .order-item {
-            background: #fff;
+            background: rgba(255, 255, 255, 0.55);
             padding: 15px;
             border-radius: var(--radius-sm);
             margin-bottom: 15px;
@@ -565,8 +569,8 @@
 
         .pending-banner {
             background: rgba(255, 248, 225, 0.95);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(20px) saturate(1.15);
+            -webkit-backdrop-filter: blur(20px) saturate(1.15);
             border: 2px solid #f5a623;
             border-radius: 12px;
             padding: 18px;
@@ -743,7 +747,7 @@
 
         .cocktail-premium {
             border: 2px solid #D4AF37;
-            background: rgba(255, 250, 236, 0.95);
+            background: rgba(255, 250, 236, 0.76);
         }
 
         .cocktail-premium::before {
@@ -873,7 +877,7 @@
         }
 
         .review-item {
-            background: #fff;
+            background: rgba(255, 255, 255, 0.55);
             border-left: 4px solid #f5a623;
             border-radius: var(--radius-sm);
             padding: 14px;
@@ -998,6 +1002,7 @@
         }
 
         .danny-avatar {
+            position: relative;
             width: 56px;
             height: 56px;
             border-radius: 50%;
@@ -1012,15 +1017,47 @@
 
         .danny-avatar:active { transform: scale(0.92); }
 
-        .danny-avatar.calling {
-            animation: dannyWave 2.6s ease-in-out infinite;
+        /* Si anima l'emoji, non il pulsante: il bersaglio da toccare
+           resta fermo, altrimenti diventa difficile da centrare. */
+        .danny-face {
+            display: inline-block;
+            animation: dannyIdle 4.5s ease-in-out infinite;
         }
 
-        @keyframes dannyWave {
-            0%, 70%, 100% { transform: rotate(0deg) scale(1); }
-            76%  { transform: rotate(-11deg) scale(1.06); }
-            84%  { transform: rotate(9deg) scale(1.06); }
-            92%  { transform: rotate(-5deg) scale(1.03); }
+        @keyframes dannyIdle {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50%      { transform: translateY(-3px) rotate(-6deg); }
+        }
+
+        /* Quando ha qualcosa da dire: rimbalza per farsi notare */
+        .danny-avatar.calling .danny-face {
+            animation: dannyBounce 0.9s var(--ease-bounce) 2;
+        }
+
+        @keyframes dannyBounce {
+            0%   { transform: translateY(0) scale(1) rotate(0deg); }
+            25%  { transform: translateY(-10px) scale(1.15) rotate(-14deg); }
+            50%  { transform: translateY(0) scale(0.92) rotate(8deg); }
+            72%  { transform: translateY(-5px) scale(1.06) rotate(-5deg); }
+            100% { transform: translateY(0) scale(1) rotate(0deg); }
+        }
+
+        /* Pallino di notifica: c'è un consiglio non letto */
+        .danny-dot {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #E53935;
+            border: 2px solid var(--sand);
+            animation: dotPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes dotPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(229,57,53,0.65); }
+            50%      { transform: scale(1.18); box-shadow: 0 0 0 7px rgba(229,57,53,0); }
         }
 
         .danny-bubble {
@@ -1031,8 +1068,48 @@
             border-bottom-right-radius: 4px;
             padding: 14px 16px 14px 14px;
             box-shadow: var(--shadow-lift);
-            animation: fadeSlideUp 0.3s var(--ease-out) both;
+            transform-origin: bottom right;
+            animation: bubbleIn 0.38s var(--ease-bounce) both;
         }
+
+        /* Il fumetto si gonfia dall'angolo in basso a destra,
+           dove sta Danny: sembra che le parole escano da lui. */
+        @keyframes bubbleIn {
+            0%   { opacity: 0; transform: scale(0.3) translateY(10px); }
+            60%  { opacity: 1; transform: scale(1.04) translateY(0); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* Coda del fumetto rivolta verso l'avatar */
+        .danny-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -7px;
+            right: 18px;
+            width: 16px;
+            height: 16px;
+            background: var(--sand);
+            transform: rotate(45deg);
+            border-bottom-right-radius: 3px;
+        }
+
+        .danny-secondary {
+            margin-top: 7px;
+            width: 100%;
+            background: transparent;
+            color: var(--dusk-soft);
+            border: 2px solid var(--sand-deep);
+            border-radius: var(--radius-sm);
+            padding: 8px 12px;
+            font-family: var(--font-body);
+            font-size: 0.78em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .danny-secondary:active { transform: scale(0.96); }
+        .danny-secondary:hover  { border-color: var(--lagoon); }
 
         .danny-text {
             font-family: var(--font-body);
@@ -1286,8 +1363,11 @@
             <button class="danny-close" onclick="dismissDanny()" aria-label="Chiudi">✕</button>
             <div id="dannyText" class="danny-text"></div>
             <button id="dannyAction" class="danny-action" style="display:none;"></button>
+            <button id="dannySecondary" class="danny-secondary" style="display:none;"></button>
         </div>
-        <button class="danny-avatar" onclick="toggleDanny()" aria-label="Danny">🍹</button>
+        <button class="danny-avatar" onclick="toggleDanny()" aria-label="Danny">
+            <span class="danny-face">🍹</span><span id="dannyDot" class="danny-dot" style="display:none;"></span>
+        </button>
     </div>
 
     <!-- Indicatore di stato connessione -->
@@ -1371,8 +1451,8 @@
 
         <!-- Review Buttons -->
         <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
-            <button onclick="openReviewModal()" style="flex: 1; min-width: 150px; background: rgba(255,244,230,0.94); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: var(--dusk); border: none; border-radius: var(--radius); padding: 16px 20px; font-family: var(--font-body); font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: var(--shadow-card); transition: transform 0.3s ease, box-shadow 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''" data-i18n="reviewButton">⭐ Lascia una recensione</button>
-            <button onclick="openReviewsPage()" style="flex: 1; min-width: 150px; background: rgba(255,244,230,0.94); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: var(--dusk); border: none; border-radius: var(--radius); padding: 16px 20px; font-family: var(--font-body); font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: var(--shadow-card); transition: transform 0.3s ease, box-shadow 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''" data-i18n="viewReviewsButton">💬 Leggi le recensioni</button>
+            <button onclick="openReviewModal()" style="flex: 1; min-width: 150px; background: rgba(255,244,230,0.72); backdrop-filter: blur(20px) saturate(1.15); -webkit-backdrop-filter: blur(20px) saturate(1.15); color: var(--dusk); border: none; border-radius: var(--radius); padding: 16px 20px; font-family: var(--font-body); font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: var(--shadow-card); transition: transform 0.3s ease, box-shadow 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''" data-i18n="reviewButton">⭐ Lascia una recensione</button>
+            <button onclick="openReviewsPage()" style="flex: 1; min-width: 150px; background: rgba(255,244,230,0.72); backdrop-filter: blur(20px) saturate(1.15); -webkit-backdrop-filter: blur(20px) saturate(1.15); color: var(--dusk); border: none; border-radius: var(--radius); padding: 16px 20px; font-family: var(--font-body); font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: var(--shadow-card); transition: transform 0.3s ease, box-shadow 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''" data-i18n="viewReviewsButton">💬 Leggi le recensioni</button>
         </div>
 
         <!-- Share Button -->
@@ -1904,7 +1984,19 @@
                 dannyShare: "Un amico assetato? Invitalo con un tocco 📤",
                 dannyOffline: "Sei offline, ma puoi ordinare lo stesso: invio appena torna la rete 📡",
                 dannyGeneric: "Serve una mano? Scegli un cocktail e pensiamo a tutto noi 🍹",
-                dannySeeMenu: "Vedi il menu",
+
+                dannyUndecided: "Indeciso? Il {name} non delude mai 🍹",
+                dannySunset: "È l’ora del tramonto: uno {name} ci sta tutto 🌅",
+                dannyPairSnack: "Con il {drink} ci starebbero bene delle {name} 🍿",
+                dannyPairDrink: "Qualcosa da bere? Una {name} ben fredda 🥤",
+                dannyDessert: "Chiudiamo in dolcezza? La {name} è la nostra specialità 🥧",
+                dannyUsual: "Il solito {name}? Te lo preparo subito 😉",
+                dannyAddIt: "Aggiungi",
+                dannyYesPlease: "Sì, grazie!",
+                dannySeeSnacks: "Vedi gli snack",
+                dannySeeDrinks: "Vedi le bibite",
+                dannySeeDesserts: "Vedi i dolci",
+                dannyReadReviews: "Leggi le altre",                dannySeeMenu: "Vedi il menu",
                 dannyOrderIt: "Ordina ora",
                 dannyTryIt: "Provalo",
                 dannyCloseBillAction: "Vai al conto",
@@ -2020,7 +2112,19 @@
                 dannyShare: "Got a thirsty friend? Invite them with one tap 📤",
                 dannyOffline: "You're offline, but you can still order — I'll send it when the network is back 📡",
                 dannyGeneric: "Need a hand? Pick a cocktail and leave the rest to us 🍹",
-                dannySeeMenu: "See the menu",
+
+                dannyUndecided: "Undecided? The {name} never disappoints 🍹",
+                dannySunset: "Sunset time — a {name} is just right 🌅",
+                dannyPairSnack: "Some {name} would go well with your {drink} 🍿",
+                dannyPairDrink: "Something to drink? An ice-cold {name} 🥤",
+                dannyDessert: "Finish on a sweet note? The {name} is our specialty 🥧",
+                dannyUsual: "The usual {name}? Coming right up 😉",
+                dannyAddIt: "Add it",
+                dannyYesPlease: "Yes please!",
+                dannySeeSnacks: "See snacks",
+                dannySeeDrinks: "See drinks",
+                dannySeeDesserts: "See desserts",
+                dannyReadReviews: "Read others",                dannySeeMenu: "See the menu",
                 dannyOrderIt: "Order now",
                 dannyTryIt: "Try it",
                 dannyCloseBillAction: "Go to bill",
@@ -2136,7 +2240,19 @@
                 dannyShare: "¿Un amigo sediento? Invítalo con un toque 📤",
                 dannyOffline: "Estás sin conexión, pero puedes pedir igual: lo envío al volver la red 📡",
                 dannyGeneric: "¿Necesitas ayuda? Elige un cóctel y nosotros nos ocupamos 🍹",
-                dannySeeMenu: "Ver el menú",
+
+                dannyUndecided: "¿Indeciso? El {name} nunca falla 🍹",
+                dannySunset: "Hora del atardecer: un {name} viene de maravilla 🌅",
+                dannyPairSnack: "Unas {name} irían genial con tu {drink} 🍿",
+                dannyPairDrink: "¿Algo de beber? Una {name} bien fría 🥤",
+                dannyDessert: "¿Terminamos con algo dulce? La {name} es nuestra especialidad 🥧",
+                dannyUsual: "¿Lo de siempre, un {name}? Ahora mismo 😉",
+                dannyAddIt: "Añadir",
+                dannyYesPlease: "¡Sí, gracias!",
+                dannySeeSnacks: "Ver aperitivos",
+                dannySeeDrinks: "Ver refrescos",
+                dannySeeDesserts: "Ver postres",
+                dannyReadReviews: "Leer otras",                dannySeeMenu: "Ver el menú",
                 dannyOrderIt: "Pedir ahora",
                 dannyTryIt: "Pruébalo",
                 dannyCloseBillAction: "Ir a la cuenta",
@@ -2252,7 +2368,19 @@
                 dannyShare: "Ein durstiger Freund? Lade ihn mit einem Tippen ein 📤",
                 dannyOffline: "Du bist offline, kannst aber bestellen — ich sende es bei Verbindung 📡",
                 dannyGeneric: "Brauchst du Hilfe? Wähle einen Cocktail, um den Rest kümmern wir uns 🍹",
-                dannySeeMenu: "Menü ansehen",
+
+                dannyUndecided: "Unentschlossen? Der {name} enttäuscht nie 🍹",
+                dannySunset: "Sonnenuntergang — ein {name} passt perfekt 🌅",
+                dannyPairSnack: "{name} würden gut zu deinem {drink} passen 🍿",
+                dannyPairDrink: "Etwas zu trinken? Eine eiskalte {name} 🥤",
+                dannyDessert: "Süßer Abschluss? Die {name} ist unsere Spezialität 🥧",
+                dannyUsual: "Wie immer einen {name}? Kommt sofort 😉",
+                dannyAddIt: "Hinzufügen",
+                dannyYesPlease: "Ja, gerne!",
+                dannySeeSnacks: "Snacks ansehen",
+                dannySeeDrinks: "Getränke ansehen",
+                dannySeeDesserts: "Desserts ansehen",
+                dannyReadReviews: "Andere lesen",                dannySeeMenu: "Menü ansehen",
                 dannyOrderIt: "Jetzt bestellen",
                 dannyTryIt: "Probieren",
                 dannyCloseBillAction: "Zur Rechnung",
@@ -2368,7 +2496,19 @@
                 dannyShare: "Un ami assoiffé ? Invitez-le en un geste 📤",
                 dannyOffline: "Vous êtes hors ligne, mais vous pouvez commander — j'envoie au retour du réseau 📡",
                 dannyGeneric: "Besoin d’aide ? Choisissez un cocktail, on s’occupe du reste 🍹",
-                dannySeeMenu: "Voir le menu",
+
+                dannyUndecided: "Indécis ? Le {name} ne déçoit jamais 🍹",
+                dannySunset: "C’est l’heure du coucher de soleil : un {name} s’impose 🌅",
+                dannyPairSnack: "Des {name} iraient bien avec votre {drink} 🍿",
+                dannyPairDrink: "Quelque chose à boire ? Une {name} bien fraîche 🥤",
+                dannyDessert: "On finit en douceur ? La {name} est notre spécialité 🥧",
+                dannyUsual: "Comme d’habitude, un {name} ? J’arrive 😉",
+                dannyAddIt: "Ajouter",
+                dannyYesPlease: "Oui, merci !",
+                dannySeeSnacks: "Voir les snacks",
+                dannySeeDrinks: "Voir les boissons",
+                dannySeeDesserts: "Voir les desserts",
+                dannyReadReviews: "Lire les autres",                dannySeeMenu: "Voir le menu",
                 dannyOrderIt: "Commander",
                 dannyTryIt: "Essayer",
                 dannyCloseBillAction: "Voir la note",
@@ -2484,7 +2624,19 @@
                 dannyShare: "Спраглий друг? Запросіть його одним дотиком 📤",
                 dannyOffline: "Ви офлайн, але замовити можна — надішлю, щойно буде зв’язок 📡",
                 dannyGeneric: "Потрібна допомога? Оберіть коктейль, решту зробимо ми 🍹",
-                dannySeeMenu: "Переглянути меню",
+
+                dannyUndecided: "Вагаєтесь? {name} ніколи не підводить 🍹",
+                dannySunset: "Час заходу сонця — {name} буде саме до речі 🌅",
+                dannyPairSnack: "{name} чудово пасували б до вашого {drink} 🍿",
+                dannyPairDrink: "Щось випити? Крижана {name} 🥤",
+                dannyDessert: "Завершимо солодким? {name} — наша фірмова страва 🥧",
+                dannyUsual: "Як завжди, {name}? Уже готую 😉",
+                dannyAddIt: "Додати",
+                dannyYesPlease: "Так, дякую!",
+                dannySeeSnacks: "Переглянути закуски",
+                dannySeeDrinks: "Переглянути напої",
+                dannySeeDesserts: "Переглянути десерти",
+                dannyReadReviews: "Читати інші",                dannySeeMenu: "Переглянути меню",
                 dannyOrderIt: "Замовити",
                 dannyTryIt: "Спробувати",
                 dannyCloseBillAction: "До рахунку",
@@ -2597,7 +2749,19 @@
                 dannyShare: "Um amigo com sede? Convide-o com um toque 📤",
                 dannyOffline: "Está offline, mas pode pedir na mesma: envio assim que a rede voltar 📡",
                 dannyGeneric: "Precisa de ajuda? Escolha um cocktail e nós tratamos do resto 🍹",
-                dannySeeMenu: "Ver o menu",
+
+                dannyUndecided: "Indeciso? O {name} nunca desilude 🍹",
+                dannySunset: "Hora do pôr do sol — um {name} cai mesmo bem 🌅",
+                dannyPairSnack: "Umas {name} ficariam bem com o seu {drink} 🍿",
+                dannyPairDrink: "Algo para beber? Uma {name} bem fresca 🥤",
+                dannyDessert: "Terminamos com algo doce? A {name} é a nossa especialidade 🥧",
+                dannyUsual: "O costume, um {name}? Já lhe preparo 😉",
+                dannyAddIt: "Adicionar",
+                dannyYesPlease: "Sim, obrigado!",
+                dannySeeSnacks: "Ver snacks",
+                dannySeeDrinks: "Ver bebidas",
+                dannySeeDesserts: "Ver sobremesas",
+                dannyReadReviews: "Ler outras",                dannySeeMenu: "Ver o menu",
                 dannyOrderIt: "Pedir agora",
                 dannyTryIt: "Experimentar",
                 dannyCloseBillAction: "Ir para a conta",
@@ -4951,6 +5115,7 @@
         let dannyOpen = false;
         let dannyShownTips = [];         // suggerimenti già mostrati (persistenti)
         let dannyCurrentAction = null;
+        let dannySecondaryAction = null;
         let dannyIdleTimer = null;
 
         try {
@@ -4974,26 +5139,74 @@
             const tips = [];
             const myOrders = orders.filter(o => isAdmin() || o.userId === getUserId(customerName));
             const openOrders = myOrders.filter(o => !myPendingOrderIds.includes(o.id));
-            const specialName = allProducts.map(p => p.name).find(n => isSpecial(n));
-            const premiumName = cocktails.map(c => c.name).find(n => isPremiumEnabled(n));
+            const specialName = allProducts.map(p => p.name).find(n => isSpecial(n) && !isSoldOut(n));
+            const premiumName = cocktails.map(c => c.name).find(n => isPremiumEnabled(n) && !isSoldOut(n));
+
+            // Di cosa ha già ordinato il cliente, per categoria
+            const orderedNames = myOrders.map(o => baseNameOf(o.cocktail));
+            const hasFrom = list => list.some(p => orderedNames.includes(p.name));
+            const hasCocktail = hasFrom(cocktails);
+            const hasSnack = hasFrom(snacks);
+            const hasDrink = hasFrom(softdrinks);
+            const hasDessert = hasFrom(desserts);
+
+            // Primo prodotto disponibile di una categoria
+            const pick = list => list.find(p => !isSoldOut(p.name));
+
+            // Azioni riutilizzabili
+            const goCategory = cat => () => { setCategory(cat); document.querySelector('.cocktail-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
 
             if (!isOnline()) {
-                tips.push({ id: 'offline', text: t('dannyOffline') });
+                tips.push({ id: 'offline', text: t('dannyOffline'), priority: 100 });
             }
 
             if (myOrders.length === 0) {
                 tips.push({
                     id: 'welcome',
+
+                    priority: 90,
                     text: t('dannyWelcome'),
                     actionLabel: t('dannySeeMenu'),
-                    action: () => document.querySelector('.cocktail-card')
-                        ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                    action: () => document.querySelector('.cocktail-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
                 });
+
+                // Sta guardando senza decidersi: suggerisce un classico
+                const suggestion = pick(currentProducts());
+                if (suggestion) {
+                    tips.push({
+                        id: 'undecided_' + suggestion.name,
+
+                        priority: 70,
+                        text: t('dannyUndecided').replace('{name}', suggestion.name),
+                        actionLabel: t('dannyOrderIt'),
+                        action: () => openOrderModal(suggestion.name),
+                        secondaryLabel: t('dannySeeMenu'),
+                        secondaryAction: goCategory(currentCategory)
+                    });
+                }
+            }
+
+            // Suggerimento legato all'ora: al tramonto è ora di aperitivo
+            const hour = new Date().getHours();
+            if (hour >= 17 && hour <= 21) {
+                const spritz = pick(cocktails.filter(c => c.name.includes('Spritz'))) || pick(cocktails);
+                if (spritz) {
+                    tips.push({
+                        id: 'sunset_hour',
+
+                        priority: 68,
+                        text: t('dannySunset').replace('{name}', spritz.name),
+                        actionLabel: t('dannyOrderIt'),
+                        action: () => openOrderModal(spritz.name)
+                    });
+                }
             }
 
             if (specialName) {
                 tips.push({
                     id: 'special_' + specialName,
+
+                    priority: 72,
                     text: t('dannySpecial').replace('{name}', specialName),
                     actionLabel: t('dannyOrderIt'),
                     action: () => openOrderModal(specialName)
@@ -5003,6 +5216,8 @@
             if (premiumName && myOrders.length >= 1) {
                 tips.push({
                     id: 'premium_' + premiumName,
+
+                    priority: 60,
                     text: t('dannyPremium').replace('{name}', premiumName),
                     actionLabel: t('dannyTryIt'),
                     action: () => openOrderModal(premiumName + PREMIUM_SUFFIX)
@@ -5010,10 +5225,12 @@
             }
 
             if (myOrders.length === 1) {
-                const other = allProducts.find(p => p.name !== baseNameOf(myOrders[0].cocktail));
+                const other = allProducts.find(p => p.name !== orderedNames[0] && !isSoldOut(p.name));
                 if (other) {
                     tips.push({
                         id: 'second_round',
+
+                        priority: 65,
                         text: t('dannySecondRound').replace('{name}', other.name),
                         actionLabel: t('dannyOrderIt'),
                         action: () => openOrderModal(other.name)
@@ -5021,28 +5238,104 @@
                 }
             }
 
+            // ABBINAMENTI: il cuore della parte "propositiva"
+            // Ha bevuto ma non ha preso nulla da sgranocchiare
+            if (hasCocktail && !hasSnack) {
+                const snack = pick(snacks);
+                if (snack) {
+                    tips.push({
+                        id: 'pair_snack',
+
+                        priority: 80,
+                        text: t('dannyPairSnack').replace('{drink}', orderedNames[0]).replace('{name}', snack.name),
+                        actionLabel: t('dannyAddIt'),
+                        action: () => openOrderModal(snack.name),
+                        secondaryLabel: t('dannySeeSnacks'),
+                        secondaryAction: goCategory('snacks')
+                    });
+                }
+            }
+
+            // Ha mangiato ma non ha niente da bere
+            if (hasSnack && !hasDrink && !hasCocktail) {
+                const drink = pick(softdrinks);
+                if (drink) {
+                    tips.push({
+                        id: 'pair_drink',
+
+                        priority: 80,
+                        text: t('dannyPairDrink').replace('{name}', drink.name),
+                        actionLabel: t('dannyAddIt'),
+                        action: () => openOrderModal(drink.name),
+                        secondaryLabel: t('dannySeeDrinks'),
+                        secondaryAction: goCategory('softdrinks')
+                    });
+                }
+            }
+
+            // Due o più ordini e ancora nessun dolce: la torta della nonna
+            if (myOrders.length >= 2 && !hasDessert) {
+                const cake = pick(desserts);
+                if (cake) {
+                    tips.push({
+                        id: 'suggest_dessert',
+
+                        priority: 78,
+                        text: t('dannyDessert').replace('{name}', cake.name),
+                        actionLabel: t('dannyOrderIt'),
+                        action: () => openOrderModal(cake.name),
+                        secondaryLabel: t('dannySeeDesserts'),
+                        secondaryAction: goCategory('desserts')
+                    });
+                }
+            }
+
+            // "Il solito?": riordino rapido di ciò che prende sempre
+            if (myOrders.length >= 2) {
+                const counts = {};
+                orderedNames.forEach(n => { counts[n] = (counts[n] || 0) + 1; });
+                const usual = Object.keys(counts).sort((a, b) => counts[b] - counts[a])[0];
+                if (usual && counts[usual] >= 2 && !isSoldOut(usual)) {
+                    tips.push({
+                        id: 'the_usual_' + usual,
+
+                        priority: 75,
+                        text: t('dannyUsual').replace('{name}', usual),
+                        actionLabel: t('dannyYesPlease'),
+                        action: () => openOrderModal(usual)
+                    });
+                }
+            }
+
             if (openOrders.length >= 2 && !isAdmin()) {
                 tips.push({
                     id: 'close_bill',
+
+                    priority: 85,
                     text: t('dannyCloseBill').replace('{count}', openOrders.length),
                     actionLabel: t('dannyCloseBillAction'),
-                    action: () => document.getElementById('totalSpent')
-                        ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                    action: () => document.getElementById('totalSpent')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
                 });
             }
 
             if (myOrders.length >= 3) {
                 tips.push({
                     id: 'ask_review',
+
+                    priority: 40,
                     text: t('dannyAskReview'),
                     actionLabel: t('dannyReviewAction'),
-                    action: () => openReviewModal()
+                    action: () => openReviewModal(),
+                    secondaryLabel: t('dannyReadReviews'),
+                    secondaryAction: () => openReviewsPage()
                 });
             }
 
             if (myOrders.length >= 2) {
                 tips.push({
                     id: 'share',
+
+                    priority: 30,
                     text: t('dannyShare'),
                     actionLabel: t('dannyShareAction'),
                     action: () => shareApp()
@@ -5050,8 +5343,10 @@
             }
 
             const pool = onlyUnseen ? tips.filter(x => !dannyShownTips.includes(x.id)) : tips;
-            // Le voci più specifiche stanno in fondo: si prende l'ultima utile.
-            return pool.length ? pool[pool.length - 1] : null;
+            // Vince il suggerimento con la priorità più alta: così l'ordine
+            // in cui sono scritti qui sopra non influenza la scelta.
+            pool.sort((a, b) => (b.priority || 0) - (a.priority || 0));
+            return pool.length ? pool[0] : null;
         }
 
         function showDannyTip(tip) {
@@ -5068,8 +5363,21 @@
                 dannyCurrentAction = null;
             }
 
+            // Seconda azione: un'alternativa, per non lasciare vicoli ciechi
+            const secondBtn = document.getElementById('dannySecondary');
+            if (tip.secondaryLabel && tip.secondaryAction) {
+                secondBtn.textContent = tip.secondaryLabel;
+                secondBtn.style.display = 'block';
+                dannySecondaryAction = tip.secondaryAction;
+            } else {
+                secondBtn.style.display = 'none';
+                dannySecondaryAction = null;
+            }
+
             document.getElementById('dannyBubble').style.display = 'block';
-            document.querySelector('.danny-avatar').classList.remove('calling');
+            const avatar = document.querySelector('.danny-avatar');
+            avatar.classList.remove('calling');
+            document.getElementById('dannyDot').style.display = 'none';
             dannyOpen = true;
             markTipShown(tip.id);
         }
@@ -5093,6 +5401,7 @@
             hideDannyBubble();
             dannyDismissed = true;
             document.querySelector('.danny-avatar').classList.remove('calling');
+            document.getElementById('dannyDot').style.display = 'none';
         }
 
         // Intervento spontaneo: solo se non disturba
@@ -5100,21 +5409,33 @@
             if (dannyDismissed || dannyOpen || anyModalOpen() || !customerName) return;
             const tip = pickDannyTip(true);
             if (!tip) return;
-            document.querySelector('.danny-avatar').classList.add('calling');
-            showDannyTip(tip);
+
+            // Prima si fa notare (rimbalzo + pallino), poi parla:
+            // così l'occhio ha il tempo di seguirlo.
+            const avatar = document.querySelector('.danny-avatar');
+            document.getElementById('dannyDot').style.display = 'block';
+            avatar.classList.add('calling');
+            setTimeout(() => {
+                if (!dannyDismissed && !dannyOpen && !anyModalOpen()) showDannyTip(tip);
+            }, 900);
         }
 
         // Riparte il conto alla rovescia a ogni interazione dell'utente:
         // Danny parla solo dopo una pausa, mai mentre si sta facendo altro.
         function resetDannyIdle(delay) {
             clearTimeout(dannyIdleTimer);
-            dannyIdleTimer = setTimeout(maybeShowDannyTip, delay || 12000);
+            dannyIdleTimer = setTimeout(maybeShowDannyTip, delay || 8000);
         }
 
         function initDanny() {
             document.getElementById('danny').style.display = 'flex';
             document.getElementById('dannyAction').addEventListener('click', () => {
                 const act = dannyCurrentAction;
+                hideDannyBubble();
+                if (act) act();
+            });
+            document.getElementById('dannySecondary').addEventListener('click', () => {
+                const act = dannySecondaryAction;
                 hideDannyBubble();
                 if (act) act();
             });
