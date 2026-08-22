@@ -983,6 +983,95 @@
             cursor: pointer;
         }
 
+        /* =============================================
+           DANNY — il barista virtuale
+           ============================================= */
+        .danny {
+            position: fixed;
+            right: 16px;
+            bottom: 16px;
+            z-index: 2500;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 10px;
+        }
+
+        .danny-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: 3px solid var(--sand);
+            background: linear-gradient(140deg, var(--coral) 0%, var(--coral-deep) 100%);
+            font-size: 1.7em;
+            line-height: 1;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(224, 73, 44, 0.5);
+            transition: transform 0.25s var(--ease-bounce);
+        }
+
+        .danny-avatar:active { transform: scale(0.92); }
+
+        .danny-avatar.calling {
+            animation: dannyWave 2.6s ease-in-out infinite;
+        }
+
+        @keyframes dannyWave {
+            0%, 70%, 100% { transform: rotate(0deg) scale(1); }
+            76%  { transform: rotate(-11deg) scale(1.06); }
+            84%  { transform: rotate(9deg) scale(1.06); }
+            92%  { transform: rotate(-5deg) scale(1.03); }
+        }
+
+        .danny-bubble {
+            position: relative;
+            max-width: 250px;
+            background: var(--sand);
+            border-radius: var(--radius);
+            border-bottom-right-radius: 4px;
+            padding: 14px 16px 14px 14px;
+            box-shadow: var(--shadow-lift);
+            animation: fadeSlideUp 0.3s var(--ease-out) both;
+        }
+
+        .danny-text {
+            font-family: var(--font-body);
+            font-size: 0.86em;
+            line-height: 1.45;
+            color: var(--dusk);
+            padding-right: 14px;
+        }
+
+        .danny-action {
+            margin-top: 10px;
+            width: 100%;
+            background: linear-gradient(135deg, var(--coral) 0%, var(--coral-deep) 100%);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 9px 12px;
+            font-family: var(--font-body);
+            font-size: 0.82em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .danny-action:active { transform: scale(0.96); }
+
+        .danny-close {
+            position: absolute;
+            top: 6px;
+            right: 8px;
+            background: none;
+            border: none;
+            color: var(--dusk-soft);
+            font-size: 0.85em;
+            cursor: pointer;
+            padding: 2px 4px;
+            line-height: 1;
+        }
+
         .pagination {
             display: flex;
             justify-content: center;
@@ -1058,6 +1147,16 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
+    <!-- Danny, il barista virtuale: suggerimenti contestuali -->
+    <div id="danny" class="danny" style="display:none;">
+        <div id="dannyBubble" class="danny-bubble" style="display:none;">
+            <button class="danny-close" onclick="dismissDanny()" aria-label="Chiudi">✕</button>
+            <div id="dannyText" class="danny-text"></div>
+            <button id="dannyAction" class="danny-action" style="display:none;"></button>
+        </div>
+        <button class="danny-avatar" onclick="toggleDanny()" aria-label="Danny">🍹</button>
+    </div>
+
     <!-- Indicatore di stato connessione -->
     <div id="offlineBanner" class="offline-banner" style="display:none;">
         <span data-i18n="offlineNotice">📡 Sei offline — gli ordini verranno inviati al ritorno della connessione</span>
@@ -1431,7 +1530,22 @@
                 offlineNotice: "📡 Sei offline — gli ordini verranno inviati al ritorno della connessione",
 
                 updateAvailable: "✨ Nuova versione disponibile",
-                updateNow: "Aggiorna",                syncTag: "da inviare",
+
+                dannyWelcome: "Ciao! Sono Danny 🍹 Tocca un cocktail per ordinarlo: te lo porto dove sei.",
+                dannySpecial: "Oggi {name} è in offerta speciale! 🔥",
+                dannyPremium: "Hai provato {name} Premium? Ingredienti selezionati ⭐",
+                dannySecondRound: "Il secondo giro? Ti consiglio un {name} 🍸",
+                dannyCloseBill: "Hai {count} ordini aperti. Quando vuoi puoi saldare il conto 💳",
+                dannyAskReview: "Ti sei trovato bene? Lascia una recensione, ci aiuta molto ⭐",
+                dannyShare: "Un amico assetato? Invitalo con un tocco 📤",
+                dannyOffline: "Sei offline, ma puoi ordinare lo stesso: invio appena torna la rete 📡",
+                dannyGeneric: "Serve una mano? Scegli un cocktail e pensiamo a tutto noi 🍹",
+                dannySeeMenu: "Vedi il menu",
+                dannyOrderIt: "Ordina ora",
+                dannyTryIt: "Provalo",
+                dannyCloseBillAction: "Vai al conto",
+                dannyReviewAction: "Scrivi recensione",
+                dannyShareAction: "Invita un amico",                updateNow: "Aggiorna",                syncTag: "da inviare",
                 ordersSynced: "📡 {count} ordini sincronizzati!",                shareMessage: "🍹 Ordina il tuo cocktail su Cocktail Daniel! Scegli, ordina e te lo portiamo dove sei. 🌅",
                 linkCopied: "Link copiato negli appunti!",
                 copyLinkManually: "Copia questo link e condividilo:",
@@ -1524,7 +1638,22 @@
                 offlineNotice: "📡 You are offline — orders will be sent when the connection returns",
 
                 updateAvailable: "✨ New version available",
-                updateNow: "Update",                syncTag: "to send",
+
+                dannyWelcome: "Hi! I'm Danny 🍹 Tap a cocktail to order it — I'll bring it to you.",
+                dannySpecial: "{name} is on special offer today! 🔥",
+                dannyPremium: "Tried {name} Premium yet? Selected ingredients ⭐",
+                dannySecondRound: "Second round? I recommend a {name} 🍸",
+                dannyCloseBill: "You have {count} open orders. Settle the bill whenever you like 💳",
+                dannyAskReview: "Enjoyed it? Leave a review, it helps us a lot ⭐",
+                dannyShare: "Got a thirsty friend? Invite them with one tap 📤",
+                dannyOffline: "You're offline, but you can still order — I'll send it when the network is back 📡",
+                dannyGeneric: "Need a hand? Pick a cocktail and leave the rest to us 🍹",
+                dannySeeMenu: "See the menu",
+                dannyOrderIt: "Order now",
+                dannyTryIt: "Try it",
+                dannyCloseBillAction: "Go to bill",
+                dannyReviewAction: "Write a review",
+                dannyShareAction: "Invite a friend",                updateNow: "Update",                syncTag: "to send",
                 ordersSynced: "📡 {count} orders synced!",                shareMessage: "🍹 Order your cocktail on Cocktail Daniel! Pick one, order it, and we bring it to you. 🌅",
                 linkCopied: "Link copied to clipboard!",
                 copyLinkManually: "Copy this link and share it:",
@@ -1617,7 +1746,22 @@
                 offlineNotice: "📡 Estás sin conexión — los pedidos se enviarán al volver la conexión",
 
                 updateAvailable: "✨ Nueva versión disponible",
-                updateNow: "Actualizar",                syncTag: "por enviar",
+
+                dannyWelcome: "¡Hola! Soy Danny 🍹 Toca un cóctel para pedirlo: te lo llevo donde estés.",
+                dannySpecial: "¡Hoy {name} está en oferta especial! 🔥",
+                dannyPremium: "¿Has probado {name} Premium? Ingredientes seleccionados ⭐",
+                dannySecondRound: "¿La segunda ronda? Te recomiendo un {name} 🍸",
+                dannyCloseBill: "Tienes {count} pedidos abiertos. Puedes cerrar la cuenta cuando quieras 💳",
+                dannyAskReview: "¿Te ha gustado? Deja una reseña, nos ayuda mucho ⭐",
+                dannyShare: "¿Un amigo sediento? Invítalo con un toque 📤",
+                dannyOffline: "Estás sin conexión, pero puedes pedir igual: lo envío al volver la red 📡",
+                dannyGeneric: "¿Necesitas ayuda? Elige un cóctel y nosotros nos ocupamos 🍹",
+                dannySeeMenu: "Ver el menú",
+                dannyOrderIt: "Pedir ahora",
+                dannyTryIt: "Pruébalo",
+                dannyCloseBillAction: "Ir a la cuenta",
+                dannyReviewAction: "Escribir reseña",
+                dannyShareAction: "Invitar a un amigo",                updateNow: "Actualizar",                syncTag: "por enviar",
                 ordersSynced: "📡 ¡{count} pedidos sincronizados!",                shareMessage: "🍹 ¡Pide tu cóctel en Cocktail Daniel! Elige, pide y te lo llevamos donde estés. 🌅",
                 linkCopied: "¡Enlace copiado al portapapeles!",
                 copyLinkManually: "Copia este enlace y compártelo:",
@@ -1710,7 +1854,22 @@
                 offlineNotice: "📡 Du bist offline — Bestellungen werden gesendet, sobald die Verbindung zurück ist",
 
                 updateAvailable: "✨ Neue Version verfügbar",
-                updateNow: "Aktualisieren",                syncTag: "zu senden",
+
+                dannyWelcome: "Hallo! Ich bin Danny 🍹 Tippe auf einen Cocktail — ich bringe ihn dir.",
+                dannySpecial: "Heute ist {name} im Sonderangebot! 🔥",
+                dannyPremium: "Schon {name} Premium probiert? Ausgewählte Zutaten ⭐",
+                dannySecondRound: "Zweite Runde? Ich empfehle einen {name} 🍸",
+                dannyCloseBill: "Du hast {count} offene Bestellungen. Rechnung jederzeit schließen 💳",
+                dannyAskReview: "Hat es geschmeckt? Eine Bewertung hilft uns sehr ⭐",
+                dannyShare: "Ein durstiger Freund? Lade ihn mit einem Tippen ein 📤",
+                dannyOffline: "Du bist offline, kannst aber bestellen — ich sende es bei Verbindung 📡",
+                dannyGeneric: "Brauchst du Hilfe? Wähle einen Cocktail, um den Rest kümmern wir uns 🍹",
+                dannySeeMenu: "Menü ansehen",
+                dannyOrderIt: "Jetzt bestellen",
+                dannyTryIt: "Probieren",
+                dannyCloseBillAction: "Zur Rechnung",
+                dannyReviewAction: "Bewertung schreiben",
+                dannyShareAction: "Freund einladen",                updateNow: "Aktualisieren",                syncTag: "zu senden",
                 ordersSynced: "📡 {count} Bestellungen synchronisiert!",                shareMessage: "🍹 Bestelle deinen Cocktail bei Cocktail Daniel! Aussuchen, bestellen, wir bringen ihn dir. 🌅",
                 linkCopied: "Link in die Zwischenablage kopiert!",
                 copyLinkManually: "Kopiere diesen Link und teile ihn:",
@@ -1803,7 +1962,22 @@
                 offlineNotice: "📡 Vous êtes hors ligne — les commandes seront envoyées au retour de la connexion",
 
                 updateAvailable: "✨ Nouvelle version disponible",
-                updateNow: "Mettre à jour",                syncTag: "à envoyer",
+
+                dannyWelcome: "Salut ! Je suis Danny 🍹 Touchez un cocktail pour le commander — je vous l'apporte.",
+                dannySpecial: "Aujourd'hui {name} est en promo ! 🔥",
+                dannyPremium: "Vous avez essayé {name} Premium ? Ingrédients sélectionnés ⭐",
+                dannySecondRound: "La deuxième tournée ? Je conseille un {name} 🍸",
+                dannyCloseBill: "Vous avez {count} commandes ouvertes. Réglez quand vous voulez 💳",
+                dannyAskReview: "Ça vous a plu ? Laissez un avis, ça nous aide beaucoup ⭐",
+                dannyShare: "Un ami assoiffé ? Invitez-le en un geste 📤",
+                dannyOffline: "Vous êtes hors ligne, mais vous pouvez commander — j'envoie au retour du réseau 📡",
+                dannyGeneric: "Besoin d’aide ? Choisissez un cocktail, on s’occupe du reste 🍹",
+                dannySeeMenu: "Voir le menu",
+                dannyOrderIt: "Commander",
+                dannyTryIt: "Essayer",
+                dannyCloseBillAction: "Voir la note",
+                dannyReviewAction: "Écrire un avis",
+                dannyShareAction: "Inviter un ami",                updateNow: "Mettre à jour",                syncTag: "à envoyer",
                 ordersSynced: "📡 {count} commandes synchronisées !",                shareMessage: "🍹 Commandez votre cocktail sur Cocktail Daniel ! Choisissez, commandez, on vous l'apporte. 🌅",
                 linkCopied: "Lien copié dans le presse-papiers !",
                 copyLinkManually: "Copiez ce lien et partagez-le :",
@@ -1896,7 +2070,22 @@
                 offlineNotice: "📡 Ви офлайн — замовлення надішлються після відновлення зв'язку",
 
                 updateAvailable: "✨ Доступна нова версія",
-                updateNow: "Оновити",                syncTag: "до надсилання",
+
+                dannyWelcome: "Привіт! Я Денні 🍹 Торкніться коктейлю, щоб замовити — принесу вам.",
+                dannySpecial: "Сьогодні {name} за спеціальною ціною! 🔥",
+                dannyPremium: "Пробували {name} Преміум? Добірні інгредієнти ⭐",
+                dannySecondRound: "Друге коло? Раджу {name} 🍸",
+                dannyCloseBill: "У вас {count} відкритих замовлень. Рахунок можна закрити будь-коли 💳",
+                dannyAskReview: "Сподобалось? Залиште відгук, це дуже допомагає ⭐",
+                dannyShare: "Спраглий друг? Запросіть його одним дотиком 📤",
+                dannyOffline: "Ви офлайн, але замовити можна — надішлю, щойно буде зв’язок 📡",
+                dannyGeneric: "Потрібна допомога? Оберіть коктейль, решту зробимо ми 🍹",
+                dannySeeMenu: "Переглянути меню",
+                dannyOrderIt: "Замовити",
+                dannyTryIt: "Спробувати",
+                dannyCloseBillAction: "До рахунку",
+                dannyReviewAction: "Написати відгук",
+                dannyShareAction: "Запросити друга",                updateNow: "Оновити",                syncTag: "до надсилання",
                 ordersSynced: "📡 Синхронізовано замовлень: {count}!",                shareMessage: "🍹 Замовляй свій коктейль у Cocktail Daniel! Обери, замов — і ми принесемо його тобі. 🌅",
                 linkCopied: "Посилання скопійовано!",
                 copyLinkManually: "Скопіюй це посилання та поділись:",
@@ -3101,6 +3290,7 @@
             // Close modal and refresh orders
             closeModal();
             renderOrders();
+            resetDannyIdle(15000); // Danny riproverà dopo la pausa post-ordine
 
             // Passa a WhatsApp per ultimo: su mobile interrompe l'esecuzione
             sendWhatsAppMessage(order, ADMIN_PHONE);
@@ -3584,6 +3774,193 @@
             }
         }
 
+        // =============================================
+        // DANNY — il barista virtuale
+        // Suggerisce l'azione utile in base alla situazione.
+        // Regole per non essere invadente:
+        //  - non ripete mai lo stesso suggerimento
+        //  - se lo chiudi, tace per il resto della sessione
+        //  - non parla mai con un modale aperto
+        // =============================================
+        let dannyDismissed = false;      // chiuso dall'utente in questa sessione
+        let dannyOpen = false;
+        let dannyShownTips = [];         // suggerimenti già mostrati (persistenti)
+        let dannyCurrentAction = null;
+        let dannyIdleTimer = null;
+
+        try {
+            dannyShownTips = JSON.parse(localStorage.getItem('dannyShownTips') || '[]');
+        } catch (e) { dannyShownTips = []; }
+
+        function markTipShown(id) {
+            if (!dannyShownTips.includes(id)) {
+                dannyShownTips.push(id);
+                localStorage.setItem('dannyShownTips', JSON.stringify(dannyShownTips));
+            }
+        }
+
+        function anyModalOpen() {
+            return document.querySelectorAll('.modal.active').length > 0;
+        }
+
+        // Sceglie il suggerimento più pertinente al momento.
+        // Ritorna { id, text, actionLabel, action } oppure null.
+        function pickDannyTip(onlyUnseen) {
+            const tips = [];
+            const myOrders = orders.filter(o => isAdmin() || o.userId === getUserId(customerName));
+            const openOrders = myOrders.filter(o => !myPendingOrderIds.includes(o.id));
+            const specialName = cocktails.map(c => c.name).find(n => isSpecial(n));
+            const premiumName = cocktails.map(c => c.name).find(n => isPremiumEnabled(n));
+
+            if (!isOnline()) {
+                tips.push({ id: 'offline', text: t('dannyOffline') });
+            }
+
+            if (myOrders.length === 0) {
+                tips.push({
+                    id: 'welcome',
+                    text: t('dannyWelcome'),
+                    actionLabel: t('dannySeeMenu'),
+                    action: () => document.querySelector('.cocktail-card')
+                        ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                });
+            }
+
+            if (specialName) {
+                tips.push({
+                    id: 'special_' + specialName,
+                    text: t('dannySpecial').replace('{name}', specialName),
+                    actionLabel: t('dannyOrderIt'),
+                    action: () => openOrderModal(specialName)
+                });
+            }
+
+            if (premiumName && myOrders.length >= 1) {
+                tips.push({
+                    id: 'premium_' + premiumName,
+                    text: t('dannyPremium').replace('{name}', premiumName),
+                    actionLabel: t('dannyTryIt'),
+                    action: () => openOrderModal(premiumName + PREMIUM_SUFFIX)
+                });
+            }
+
+            if (myOrders.length === 1) {
+                const other = cocktails.find(c => c.name !== baseNameOf(myOrders[0].cocktail));
+                if (other) {
+                    tips.push({
+                        id: 'second_round',
+                        text: t('dannySecondRound').replace('{name}', other.name),
+                        actionLabel: t('dannyOrderIt'),
+                        action: () => openOrderModal(other.name)
+                    });
+                }
+            }
+
+            if (openOrders.length >= 2 && !isAdmin()) {
+                tips.push({
+                    id: 'close_bill',
+                    text: t('dannyCloseBill').replace('{count}', openOrders.length),
+                    actionLabel: t('dannyCloseBillAction'),
+                    action: () => document.getElementById('totalSpent')
+                        ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                });
+            }
+
+            if (myOrders.length >= 3) {
+                tips.push({
+                    id: 'ask_review',
+                    text: t('dannyAskReview'),
+                    actionLabel: t('dannyReviewAction'),
+                    action: () => openReviewModal()
+                });
+            }
+
+            if (myOrders.length >= 2) {
+                tips.push({
+                    id: 'share',
+                    text: t('dannyShare'),
+                    actionLabel: t('dannyShareAction'),
+                    action: () => shareApp()
+                });
+            }
+
+            const pool = onlyUnseen ? tips.filter(x => !dannyShownTips.includes(x.id)) : tips;
+            // Le voci più specifiche stanno in fondo: si prende l'ultima utile.
+            return pool.length ? pool[pool.length - 1] : null;
+        }
+
+        function showDannyTip(tip) {
+            if (!tip) return;
+            document.getElementById('dannyText').textContent = tip.text;
+
+            const actionBtn = document.getElementById('dannyAction');
+            if (tip.actionLabel && tip.action) {
+                actionBtn.textContent = tip.actionLabel;
+                actionBtn.style.display = 'block';
+                dannyCurrentAction = tip.action;
+            } else {
+                actionBtn.style.display = 'none';
+                dannyCurrentAction = null;
+            }
+
+            document.getElementById('dannyBubble').style.display = 'block';
+            document.querySelector('.danny-avatar').classList.remove('calling');
+            dannyOpen = true;
+            markTipShown(tip.id);
+        }
+
+        function hideDannyBubble() {
+            document.getElementById('dannyBubble').style.display = 'none';
+            dannyOpen = false;
+        }
+
+        // Tocco sull'avatar: apre o chiude il fumetto
+        function toggleDanny() {
+            if (dannyOpen) { hideDannyBubble(); return; }
+            // Su richiesta esplicita mostra il consiglio migliore,
+            // anche se già visto in passato.
+            const tip = pickDannyTip(false) || { id: 'generic', text: t('dannyGeneric') };
+            showDannyTip(tip);
+        }
+
+        // Chiusura esplicita: Danny tace per il resto della sessione
+        function dismissDanny() {
+            hideDannyBubble();
+            dannyDismissed = true;
+            document.querySelector('.danny-avatar').classList.remove('calling');
+        }
+
+        // Intervento spontaneo: solo se non disturba
+        function maybeShowDannyTip() {
+            if (dannyDismissed || dannyOpen || anyModalOpen() || !customerName) return;
+            const tip = pickDannyTip(true);
+            if (!tip) return;
+            document.querySelector('.danny-avatar').classList.add('calling');
+            showDannyTip(tip);
+        }
+
+        // Riparte il conto alla rovescia a ogni interazione dell'utente:
+        // Danny parla solo dopo una pausa, mai mentre si sta facendo altro.
+        function resetDannyIdle(delay) {
+            clearTimeout(dannyIdleTimer);
+            dannyIdleTimer = setTimeout(maybeShowDannyTip, delay || 12000);
+        }
+
+        function initDanny() {
+            document.getElementById('danny').style.display = 'flex';
+            document.getElementById('dannyAction').addEventListener('click', () => {
+                const act = dannyCurrentAction;
+                hideDannyBubble();
+                if (act) act();
+            });
+            ['click', 'touchstart', 'scroll'].forEach(evt => {
+                document.addEventListener(evt, () => {
+                    if (!dannyOpen) resetDannyIdle();
+                }, { passive: true });
+            });
+            resetDannyIdle(9000); // primo intervento dopo 9 secondi di quiete
+        }
+
         async function sendReview() {
             const reviewText = document.getElementById('reviewText').value.trim();
 
@@ -3636,6 +4013,7 @@
         startPaymentPolling();
         loadPricing();       // Carica il listino aggiornato dal cloud
         syncPendingOrders(); // Invia gli ordini rimasti in coda da sessioni offline
+        initDanny();         // Attiva il barista virtuale
 
         // Close modal on outside click
         document.getElementById('orderModal').addEventListener('click', function(e) {
