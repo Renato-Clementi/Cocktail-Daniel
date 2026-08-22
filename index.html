@@ -1072,6 +1072,53 @@
             line-height: 1;
         }
 
+        .price-section-title {
+            font-family: var(--font-display);
+            font-size: 1em;
+            color: var(--dusk);
+            margin: 18px 0 12px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid var(--sand-deep);
+        }
+
+        .price-section-title:first-child { margin-top: 0; }
+
+        .category-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 18px;
+            background: rgba(255, 244, 230, 0.25);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: var(--radius);
+            padding: 5px;
+        }
+
+        .category-tab {
+            flex: 1;
+            padding: 11px 8px;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: transparent;
+            color: #fff;
+            font-family: var(--font-body);
+            font-size: 0.92em;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            cursor: pointer;
+            text-shadow: 0 1px 4px rgba(27,58,92,0.5);
+            transition: background 0.25s var(--ease-out), color 0.25s ease, transform 0.2s ease;
+        }
+
+        .category-tab.active {
+            background: var(--sand);
+            color: var(--dusk);
+            text-shadow: none;
+            box-shadow: 0 3px 10px rgba(27,58,92,0.25);
+        }
+
+        .category-tab:active { transform: scale(0.96); }
+
         .pagination {
             display: flex;
             justify-content: center;
@@ -1201,7 +1248,17 @@
             <div id="pendingPaymentsList"></div>
         </div>
 
-        <!-- Cocktail Grid -->
+        <!-- Schede categoria -->
+        <div class="category-tabs">
+            <button class="category-tab" id="tabCocktails" onclick="setCategory('cocktails')">
+                🍹 <span data-i18n="tabCocktails">Cocktail</span>
+            </button>
+            <button class="category-tab" id="tabSnacks" onclick="setCategory('snacks')">
+                🍿 <span data-i18n="tabSnacks">Snack</span>
+            </button>
+        </div>
+
+        <!-- Catalogo prodotti -->
         <div class="cocktail-grid" id="cocktailGrid"></div>
 
         <!-- Orders Section -->
@@ -1444,6 +1501,81 @@
         ];
 
         // =============================================
+        // SNACK
+        // Stessa struttura dei cocktail, ma senza versione Premium.
+        // =============================================
+        const snacks = [
+            {
+                name: "Noccioline",
+                icon: "🥜",
+                description: "Tostate e croccanti",
+                variants: ["Salate", "Al miele", "Piccanti"]
+            },
+            {
+                name: "Patatine",
+                icon: "🍟",
+                description: "Croccanti, servite calde",
+                variants: ["Classiche", "Paprika", "Sale marino"]
+            },
+            {
+                name: "Olive",
+                icon: "🫒",
+                description: "Olive marinate",
+                variants: ["Verdi", "Nere", "Miste"]
+            },
+            {
+                name: "Tagliere Formaggi",
+                icon: "🧀",
+                description: "Selezione di formaggi locali",
+                variants: ["Piccolo", "Medio", "Grande"]
+            },
+            {
+                name: "Bruschette",
+                icon: "🥖",
+                description: "Pane tostato e condimenti",
+                variants: ["Pomodoro", "Olive", "Miste"]
+            },
+            {
+                name: "Gamberi Fritti",
+                icon: "🍤",
+                description: "Gamberi in pastella croccante",
+                variants: ["Singola", "Da condividere"]
+            },
+            {
+                name: "Nachos",
+                icon: "🌮",
+                description: "Tortilla chips e salsa",
+                variants: ["Classici", "Con formaggio", "Piccanti"]
+            },
+            {
+                name: "Frutta Fresca",
+                icon: "🍉",
+                description: "Frutta di stagione tagliata",
+                variants: ["Anguria", "Mista tropicale", "Ananas"]
+            }
+        ];
+
+        // Catalogo completo: serve alle funzioni che devono ritrovare
+        // un prodotto per nome, senza sapere a quale categoria appartiene.
+        const allProducts = cocktails.concat(snacks);
+
+        function findProduct(name) {
+            return allProducts.find(p => p.name === baseNameOf(name));
+        }
+
+        function isSnack(name) {
+            const base = baseNameOf(name);
+            return snacks.some(s => s.name === base);
+        }
+
+        // Categoria attualmente visualizzata nel catalogo
+        let currentCategory = localStorage.getItem('currentCategory') || 'cocktails';
+
+        function currentProducts() {
+            return currentCategory === 'snacks' ? snacks : cocktails;
+        }
+
+        // =============================================
         // TRADUZIONI (i18n)
         // I messaggi WhatsApp restano SEMPRE in italiano.
         // Le traduzioni riguardano solo l'interfaccia visibile.
@@ -1485,7 +1617,9 @@
                 priceToPay: "💰 Prezzo da pagare alla consegna:",
                 confirmOrderBtn: "Conferma Ordine",
                 orderNow: "Ordina",
-                noOrders: "Nessun ordine ancora 🍹",
+
+                tabCocktails: "Cocktail",
+                tabSnacks: "Snack",                noOrders: "Nessun ordine ancora 🍹",
                 orderedLabel: "Ordinato:",
                 orderSingular: "ordine",
                 orderPlural: "ordini",
@@ -1593,7 +1727,9 @@
                 priceToPay: "💰 Price to pay on delivery:",
                 confirmOrderBtn: "Confirm Order",
                 orderNow: "Order",
-                noOrders: "No orders yet 🍹",
+
+                tabCocktails: "Cocktails",
+                tabSnacks: "Snacks",                noOrders: "No orders yet 🍹",
                 orderedLabel: "Ordered:",
                 orderSingular: "order",
                 orderPlural: "orders",
@@ -1701,7 +1837,9 @@
                 priceToPay: "💰 Precio a pagar en la entrega:",
                 confirmOrderBtn: "Confirmar Pedido",
                 orderNow: "Pedir",
-                noOrders: "Aún no hay pedidos 🍹",
+
+                tabCocktails: "Cócteles",
+                tabSnacks: "Aperitivos",                noOrders: "Aún no hay pedidos 🍹",
                 orderedLabel: "Pedido:",
                 orderSingular: "pedido",
                 orderPlural: "pedidos",
@@ -1809,7 +1947,9 @@
                 priceToPay: "💰 Bei Lieferung zu zahlender Preis:",
                 confirmOrderBtn: "Bestellung bestätigen",
                 orderNow: "Bestellen",
-                noOrders: "Noch keine Bestellungen 🍹",
+
+                tabCocktails: "Cocktails",
+                tabSnacks: "Snacks",                noOrders: "Noch keine Bestellungen 🍹",
                 orderedLabel: "Bestellt:",
                 orderSingular: "Bestellung",
                 orderPlural: "Bestellungen",
@@ -1917,7 +2057,9 @@
                 priceToPay: "💰 Prix à payer à la livraison :",
                 confirmOrderBtn: "Confirmer la Commande",
                 orderNow: "Commander",
-                noOrders: "Aucune commande pour l'instant 🍹",
+
+                tabCocktails: "Cocktails",
+                tabSnacks: "Snacks",                noOrders: "Aucune commande pour l'instant 🍹",
                 orderedLabel: "Commandé :",
                 orderSingular: "commande",
                 orderPlural: "commandes",
@@ -2025,7 +2167,9 @@
                 priceToPay: "💰 Ціна до сплати при доставці:",
                 confirmOrderBtn: "Підтвердити замовлення",
                 orderNow: "Замовити",
-                noOrders: "Ще немає замовлень 🍹",
+
+                tabCocktails: "Коктейлі",
+                tabSnacks: "Закуски",                noOrders: "Ще немає замовлень 🍹",
                 orderedLabel: "Замовлено:",
                 orderSingular: "замовлення",
                 orderPlural: "замовлень",
@@ -2112,7 +2256,15 @@
                     "Gin, limone, soda": "Gin, lemon, soda",
                     "Prosecco, sambuco, menta, soda": "Prosecco, elderflower, mint, soda",
                     "Rum, cocco, ananas": "Rum, coconut, pineapple",
-                    "Cachaça, lime, zucchero": "Cachaça, lime, sugar"
+                    "Cachaça, lime, zucchero": "Cachaça, lime, sugar",
+                    "Tostate e croccanti": "Roasted and crunchy",
+                    "Croccanti, servite calde": "Crispy, served warm",
+                    "Olive marinate": "Marinated olives",
+                    "Selezione di formaggi locali": "Selection of local cheeses",
+                    "Pane tostato e condimenti": "Toasted bread with toppings",
+                    "Gamberi in pastella croccante": "Shrimp in crispy batter",
+                    "Tortilla chips e salsa": "Tortilla chips with salsa",
+                    "Frutta di stagione tagliata": "Sliced seasonal fruit"
                 },
                 variants: {
                     "Classico": "Classic",
@@ -2129,7 +2281,27 @@
                     "Profumato": "Aromatic",
                     "Speziato": "Spiced",
                     "Fresco": "Fresh",
-                    "Tropicale": "Tropical"
+                    "Tropicale": "Tropical",
+                    "Salate": "Salted",
+                    "Al miele": "Honey",
+                    "Piccanti": "Spicy",
+                    "Classiche": "Classic",
+                    "Paprika": "Paprika",
+                    "Sale marino": "Sea salt",
+                    "Verdi": "Green",
+                    "Nere": "Black",
+                    "Miste": "Mixed",
+                    "Piccolo": "Small",
+                    "Medio": "Medium",
+                    "Grande": "Large",
+                    "Pomodoro": "Tomato",
+                    "Olive": "Olives",
+                    "Singola": "Single",
+                    "Da condividere": "To share",
+                    "Con formaggio": "With cheese",
+                    "Anguria": "Watermelon",
+                    "Mista tropicale": "Tropical mix",
+                    "Ananas": "Pineapple"
                 }
             },
             es: {
@@ -2142,7 +2314,15 @@
                     "Gin, limone, soda": "Ginebra, limón, soda",
                     "Prosecco, sambuco, menta, soda": "Prosecco, saúco, menta, soda",
                     "Rum, cocco, ananas": "Ron, coco, piña",
-                    "Cachaça, lime, zucchero": "Cachaça, lima, azúcar"
+                    "Cachaça, lime, zucchero": "Cachaça, lima, azúcar",
+                    "Tostate e croccanti": "Tostados y crujientes",
+                    "Croccanti, servite calde": "Crujientes, servidas calientes",
+                    "Olive marinate": "Aceitunas marinadas",
+                    "Selezione di formaggi locali": "Selección de quesos locales",
+                    "Pane tostato e condimenti": "Pan tostado con ingredientes",
+                    "Gamberi in pastella croccante": "Gambas en rebozado crujiente",
+                    "Tortilla chips e salsa": "Nachos con salsa",
+                    "Frutta di stagione tagliata": "Fruta de temporada cortada"
                 },
                 variants: {
                     "Classico": "Clásico",
@@ -2159,7 +2339,27 @@
                     "Profumato": "Aromático",
                     "Speziato": "Especiado",
                     "Fresco": "Fresco",
-                    "Tropicale": "Tropical"
+                    "Tropicale": "Tropical",
+                    "Salate": "Saladas",
+                    "Al miele": "Con miel",
+                    "Piccanti": "Picantes",
+                    "Classiche": "Clásicas",
+                    "Paprika": "Pimentón",
+                    "Sale marino": "Sal marina",
+                    "Verdi": "Verdes",
+                    "Nere": "Negras",
+                    "Miste": "Mixtas",
+                    "Piccolo": "Pequeño",
+                    "Medio": "Mediano",
+                    "Grande": "Grande",
+                    "Pomodoro": "Tomate",
+                    "Olive": "Aceitunas",
+                    "Singola": "Individual",
+                    "Da condividere": "Para compartir",
+                    "Con formaggio": "Con queso",
+                    "Anguria": "Sandía",
+                    "Mista tropicale": "Mix tropical",
+                    "Ananas": "Piña"
                 }
             },
             de: {
@@ -2172,7 +2372,15 @@
                     "Gin, limone, soda": "Gin, Zitrone, Soda",
                     "Prosecco, sambuco, menta, soda": "Prosecco, Holunderblüte, Minze, Soda",
                     "Rum, cocco, ananas": "Rum, Kokos, Ananas",
-                    "Cachaça, lime, zucchero": "Cachaça, Limette, Zucker"
+                    "Cachaça, lime, zucchero": "Cachaça, Limette, Zucker",
+                    "Tostate e croccanti": "Geröstet und knusprig",
+                    "Croccanti, servite calde": "Knusprig, warm serviert",
+                    "Olive marinate": "Marinierte Oliven",
+                    "Selezione di formaggi locali": "Auswahl regionaler Käse",
+                    "Pane tostato e condimenti": "Geröstetes Brot mit Belag",
+                    "Gamberi in pastella croccante": "Garnelen im knusprigen Teig",
+                    "Tortilla chips e salsa": "Tortilla-Chips mit Salsa",
+                    "Frutta di stagione tagliata": "Geschnittenes Saisonobst"
                 },
                 variants: {
                     "Classico": "Klassisch",
@@ -2189,7 +2397,27 @@
                     "Profumato": "Aromatisch",
                     "Speziato": "Würzig",
                     "Fresco": "Frisch",
-                    "Tropicale": "Tropisch"
+                    "Tropicale": "Tropisch",
+                    "Salate": "Gesalzen",
+                    "Al miele": "Mit Honig",
+                    "Piccanti": "Scharf",
+                    "Classiche": "Klassisch",
+                    "Paprika": "Paprika",
+                    "Sale marino": "Meersalz",
+                    "Verdi": "Grün",
+                    "Nere": "Schwarz",
+                    "Miste": "Gemischt",
+                    "Piccolo": "Klein",
+                    "Medio": "Mittel",
+                    "Grande": "Groß",
+                    "Pomodoro": "Tomate",
+                    "Olive": "Oliven",
+                    "Singola": "Einzeln",
+                    "Da condividere": "Zum Teilen",
+                    "Con formaggio": "Mit Käse",
+                    "Anguria": "Wassermelone",
+                    "Mista tropicale": "Tropen-Mix",
+                    "Ananas": "Ananas"
                 }
             },
             fr: {
@@ -2202,7 +2430,15 @@
                     "Gin, limone, soda": "Gin, citron, soda",
                     "Prosecco, sambuco, menta, soda": "Prosecco, sureau, menthe, soda",
                     "Rum, cocco, ananas": "Rhum, noix de coco, ananas",
-                    "Cachaça, lime, zucchero": "Cachaça, citron vert, sucre"
+                    "Cachaça, lime, zucchero": "Cachaça, citron vert, sucre",
+                    "Tostate e croccanti": "Grillées et croquantes",
+                    "Croccanti, servite calde": "Croustillantes, servies chaudes",
+                    "Olive marinate": "Olives marinées",
+                    "Selezione di formaggi locali": "Sélection de fromages locaux",
+                    "Pane tostato e condimenti": "Pain grillé et garnitures",
+                    "Gamberi in pastella croccante": "Crevettes en beignet croustillant",
+                    "Tortilla chips e salsa": "Chips tortilla et salsa",
+                    "Frutta di stagione tagliata": "Fruits de saison coupés"
                 },
                 variants: {
                     "Classico": "Classique",
@@ -2219,7 +2455,27 @@
                     "Profumato": "Parfumé",
                     "Speziato": "Épicé",
                     "Fresco": "Frais",
-                    "Tropicale": "Tropical"
+                    "Tropicale": "Tropical",
+                    "Salate": "Salées",
+                    "Al miele": "Au miel",
+                    "Piccanti": "Épicées",
+                    "Classiche": "Classiques",
+                    "Paprika": "Paprika",
+                    "Sale marino": "Sel marin",
+                    "Verdi": "Vertes",
+                    "Nere": "Noires",
+                    "Miste": "Mélangées",
+                    "Piccolo": "Petit",
+                    "Medio": "Moyen",
+                    "Grande": "Grand",
+                    "Pomodoro": "Tomate",
+                    "Olive": "Olives",
+                    "Singola": "Individuelle",
+                    "Da condividere": "À partager",
+                    "Con formaggio": "Au fromage",
+                    "Anguria": "Pastèque",
+                    "Mista tropicale": "Mix tropical",
+                    "Ananas": "Ananas"
                 }
             },
             uk: {
@@ -2232,7 +2488,15 @@
                     "Gin, limone, soda": "Джин, лимон, содова",
                     "Prosecco, sambuco, menta, soda": "Просекко, бузина, м'ята, содова",
                     "Rum, cocco, ananas": "Ром, кокос, ананас",
-                    "Cachaça, lime, zucchero": "Кашаса, лайм, цукор"
+                    "Cachaça, lime, zucchero": "Кашаса, лайм, цукор",
+                    "Tostate e croccanti": "Смажені та хрусткі",
+                    "Croccanti, servite calde": "Хрусткі, подаються теплими",
+                    "Olive marinate": "Мариновані оливки",
+                    "Selezione di formaggi locali": "Добірка місцевих сирів",
+                    "Pane tostato e condimenti": "Підсмажений хліб із начинкою",
+                    "Gamberi in pastella croccante": "Креветки у хрусткому клярі",
+                    "Tortilla chips e salsa": "Тортилья-чіпси із сальсою",
+                    "Frutta di stagione tagliata": "Нарізані сезонні фрукти"
                 },
                 variants: {
                     "Classico": "Класичний",
@@ -2249,7 +2513,27 @@
                     "Profumato": "Ароматний",
                     "Speziato": "Пряний",
                     "Fresco": "Свіжий",
-                    "Tropicale": "Тропічний"
+                    "Tropicale": "Тропічний",
+                    "Salate": "Солоні",
+                    "Al miele": "У меду",
+                    "Piccanti": "Гострі",
+                    "Classiche": "Класичні",
+                    "Paprika": "Паприка",
+                    "Sale marino": "Морська сіль",
+                    "Verdi": "Зелені",
+                    "Nere": "Чорні",
+                    "Miste": "Мікс",
+                    "Piccolo": "Мала",
+                    "Medio": "Середня",
+                    "Grande": "Велика",
+                    "Pomodoro": "Томат",
+                    "Olive": "Оливки",
+                    "Singola": "Одна порція",
+                    "Da condividere": "Для компанії",
+                    "Con formaggio": "Із сиром",
+                    "Anguria": "Кавун",
+                    "Mista tropicale": "Тропічний мікс",
+                    "Ananas": "Ананас"
                 }
             }
         };
@@ -2267,6 +2551,15 @@
                     special: false,
                     premium: false,        // Se attivo, appare una card "Nome Premium" nel catalogo
                     premiumSurcharge: 2.00 // Maggiorazione applicata alla versione premium
+                };
+            });
+            // Gli snack partono da prezzi diversi e non hanno versione Premium
+            snacks.forEach(s => {
+                items[s.name] = {
+                    prices: [2.00, 3.00, 4.00].slice(0, s.variants.length),
+                    special: false,
+                    premium: false,
+                    premiumSurcharge: 0
                 };
             });
             return {
@@ -2303,7 +2596,7 @@
         // Accetta sia "Mojito" sia "Mojito Premium".
         function computePrice(cocktailName, variant, time) {
             const base = baseNameOf(cocktailName);
-            const cocktail = cocktails.find(c => c.name === base);
+            const cocktail = findProduct(base);
             if (!cocktail) return 0;
             const variantIndex = cocktail.variants.indexOf(variant);
             let price = getBasePrice(base, variantIndex) + getTimeSurcharge(time);
@@ -2353,9 +2646,10 @@
         // più, per quelli con premium attivo, una card dedicata.
         function getCatalogItems() {
             const list = [];
-            cocktails.forEach(c => {
+            currentProducts().forEach(c => {
                 list.push({ ...c, displayName: c.name, premium: false });
-                if (isPremiumEnabled(c.name)) {
+                // La versione Premium esiste solo per i cocktail
+                if (!isSnack(c.name) && isPremiumEnabled(c.name)) {
                     list.push({
                         ...c,
                         displayName: c.name + PREMIUM_SUFFIX,
@@ -2902,7 +3196,10 @@
             if (!isAdmin()) return;
 
             const form = document.getElementById('priceListForm');
-            form.innerHTML = cocktails.map(c => {
+
+            // Genera la scheda di un prodotto. La sezione Premium compare
+            // solo per i cocktail: sugli snack non ha senso.
+            const buildCard = (c, allowPremium) => {
                 const item = pricing.items[c.name] || { prices: [], special: false, premium: false, premiumSurcharge: 2 };
                 const rows = c.variants.map((v, i) => `
                     <div class="price-row">
@@ -2913,16 +3210,8 @@
                         <span class="price-currency">€</span>
                     </div>
                 `).join('');
-                return `
-                    <div class="price-card">
-                        <div class="price-card-header">
-                            <span>${c.icon} <strong>${c.name}</strong></span>
-                            <label class="special-toggle">
-                                <input type="checkbox" data-special="${c.name}" ${item.special ? 'checked' : ''}>
-                                <span>🔥 ${t('specialOffer')}</span>
-                            </label>
-                        </div>
-                        ${rows}
+
+                const premiumBlock = allowPremium ? `
                         <div class="premium-section">
                             <label class="premium-toggle">
                                 <input type="checkbox" data-premium="${c.name}" ${item.premium ? 'checked' : ''}
@@ -2936,10 +3225,28 @@
                                        value="${(item.premiumSurcharge ?? 2).toFixed(2)}">
                                 <span class="price-currency">€</span>
                             </div>
+                        </div>` : '';
+
+                return `
+                    <div class="price-card">
+                        <div class="price-card-header">
+                            <span>${c.icon} <strong>${c.name}</strong></span>
+                            <label class="special-toggle">
+                                <input type="checkbox" data-special="${c.name}" ${item.special ? 'checked' : ''}>
+                                <span>🔥 ${t('specialOffer')}</span>
+                            </label>
                         </div>
+                        ${rows}
+                        ${premiumBlock}
                     </div>
                 `;
-            }).join('');
+            };
+
+            form.innerHTML =
+                `<div class="price-section-title">🍹 ${t('tabCocktails')}</div>` +
+                cocktails.map(c => buildCard(c, true)).join('') +
+                `<div class="price-section-title">🍿 ${t('tabSnacks')}</div>` +
+                snacks.map(s => buildCard(s, false)).join('');
 
             const ts = pricing.timeSurcharge || {};
             document.getElementById('surchargeNow').value = (ts['Subito'] ?? 1).toFixed(2);
@@ -3018,6 +3325,21 @@
             setTimeout(() => successMsg.classList.remove('show'), 3000);
         }
 
+        // Passa da Cocktail a Snack e viceversa
+        function setCategory(category) {
+            currentCategory = category;
+            localStorage.setItem('currentCategory', category);
+            updateCategoryTabs();
+            renderCocktails();
+        }
+
+        function updateCategoryTabs() {
+            document.getElementById('tabCocktails')
+                .classList.toggle('active', currentCategory === 'cocktails');
+            document.getElementById('tabSnacks')
+                .classList.toggle('active', currentCategory === 'snacks');
+        }
+
         // Render cocktails
         function renderCocktails() {
             const grid = document.getElementById('cocktailGrid');
@@ -3052,7 +3374,7 @@
         // Open order modal
         function openOrderModal(cocktailName) {
             // cocktailName può essere "Mojito" o "Mojito Premium"
-            const cocktail = cocktails.find(c => c.name === baseNameOf(cocktailName));
+            const cocktail = findProduct(cocktailName);
             if (!cocktail) return;
             
             selectedCocktail = cocktailName;
@@ -3105,7 +3427,7 @@
 
         // Update price display based on selected variant
         function updatePriceDisplay() {
-            const cocktail = cocktails.find(c => c.name === baseNameOf(selectedCocktail));
+            const cocktail = findProduct(selectedCocktail);
             if (!cocktail) return;
 
             const totalPrice = computePrice(selectedCocktail, selectedVariant, selectedDeliveryTime);
@@ -3816,7 +4138,7 @@
             const tips = [];
             const myOrders = orders.filter(o => isAdmin() || o.userId === getUserId(customerName));
             const openOrders = myOrders.filter(o => !myPendingOrderIds.includes(o.id));
-            const specialName = cocktails.map(c => c.name).find(n => isSpecial(n));
+            const specialName = allProducts.map(p => p.name).find(n => isSpecial(n));
             const premiumName = cocktails.map(c => c.name).find(n => isPremiumEnabled(n));
 
             if (!isOnline()) {
@@ -3852,7 +4174,7 @@
             }
 
             if (myOrders.length === 1) {
-                const other = cocktails.find(c => c.name !== baseNameOf(myOrders[0].cocktail));
+                const other = allProducts.find(p => p.name !== baseNameOf(myOrders[0].cocktail));
                 if (other) {
                     tips.push({
                         id: 'second_round',
@@ -4031,6 +4353,7 @@
         // Initialize
         applyTranslations();
         updateOfflineBanner();   // Mostra subito lo stato della connessione
+        updateCategoryTabs();    // Evidenzia la categoria salvata
         renderCocktails();
         renderOrders();
         checkRegistration(); // Mostra il popup nome oppure carica gli ordini dell'utente dal cloud
