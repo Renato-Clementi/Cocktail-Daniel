@@ -1072,6 +1072,78 @@
             line-height: 1;
         }
 
+        /* =============================================
+           PRODOTTO ESAURITO
+           La card resta visibile ma "spenta": si capisce a colpo
+           d'occhio che non è ordinabile, senza doverla leggere.
+           ============================================= */
+        .cocktail-soldout {
+            filter: grayscale(0.85);
+            opacity: 0.62;
+            cursor: default;
+            border: 2px dashed var(--dusk-soft);
+        }
+
+        /* Niente animazioni su ciò che non si può ordinare */
+        .cocktail-soldout::before {
+            animation: none;
+            opacity: 0.22;
+        }
+
+        .cocktail-soldout:hover,
+        .cocktail-soldout:active {
+            transform: none;
+            box-shadow: var(--shadow-card);
+        }
+
+        .soldout-ribbon {
+            position: absolute;
+            top: 46%;
+            left: -14%;
+            width: 128%;
+            transform: rotate(-11deg);
+            background: rgba(27, 58, 92, 0.92);
+            color: #fff;
+            font-family: var(--font-body);
+            font-size: 0.66em;
+            font-weight: 700;
+            letter-spacing: 1.4px;
+            text-align: center;
+            padding: 4px 0;
+            z-index: 3;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+        }
+
+        .order-btn-disabled {
+            background: var(--dusk-soft) !important;
+            box-shadow: none !important;
+            cursor: not-allowed;
+        }
+
+        .order-btn-disabled:active { transform: none; }
+
+        /* Listino admin: evidenzia i prodotti segnati come esauriti */
+        .soldout-toggle {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.8em;
+            cursor: pointer;
+            color: #B03A2E;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .soldout-toggle input {
+            width: auto;
+            margin: 0;
+        }
+
+        .price-card-soldout {
+            border-left-color: var(--dusk-soft);
+            background: #f0f0f0;
+        }
+
         .price-section-title {
             font-family: var(--font-display);
             font-size: 1em;
@@ -1536,10 +1608,16 @@
                 variants: ["Pomodoro", "Olive", "Miste"]
             },
             {
-                name: "Gamberi Fritti",
-                icon: "🍤",
-                description: "Gamberi in pastella croccante",
-                variants: ["Singola", "Da condividere"]
+                name: "Pizzette",
+                icon: "🍕",
+                description: "Mini pizze appena sfornate",
+                variants: ["Margherita", "Wurstel", "Miste"]
+            },
+            {
+                name: "Popcorn",
+                icon: "🍿",
+                description: "Popcorn appena fatti",
+                variants: ["Salati", "Dolci", "Al burro"]
             },
             {
                 name: "Nachos",
@@ -1653,7 +1731,11 @@
                 priceListSaved: "✅ Listino salvato e pubblicato!",
                 priceListSavedLocal: "⚠️ Listino salvato solo in locale (cloud non raggiungibile).",
                 specialOffer: "OFFERTA",
-                fromPrice: "da",
+
+                soldOutLabel: "ESAURITO",
+                soldOutButton: "Non disponibile",
+                soldOutEnable: "Segna come esaurito",
+                soldOutAlert: "{name} è esaurito al momento. Scegli un altro prodotto!",                fromPrice: "da",
                 premiumLabel: "PREMIUM",
                 premiumDesc: "ingredienti selezionati",
                 premiumEnable: "Abilita versione Premium",
@@ -1763,7 +1845,11 @@
                 priceListSaved: "✅ Price list saved and published!",
                 priceListSavedLocal: "⚠️ Price list saved locally only (cloud unreachable).",
                 specialOffer: "SPECIAL",
-                fromPrice: "from",
+
+                soldOutLabel: "SOLD OUT",
+                soldOutButton: "Unavailable",
+                soldOutEnable: "Mark as sold out",
+                soldOutAlert: "{name} is sold out right now. Please pick something else!",                fromPrice: "from",
                 premiumLabel: "PREMIUM",
                 premiumDesc: "selected ingredients",
                 premiumEnable: "Enable Premium version",
@@ -1873,7 +1959,11 @@
                 priceListSaved: "✅ ¡Lista de precios guardada y publicada!",
                 priceListSavedLocal: "⚠️ Lista guardada solo localmente (nube no disponible).",
                 specialOffer: "OFERTA",
-                fromPrice: "desde",
+
+                soldOutLabel: "AGOTADO",
+                soldOutButton: "No disponible",
+                soldOutEnable: "Marcar como agotado",
+                soldOutAlert: "{name} está agotado en este momento. ¡Elige otro producto!",                fromPrice: "desde",
                 premiumLabel: "PREMIUM",
                 premiumDesc: "ingredientes seleccionados",
                 premiumEnable: "Activar versión Premium",
@@ -1983,7 +2073,11 @@
                 priceListSaved: "✅ Preisliste gespeichert und veröffentlicht!",
                 priceListSavedLocal: "⚠️ Preisliste nur lokal gespeichert (Cloud nicht erreichbar).",
                 specialOffer: "ANGEBOT",
-                fromPrice: "ab",
+
+                soldOutLabel: "AUSVERKAUFT",
+                soldOutButton: "Nicht verfügbar",
+                soldOutEnable: "Als ausverkauft markieren",
+                soldOutAlert: "{name} ist gerade ausverkauft. Bitte wähle etwas anderes!",                fromPrice: "ab",
                 premiumLabel: "PREMIUM",
                 premiumDesc: "ausgewählte Zutaten",
                 premiumEnable: "Premium-Version aktivieren",
@@ -2093,7 +2187,11 @@
                 priceListSaved: "✅ Tarifs enregistrés et publiés !",
                 priceListSavedLocal: "⚠️ Tarifs enregistrés localement uniquement (cloud indisponible).",
                 specialOffer: "PROMO",
-                fromPrice: "à partir de",
+
+                soldOutLabel: "ÉPUISÉ",
+                soldOutButton: "Indisponible",
+                soldOutEnable: "Marquer comme épuisé",
+                soldOutAlert: "{name} est épuisé pour le moment. Choisissez autre chose !",                fromPrice: "à partir de",
                 premiumLabel: "PREMIUM",
                 premiumDesc: "ingrédients sélectionnés",
                 premiumEnable: "Activer la version Premium",
@@ -2203,7 +2301,11 @@
                 priceListSaved: "✅ Прайс збережено та опубліковано!",
                 priceListSavedLocal: "⚠️ Прайс збережено лише локально (хмара недоступна).",
                 specialOffer: "АКЦІЯ",
-                fromPrice: "від",
+
+                soldOutLabel: "ЗАКІНЧИВСЯ",
+                soldOutButton: "Недоступно",
+                soldOutEnable: "Позначити як закінчений",
+                soldOutAlert: "{name} наразі закінчився. Оберіть щось інше!",                fromPrice: "від",
                 premiumLabel: "ПРЕМІУМ",
                 premiumDesc: "добірні інгредієнти",
                 premiumEnable: "Увімкнути Преміум-версію",
@@ -2262,9 +2364,10 @@
                     "Olive marinate": "Marinated olives",
                     "Selezione di formaggi locali": "Selection of local cheeses",
                     "Pane tostato e condimenti": "Toasted bread with toppings",
-                    "Gamberi in pastella croccante": "Shrimp in crispy batter",
                     "Tortilla chips e salsa": "Tortilla chips with salsa",
-                    "Frutta di stagione tagliata": "Sliced seasonal fruit"
+                    "Frutta di stagione tagliata": "Sliced seasonal fruit",
+                    "Mini pizze appena sfornate": "Freshly baked mini pizzas",
+                    "Popcorn appena fatti": "Freshly popped popcorn"
                 },
                 variants: {
                     "Classico": "Classic",
@@ -2296,12 +2399,15 @@
                     "Grande": "Large",
                     "Pomodoro": "Tomato",
                     "Olive": "Olives",
-                    "Singola": "Single",
-                    "Da condividere": "To share",
                     "Con formaggio": "With cheese",
                     "Anguria": "Watermelon",
                     "Mista tropicale": "Tropical mix",
-                    "Ananas": "Pineapple"
+                    "Ananas": "Pineapple",
+                    "Margherita": "Margherita",
+                    "Wurstel": "Hot dog",
+                    "Salati": "Salted",
+                    "Dolci": "Sweet",
+                    "Al burro": "Buttered"
                 }
             },
             es: {
@@ -2320,9 +2426,10 @@
                     "Olive marinate": "Aceitunas marinadas",
                     "Selezione di formaggi locali": "Selección de quesos locales",
                     "Pane tostato e condimenti": "Pan tostado con ingredientes",
-                    "Gamberi in pastella croccante": "Gambas en rebozado crujiente",
                     "Tortilla chips e salsa": "Nachos con salsa",
-                    "Frutta di stagione tagliata": "Fruta de temporada cortada"
+                    "Frutta di stagione tagliata": "Fruta de temporada cortada",
+                    "Mini pizze appena sfornate": "Mini pizzas recién horneadas",
+                    "Popcorn appena fatti": "Palomitas recién hechas"
                 },
                 variants: {
                     "Classico": "Clásico",
@@ -2354,12 +2461,15 @@
                     "Grande": "Grande",
                     "Pomodoro": "Tomate",
                     "Olive": "Aceitunas",
-                    "Singola": "Individual",
-                    "Da condividere": "Para compartir",
                     "Con formaggio": "Con queso",
                     "Anguria": "Sandía",
                     "Mista tropicale": "Mix tropical",
-                    "Ananas": "Piña"
+                    "Ananas": "Piña",
+                    "Margherita": "Margarita",
+                    "Wurstel": "Salchicha",
+                    "Salati": "Saladas",
+                    "Dolci": "Dulces",
+                    "Al burro": "Con mantequilla"
                 }
             },
             de: {
@@ -2378,9 +2488,10 @@
                     "Olive marinate": "Marinierte Oliven",
                     "Selezione di formaggi locali": "Auswahl regionaler Käse",
                     "Pane tostato e condimenti": "Geröstetes Brot mit Belag",
-                    "Gamberi in pastella croccante": "Garnelen im knusprigen Teig",
                     "Tortilla chips e salsa": "Tortilla-Chips mit Salsa",
-                    "Frutta di stagione tagliata": "Geschnittenes Saisonobst"
+                    "Frutta di stagione tagliata": "Geschnittenes Saisonobst",
+                    "Mini pizze appena sfornate": "Frisch gebackene Mini-Pizzen",
+                    "Popcorn appena fatti": "Frisch gemachtes Popcorn"
                 },
                 variants: {
                     "Classico": "Klassisch",
@@ -2412,12 +2523,15 @@
                     "Grande": "Groß",
                     "Pomodoro": "Tomate",
                     "Olive": "Oliven",
-                    "Singola": "Einzeln",
-                    "Da condividere": "Zum Teilen",
                     "Con formaggio": "Mit Käse",
                     "Anguria": "Wassermelone",
                     "Mista tropicale": "Tropen-Mix",
-                    "Ananas": "Ananas"
+                    "Ananas": "Ananas",
+                    "Margherita": "Margherita",
+                    "Wurstel": "Würstchen",
+                    "Salati": "Gesalzen",
+                    "Dolci": "Süß",
+                    "Al burro": "Mit Butter"
                 }
             },
             fr: {
@@ -2436,9 +2550,10 @@
                     "Olive marinate": "Olives marinées",
                     "Selezione di formaggi locali": "Sélection de fromages locaux",
                     "Pane tostato e condimenti": "Pain grillé et garnitures",
-                    "Gamberi in pastella croccante": "Crevettes en beignet croustillant",
                     "Tortilla chips e salsa": "Chips tortilla et salsa",
-                    "Frutta di stagione tagliata": "Fruits de saison coupés"
+                    "Frutta di stagione tagliata": "Fruits de saison coupés",
+                    "Mini pizze appena sfornate": "Mini-pizzas fraîchement cuites",
+                    "Popcorn appena fatti": "Popcorn fraîchement éclaté"
                 },
                 variants: {
                     "Classico": "Classique",
@@ -2470,12 +2585,15 @@
                     "Grande": "Grand",
                     "Pomodoro": "Tomate",
                     "Olive": "Olives",
-                    "Singola": "Individuelle",
-                    "Da condividere": "À partager",
                     "Con formaggio": "Au fromage",
                     "Anguria": "Pastèque",
                     "Mista tropicale": "Mix tropical",
-                    "Ananas": "Ananas"
+                    "Ananas": "Ananas",
+                    "Margherita": "Margherita",
+                    "Wurstel": "Saucisse",
+                    "Salati": "Salé",
+                    "Dolci": "Sucré",
+                    "Al burro": "Au beurre"
                 }
             },
             uk: {
@@ -2494,9 +2612,10 @@
                     "Olive marinate": "Мариновані оливки",
                     "Selezione di formaggi locali": "Добірка місцевих сирів",
                     "Pane tostato e condimenti": "Підсмажений хліб із начинкою",
-                    "Gamberi in pastella croccante": "Креветки у хрусткому клярі",
                     "Tortilla chips e salsa": "Тортилья-чіпси із сальсою",
-                    "Frutta di stagione tagliata": "Нарізані сезонні фрукти"
+                    "Frutta di stagione tagliata": "Нарізані сезонні фрукти",
+                    "Mini pizze appena sfornate": "Свіжоспечені міні-піци",
+                    "Popcorn appena fatti": "Свіжий попкорн"
                 },
                 variants: {
                     "Classico": "Класичний",
@@ -2528,12 +2647,15 @@
                     "Grande": "Велика",
                     "Pomodoro": "Томат",
                     "Olive": "Оливки",
-                    "Singola": "Одна порція",
-                    "Da condividere": "Для компанії",
                     "Con formaggio": "Із сиром",
                     "Anguria": "Кавун",
                     "Mista tropicale": "Тропічний мікс",
-                    "Ananas": "Ананас"
+                    "Ananas": "Ананас",
+                    "Margherita": "Маргарита",
+                    "Wurstel": "Сосиска",
+                    "Salati": "Солоний",
+                    "Dolci": "Солодкий",
+                    "Al burro": "З маслом"
                 }
             }
         };
@@ -2549,6 +2671,7 @@
                 items[c.name] = {
                     prices: [0.50, 1.00, 2.00].slice(0, c.variants.length),
                     special: false,
+                    soldOut: false,        // Se attivo, il prodotto non è ordinabile
                     premium: false,        // Se attivo, appare una card "Nome Premium" nel catalogo
                     premiumSurcharge: 2.00 // Maggiorazione applicata alla versione premium
                 };
@@ -2558,6 +2681,7 @@
                 items[s.name] = {
                     prices: [2.00, 3.00, 4.00].slice(0, s.variants.length),
                     special: false,
+                    soldOut: false,
                     premium: false,
                     premiumSurcharge: 0
                 };
@@ -2612,6 +2736,13 @@
 
         function isSpecial(cocktailName) {
             return !!(pricing.items[cocktailName] && pricing.items[cocktailName].special);
+        }
+
+        // Prodotto esaurito. Vale anche per la versione Premium:
+        // è lo stesso prodotto base, quindi se manca, manca per entrambe.
+        function isSoldOut(name) {
+            const base = baseNameOf(name);
+            return !!(pricing.items[base] && pricing.items[base].soldOut);
         }
 
         // =============================================
@@ -2675,6 +2806,7 @@
                                 merged.items[name] = {
                                     prices: data.items[name].prices || merged.items[name].prices,
                                     special: !!data.items[name].special,
+                                    soldOut: !!data.items[name].soldOut,
                                     premium: !!data.items[name].premium,
                                     premiumSurcharge: (typeof data.items[name].premiumSurcharge === 'number')
                                         ? data.items[name].premiumSurcharge
@@ -3228,7 +3360,7 @@
                         </div>` : '';
 
                 return `
-                    <div class="price-card">
+                    <div class="price-card${item.soldOut ? ' price-card-soldout' : ''}">
                         <div class="price-card-header">
                             <span>${c.icon} <strong>${c.name}</strong></span>
                             <label class="special-toggle">
@@ -3236,6 +3368,11 @@
                                 <span>🔥 ${t('specialOffer')}</span>
                             </label>
                         </div>
+                        <label class="soldout-toggle">
+                            <input type="checkbox" data-soldout="${c.name}" ${item.soldOut ? 'checked' : ''}
+                                   onchange="this.closest('.price-card').classList.toggle('price-card-soldout', this.checked)">
+                            <span>🚫 ${t('soldOutEnable')}</span>
+                        </label>
                         ${rows}
                         ${premiumBlock}
                     </div>
@@ -3284,6 +3421,12 @@
             document.querySelectorAll('#priceListForm input[data-special]').forEach(chk => {
                 const name = chk.getAttribute('data-special');
                 if (updated.items[name]) updated.items[name].special = chk.checked;
+            });
+
+            // Prodotti esauriti
+            document.querySelectorAll('#priceListForm input[data-soldout]').forEach(chk => {
+                const name = chk.getAttribute('data-soldout');
+                if (updated.items[name]) updated.items[name].soldOut = chk.checked;
             });
 
             // Versione premium attiva/disattiva
@@ -3345,18 +3488,27 @@
             const grid = document.getElementById('cocktailGrid');
             grid.innerHTML = getCatalogItems().map(item => {
                 const baseName = item.name;
-                const special = !item.premium && isSpecial(baseName);
+                const soldOut = isSoldOut(baseName);
+                // Su un prodotto esaurito l'offerta non ha senso: non si può ordinare
+                const special = !soldOut && !item.premium && isSpecial(baseName);
                 const basePrices = pricing.items[baseName]?.prices || [0.50];
                 let fromPrice = Math.min(...basePrices);
                 if (item.premium) fromPrice += getPremiumSurcharge(baseName);
 
-                const cardClass = item.premium ? ' cocktail-premium' : (special ? ' cocktail-special' : '');
-                const badge = item.premium
-                    ? `<div class="premium-badge">⭐ ${t('premiumLabel')}</div>`
-                    : (special ? `<div class="special-badge">🔥 ${t('specialOffer')}</div>` : '');
+                let cardClass = item.premium ? ' cocktail-premium' : (special ? ' cocktail-special' : '');
+                if (soldOut) cardClass += ' cocktail-soldout';
+
+                const badge = soldOut
+                    ? `<div class="soldout-ribbon">${t('soldOutLabel')}</div>`
+                    : (item.premium
+                        ? `<div class="premium-badge">⭐ ${t('premiumLabel')}</div>`
+                        : (special ? `<div class="special-badge">🔥 ${t('specialOffer')}</div>` : ''));
+
+                // Se esaurito la card non è cliccabile
+                const openHandler = soldOut ? '' : ` onclick="openOrderModal('${item.displayName}')"`;
 
                 return `
-                <div class="cocktail-card${cardClass}" onclick="openOrderModal('${item.displayName}')">
+                <div class="cocktail-card${cardClass}"${openHandler}>
                     ${badge}
                     <div class="cocktail-icon">${item.icon}</div>
                     <div class="cocktail-info">
@@ -3364,9 +3516,9 @@
                         <div class="cocktail-description">${translateDescription(item.description)}${item.premium ? ` · <em>${t('premiumDesc')}</em>` : ''}</div>
                         <div class="cocktail-price">${t('fromPrice')} ${formatPrice(fromPrice)}</div>
                     </div>
-                    <button class="order-btn" onclick="event.stopPropagation(); openOrderModal('${item.displayName}')">
-                        ${t('orderNow')}
-                    </button>
+                    ${soldOut
+                        ? `<button class="order-btn order-btn-disabled" disabled>${t('soldOutButton')}</button>`
+                        : `<button class="order-btn" onclick="event.stopPropagation(); openOrderModal('${item.displayName}')">${t('orderNow')}</button>`}
                 </div>`;
             }).join('');
         }
@@ -3376,6 +3528,12 @@
             // cocktailName può essere "Mojito" o "Mojito Premium"
             const cocktail = findProduct(cocktailName);
             if (!cocktail) return;
+
+            // Protezione: un prodotto esaurito non è ordinabile
+            if (isSoldOut(cocktailName)) {
+                alert(t('soldOutAlert').replace('{name}', cocktailName));
+                return;
+            }
             
             selectedCocktail = cocktailName;
             selectedVariant = cocktail.variants[0]; // Auto-select first variant
@@ -3539,6 +3697,14 @@
         // Confirm order
         async function confirmOrder() {
             const notes = document.getElementById('orderNotes').value.trim();
+
+            // Il prodotto potrebbe essere finito mentre il modale era aperto
+            if (isSoldOut(selectedCocktail)) {
+                alert(t('soldOutAlert').replace('{name}', selectedCocktail));
+                closeModal();
+                renderCocktails();
+                return;
+            }
 
             // Calculate price using the shared pricing configuration
             const price = formatPrice(computePrice(selectedCocktail, selectedVariant, selectedDeliveryTime));
