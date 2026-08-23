@@ -2118,6 +2118,42 @@
         .topup-quick-btn:hover { border-color: var(--sand-gold); background: rgba(245,166,35,0.08); }
         .topup-quick-btn:active { transform: scale(0.95); }
 
+        /* =============================================
+           PACCHETTI FESTA
+           ============================================= */
+        .party-contents-box {
+            background: rgba(46, 196, 182, 0.10);
+            border-left: 4px solid var(--lagoon);
+            border-radius: var(--radius-sm);
+            padding: 12px 14px;
+            margin-bottom: 16px;
+            font-size: 0.84em;
+            color: var(--dusk);
+            line-height: 1.7;
+        }
+
+        .party-tier-btn {
+            font-size: 0.8em;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        .party-tier-btn strong {
+            font-family: var(--font-mono);
+            font-size: 1.05em;
+        }
+
+        input[type="date"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--sand-deep);
+            border-radius: var(--radius-sm);
+            font-family: var(--font-body);
+            font-size: 16px;
+            color: var(--dusk);
+            background: #fff;
+        }
+
         .pagination {
             display: flex;
             justify-content: center;
@@ -2334,6 +2370,21 @@
                 </div>
             </div>
 
+            <div class="guide-section collapsed" id="guide-party">
+                <button type="button" class="guide-toggle" onclick="toggleGuide('party')">
+                    <span>🎉 Pacchetti festa</span><span class="pc-chevron">▾</span>
+                </button>
+                <div class="guide-body">
+                    <p>Settima scheda del catalogo: 6 pacchetti a tema (Summer, Halloween, Xmas, Capodanno, Compleanno, BBQ Festival), ognuno con drink, cibo, dolce e decorazioni già combinati, su 3 fasce di invitati (10/20/30 persone) a prezzo fisso.</p>
+                    <p>Il <strong>BBQ Festival</strong> segue lo stesso schema ma senza dolce (birra alla spina, carne alla griglia, salsicce, crauti, patate arrosto, insalate): il modale mostra "Non incluso" al posto del dolce, invece di lasciare la riga vuota. Parte da 7€ a persona.</p>
+                    <p><strong>Diversamente da tutto il resto: qui non si ordina per il ritiro immediato.</strong> Chi prenota sceglie una data futura e la richiesta resta <em>in attesa</em> finché tu non la confermi o rifiuti. Non è un "conferma sempre": stai davvero verificando la tua disponibilità per quella data.</p>
+                    <p>Le richieste in attesa compaiono nel pannello <strong>🎉 Richieste feste</strong>. Per ognuna hai due pulsanti: <strong>✓ Accetta</strong> (la data è confermata) o <strong>🚫 Rifiuta</strong> (ti chiede un motivo breve, es. "data non disponibile", che il cliente vede).</p>
+                    <p>Gli eventi confermati restano visibili sotto, in <strong>Prossimi eventi confermati</strong>, ordinati per data — così non perdi il filo di cosa hai in calendario.</p>
+                    <p><strong>Nel listino</strong> (sezione 🎉 Feste) puoi cambiare il prezzo di ogni fascia per ogni pacchetto, e metterne uno in pausa con ⏸️ se è fuori stagione (es. Xmas Party a luglio).</p>
+                    <p class="guide-warn">⚠️ L'app non controlla automaticamente se una data è già impegnata: la verifica di disponibilità è manuale, sei tu a saperlo.</p>
+                </div>
+            </div>
+
             <div class="guide-section collapsed" id="guide-tech">
                 <button type="button" class="guide-toggle" onclick="toggleGuide('tech')">
                     <span>🔧 Manutenzione</span><span class="pc-chevron">▾</span>
@@ -2439,6 +2490,26 @@
             <div id="myChoresList"></div>
         </div>
 
+        <!-- Richieste feste da confermare (solo admin) -->
+        <div id="adminPartyPanel" class="orders-section" style="display:none; margin-bottom:20px;">
+            <h2 style="margin-bottom:12px;">
+                🎉 <span data-i18n="partyRequestsTitle">Richieste feste</span>
+                <span class="badge" id="partyPendingCount">0</span>
+            </h2>
+            <div id="partyPendingList"></div>
+
+            <div id="partyUpcomingBox" class="chore-payout-box" style="display:none;">
+                <div class="chore-payout-header">📅 <span data-i18n="partyUpcomingTitle">Prossimi eventi confermati</span></div>
+                <div id="partyUpcomingList"></div>
+            </div>
+        </div>
+
+        <!-- Le mie feste prenotate (clienti/famiglia) -->
+        <div id="myPartyPanel" class="orders-section" style="display:none; margin-bottom:20px;">
+            <h2 style="margin-bottom:12px;">🎉 <span data-i18n="myPartyTitle">Le mie feste prenotate</span></h2>
+            <div id="myPartyList"></div>
+        </div>
+
         <!-- Sezione admin: richieste di pagamento da confermare -->
         <div id="pendingPaymentsSection" class="orders-section" style="display:none; margin-bottom:20px;">
             <h2 style="margin-bottom:15px;">
@@ -2478,6 +2549,9 @@
             </button>
             <button class="category-tab" id="tabMerch" onclick="setCategory('merch')">
                 🛍️ <span data-i18n="tabMerch">Merchandising</span>
+            </button>
+            <button class="category-tab" id="tabParty" onclick="setCategory('party')">
+                🎉 <span data-i18n="tabParty">Feste</span>
             </button>
             </div>
             <button class="tab-scroll-arrow tab-scroll-arrow-right" onclick="scrollTabs(1)" aria-label="Scorri a destra">›</button>
@@ -2564,6 +2638,46 @@
             <div class="btn-group" style="flex-direction:column; gap:10px;">
                 <button id="walletChoiceCardBtn" class="btn btn-primary" style="width:100%;" onclick="payWithCard()" data-i18n="payWithCardBtn">💳 Usa il saldo (-10%)</button>
                 <button class="btn btn-secondary" style="width:100%;" onclick="closeWalletChoiceModal(); proceedCashPayment();" data-i18n="payCashBtn">💶 Paga in contanti</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale prenotazione pacchetto festa -->
+    <div class="modal" id="partyModal">
+        <div class="modal-content" style="max-width:420px;">
+            <button class="modal-close" onclick="closePartyModal()" aria-label="Chiudi">✕</button>
+            <div style="text-align:center; margin-bottom:6px;">
+                <span style="font-size:2em;" id="partyModalIcon"></span>
+            </div>
+            <h2 id="partyModalName" style="text-align:center; margin-bottom:10px;"></h2>
+
+            <div class="party-contents-box">
+                <div><strong data-i18n="partyDrinksLabel">🍹 Drink:</strong> <span id="partyDrinks"></span></div>
+                <div><strong data-i18n="partyFoodLabel">🍿 Da mangiare:</strong> <span id="partyFood"></span></div>
+                <div><strong data-i18n="partyDessertLabel">🍰 Dolce:</strong> <span id="partyDessert"></span></div>
+                <div><strong data-i18n="partyDecorLabel">🎈 Decorazioni:</strong> <span id="partyDecor"></span></div>
+            </div>
+
+            <div class="form-group">
+                <label data-i18n="partyGuestsLabel">Numero di invitati:</label>
+                <div class="variant-buttons" id="partyTierButtons"></div>
+            </div>
+
+            <div class="form-group">
+                <label data-i18n="partyDateLabel">Data dell'evento:</label>
+                <input type="date" id="partyDate">
+            </div>
+
+            <div class="form-group">
+                <label data-i18n="choreNoteLabel">Note (opzionale):</label>
+                <input type="text" id="partyNote" data-i18n-placeholder="partyNotePlaceholder" placeholder="es: allergie, orario, indirizzo">
+            </div>
+
+            <p style="font-size:0.78em; color:var(--dusk-soft); margin-bottom:14px;" data-i18n="partyConfirmationNotice">📌 La prenotazione sarà valida solo dopo la conferma di Daniel.</p>
+
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="closePartyModal()" data-i18n="cancel">Annulla</button>
+                <button class="btn btn-primary" onclick="confirmPartyBooking()" data-i18n="sendPartyRequest">Invia richiesta</button>
             </div>
         </div>
     </div>
@@ -3055,6 +3169,92 @@
         const allProducts = cocktails.concat(snacks, softdrinks, desserts, merch);
 
         // =============================================
+        // PACCHETTI FESTA
+        // A differenza di tutto il resto del catalogo, qui non si ordina
+        // per il ritiro immediato: si prenota per una data futura e
+        // Daniel deve confermare la disponibilità prima che sia definitivo.
+        // =============================================
+        const partyPackages = [
+            {
+                id: 'summer', name: 'Summer Party', icon: '☀️',
+                drinks: ['Mojito', 'Piña Colada', 'Caipirinha'],
+                food: ['Patatine', 'Nachos'],
+                dessert: ['Macedonia'],
+                decor: 'Decorazioni tropicali (ombrellini, luci)'
+            },
+            {
+                id: 'halloween', name: 'Halloween Party', icon: '🎃',
+                drinks: ['Negroni', 'Sangria'],
+                food: ['Popcorn', 'Tagliere Formaggi'],
+                dessert: ['Brownie'],
+                decor: 'Decorazioni a tema (zucche, ragnatele)'
+            },
+            {
+                id: 'xmas', name: 'Xmas Party', icon: '🎄',
+                drinks: ['Sangria', 'Hugo Spritz', 'Aperol Spritz'],
+                food: ['Bruschette', 'Tagliere Formaggi'],
+                dessert: ['Torta della Nonna Giovanna'],
+                decor: 'Decorazioni natalizie'
+            },
+            {
+                id: 'capodanno', name: 'Capodanno Party', icon: '🎆',
+                drinks: ['Aperol Spritz', 'Negroni', 'Margarita'],
+                food: ['Tagliere Formaggi', 'Bruschette'],
+                dessert: ['Tiramisù'],
+                decor: 'Decorazioni scintillanti, brindisi di mezzanotte'
+            },
+            {
+                id: 'compleanno', name: 'Compleanno Party', icon: '🎂',
+                drinks: ['Mojito', 'Aperol Spritz', 'Gin Tonic'],
+                food: ['Patatine', 'Nachos'],
+                dessert: ['Torta della Nonna Giovanna', 'Gelato'],
+                decor: 'Palloncini e decorazioni personalizzabili'
+            },
+            {
+                id: 'bbq', name: 'BBQ Festival', icon: '🍖',
+                drinks: ['Birra alla spina', 'Soft drink a volontà'],
+                food: ['Carne mista alla griglia', 'Salsicce', 'Crauti', 'Patate arrosto', 'Insalate fresche'],
+                dessert: [],
+                decor: 'Postazione barbecue, tavoli conviviali, luci da giardino'
+            }
+        ];
+
+        // Prezzi predefiniti per fascia di invitati (10 / 20 / 30 persone).
+        // L'admin può cambiarli dal listino.
+        function buildDefaultPartyPricing() {
+            const defaults = {
+                summer: [80, 150, 210],
+                halloween: [85, 160, 220],
+                xmas: [90, 170, 230],
+                capodanno: [95, 180, 250],
+                compleanno: [75, 140, 195],
+                bbq: [70, 140, 210] // almeno 7€ a persona (10/20/30 invitati)
+            };
+            const items = {};
+            partyPackages.forEach(p => {
+                items[p.id] = { tiers: defaults[p.id] || [80, 150, 210], paused: false };
+            });
+            return items;
+        }
+
+        const PARTY_GUEST_TIERS = [10, 20, 30];
+
+        function partyById(id) {
+            return partyPackages.find(p => p.id === id);
+        }
+
+        function getPartyTierPrice(id, tierIndex) {
+            const item = pricing.partyItems && pricing.partyItems[id];
+            const tiers = (item && item.tiers) || [80, 150, 210];
+            return tiers[tierIndex] ?? tiers[0];
+        }
+
+        function isPartyPaused(id) {
+            const item = pricing.partyItems && pricing.partyItems[id];
+            return !!(item && item.paused);
+        }
+
+        // =============================================
         // LAVORETTI DOMESTICI
         // Sistema separato dai prodotti da bar: qui è la famiglia
         // ad "ordinare" qualcosa a Daniel, e il compenso (mancia) lo
@@ -3180,7 +3380,8 @@
             snacks: snacks,
             softdrinks: softdrinks,
             desserts: desserts,
-            merch: merch
+            merch: merch,
+            party: partyPackages
         };
 
         function currentProducts() {
@@ -3270,6 +3471,41 @@
 
                 soldOutLabel: "ESAURITO",
 
+                tabParty: "Feste",
+                bookParty: "Prenota",
+                guestsLabel: "persone",
+                party_summer: "Summer Party",
+                party_halloween: "Halloween Party",
+                party_xmas: "Xmas Party",
+                party_capodanno: "Capodanno Party",
+                party_compleanno: "Compleanno Party",
+
+                party_bbq: "BBQ Festival",
+                partyNotIncluded: "Non incluso in questo pacchetto",                partyDrinksLabel: "🍹 Drink:",
+                partyFoodLabel: "🍿 Da mangiare:",
+                partyDessertLabel: "🍰 Dolce:",
+                partyDecorLabel: "🎈 Decorazioni:",
+                partyGuestsLabel: "Numero di invitati:",
+                partyDateLabel: "Data dell'evento:",
+                partyNotePlaceholder: "es: allergie, orario, indirizzo",
+                partyConfirmationNotice: "📌 La prenotazione sarà valida solo dopo la conferma di Daniel.",
+                sendPartyRequest: "Invia richiesta",
+                partyDateRequired: "Scegli la data dell'evento.",
+                partyRequestedMsg: "🎉 Richiesta inviata! In attesa di conferma.",
+                partyRequestsTitle: "Richieste feste",
+                noPartyPending: "Nessuna richiesta in attesa 🎉",
+                accept: "Accetta",
+                partyUpcomingTitle: "Prossimi eventi confermati",
+                myPartyTitle: "Le mie feste prenotate",
+                confirmAcceptParty: "Confermi la disponibilità per {name}?",
+                partyRejectReasonPrompt: "Motivo del rifiuto (es: data non disponibile):",
+                partyRejectReasonDefault: "Data non disponibile",
+                partyConfirmedAlert: "✅ La tua richiesta per {name} il {date} è stata confermata!",
+                partyRejectedAlert: "❌ La tua richiesta per {name} è stata rifiutata: {reason}",
+                partyConfirmedLabel: "Confermata",
+                partyRejectedLabel: "Rifiutata",
+                partyPendingLabel: "In attesa",
+                partyPauseEnable: "Metti in pausa (fuori stagione)",
                 tabMerch: "Merchandising",
                 merchPickupNotice: "🛍️ Da ritirare al banco.",
                 merchPickupLabel: "Ritiro al banco",
@@ -3497,6 +3733,41 @@
 
                 soldOutLabel: "SOLD OUT",
 
+                tabParty: "Parties",
+                bookParty: "Book",
+                guestsLabel: "guests",
+                party_summer: "Summer Party",
+                party_halloween: "Halloween Party",
+                party_xmas: "Xmas Party",
+                party_capodanno: "New Year's Party",
+                party_compleanno: "Birthday Party",
+
+                party_bbq: "BBQ Festival",
+                partyNotIncluded: "Not included in this package",                partyDrinksLabel: "🍹 Drinks:",
+                partyFoodLabel: "🍿 To eat:",
+                partyDessertLabel: "🍰 Dessert:",
+                partyDecorLabel: "🎈 Decorations:",
+                partyGuestsLabel: "Number of guests:",
+                partyDateLabel: "Event date:",
+                partyNotePlaceholder: "e.g: allergies, time, address",
+                partyConfirmationNotice: "📌 The booking is confirmed only once Daniel accepts it.",
+                sendPartyRequest: "Send request",
+                partyDateRequired: "Please choose the event date.",
+                partyRequestedMsg: "🎉 Request sent! Awaiting confirmation.",
+                partyRequestsTitle: "Party requests",
+                noPartyPending: "No pending requests 🎉",
+                accept: "Accept",
+                partyUpcomingTitle: "Upcoming confirmed events",
+                myPartyTitle: "My booked parties",
+                confirmAcceptParty: "Confirm availability for {name}?",
+                partyRejectReasonPrompt: "Reason for rejection (e.g: date unavailable):",
+                partyRejectReasonDefault: "Date unavailable",
+                partyConfirmedAlert: "✅ Your request for {name} on {date} has been confirmed!",
+                partyRejectedAlert: "❌ Your request for {name} was rejected: {reason}",
+                partyConfirmedLabel: "Confirmed",
+                partyRejectedLabel: "Rejected",
+                partyPendingLabel: "Pending",
+                partyPauseEnable: "Pause (out of season)",
                 tabMerch: "Merchandise",
                 merchPickupNotice: "🛍️ To pick up at the counter.",
                 merchPickupLabel: "Counter pickup",
@@ -3724,6 +3995,41 @@
 
                 soldOutLabel: "AGOTADO",
 
+                tabParty: "Fiestas",
+                bookParty: "Reservar",
+                guestsLabel: "personas",
+                party_summer: "Summer Party",
+                party_halloween: "Halloween Party",
+                party_xmas: "Xmas Party",
+                party_capodanno: "Fiesta de Fin de Año",
+                party_compleanno: "Fiesta de Cumpleaños",
+
+                party_bbq: "BBQ Festival",
+                partyNotIncluded: "No incluido en este paquete",                partyDrinksLabel: "🍹 Bebidas:",
+                partyFoodLabel: "🍿 Para comer:",
+                partyDessertLabel: "🍰 Postre:",
+                partyDecorLabel: "🎈 Decoraciones:",
+                partyGuestsLabel: "Número de invitados:",
+                partyDateLabel: "Fecha del evento:",
+                partyNotePlaceholder: "ej.: alergias, hora, dirección",
+                partyConfirmationNotice: "📌 La reserva será válida solo tras la confirmación de Daniel.",
+                sendPartyRequest: "Enviar solicitud",
+                partyDateRequired: "Elige la fecha del evento.",
+                partyRequestedMsg: "🎉 ¡Solicitud enviada! Esperando confirmación.",
+                partyRequestsTitle: "Solicitudes de fiestas",
+                noPartyPending: "No hay solicitudes pendientes 🎉",
+                accept: "Aceptar",
+                partyUpcomingTitle: "Próximos eventos confirmados",
+                myPartyTitle: "Mis fiestas reservadas",
+                confirmAcceptParty: "¿Confirmas la disponibilidad para {name}?",
+                partyRejectReasonPrompt: "Motivo del rechazo (ej: fecha no disponible):",
+                partyRejectReasonDefault: "Fecha no disponible",
+                partyConfirmedAlert: "✅ ¡Tu solicitud para {name} el {date} ha sido confirmada!",
+                partyRejectedAlert: "❌ Tu solicitud para {name} fue rechazada: {reason}",
+                partyConfirmedLabel: "Confirmada",
+                partyRejectedLabel: "Rechazada",
+                partyPendingLabel: "Pendiente",
+                partyPauseEnable: "Pausar (fuera de temporada)",
                 tabMerch: "Merchandising",
                 merchPickupNotice: "🛍️ Para recoger en el mostrador.",
                 merchPickupLabel: "Recogida en el mostrador",
@@ -3951,6 +4257,41 @@
 
                 soldOutLabel: "AUSVERKAUFT",
 
+                tabParty: "Partys",
+                bookParty: "Buchen",
+                guestsLabel: "Gäste",
+                party_summer: "Summer Party",
+                party_halloween: "Halloween Party",
+                party_xmas: "Xmas Party",
+                party_capodanno: "Silvesterparty",
+                party_compleanno: "Geburtstagsparty",
+
+                party_bbq: "BBQ Festival",
+                partyNotIncluded: "Nicht im Paket enthalten",                partyDrinksLabel: "🍹 Getränke:",
+                partyFoodLabel: "🍿 Zum Essen:",
+                partyDessertLabel: "🍰 Dessert:",
+                partyDecorLabel: "🎈 Deko:",
+                partyGuestsLabel: "Anzahl der Gäste:",
+                partyDateLabel: "Datum der Veranstaltung:",
+                partyNotePlaceholder: "z.B.: Allergien, Uhrzeit, Adresse",
+                partyConfirmationNotice: "📌 Die Buchung gilt erst nach Bestätigung durch Daniel.",
+                sendPartyRequest: "Anfrage senden",
+                partyDateRequired: "Bitte wähle das Datum der Veranstaltung.",
+                partyRequestedMsg: "🎉 Anfrage gesendet! Warte auf Bestätigung.",
+                partyRequestsTitle: "Party-Anfragen",
+                noPartyPending: "Keine offenen Anfragen 🎉",
+                accept: "Annehmen",
+                partyUpcomingTitle: "Nächste bestätigte Termine",
+                myPartyTitle: "Meine gebuchten Partys",
+                confirmAcceptParty: "Verfügbarkeit für {name} bestätigen?",
+                partyRejectReasonPrompt: "Grund für die Ablehnung (z.B.: Termin nicht verfügbar):",
+                partyRejectReasonDefault: "Termin nicht verfügbar",
+                partyConfirmedAlert: "✅ Deine Anfrage für {name} am {date} wurde bestätigt!",
+                partyRejectedAlert: "❌ Deine Anfrage für {name} wurde abgelehnt: {reason}",
+                partyConfirmedLabel: "Bestätigt",
+                partyRejectedLabel: "Abgelehnt",
+                partyPendingLabel: "Ausstehend",
+                partyPauseEnable: "Pausieren (außerhalb der Saison)",
                 tabMerch: "Merchandise",
                 merchPickupNotice: "🛍️ Abholung am Tresen.",
                 merchPickupLabel: "Abholung am Tresen",
@@ -4178,6 +4519,41 @@
 
                 soldOutLabel: "ÉPUISÉ",
 
+                tabParty: "Fêtes",
+                bookParty: "Réserver",
+                guestsLabel: "personnes",
+                party_summer: "Summer Party",
+                party_halloween: "Halloween Party",
+                party_xmas: "Xmas Party",
+                party_capodanno: "Soirée du Nouvel An",
+                party_compleanno: "Fête d’anniversaire",
+
+                party_bbq: "BBQ Festival",
+                partyNotIncluded: "Non inclus dans ce forfait",                partyDrinksLabel: "🍹 Boissons :",
+                partyFoodLabel: "🍿 À manger :",
+                partyDessertLabel: "🍰 Dessert :",
+                partyDecorLabel: "🎈 Décorations :",
+                partyGuestsLabel: "Nombre d'invités :",
+                partyDateLabel: "Date de l'événement :",
+                partyNotePlaceholder: "ex : allergies, heure, adresse",
+                partyConfirmationNotice: "📌 La réservation ne sera valable qu’après confirmation de Daniel.",
+                sendPartyRequest: "Envoyer la demande",
+                partyDateRequired: "Choisissez la date de l'événement.",
+                partyRequestedMsg: "🎉 Demande envoyée ! En attente de confirmation.",
+                partyRequestsTitle: "Demandes de fêtes",
+                noPartyPending: "Aucune demande en attente 🎉",
+                accept: "Accepter",
+                partyUpcomingTitle: "Prochains événements confirmés",
+                myPartyTitle: "Mes fêtes réservées",
+                confirmAcceptParty: "Confirmer la disponibilité pour {name} ?",
+                partyRejectReasonPrompt: "Motif du refus (ex : date indisponible) :",
+                partyRejectReasonDefault: "Date indisponible",
+                partyConfirmedAlert: "✅ Votre demande pour {name} le {date} a été confirmée !",
+                partyRejectedAlert: "❌ Votre demande pour {name} a été refusée : {reason}",
+                partyConfirmedLabel: "Confirmée",
+                partyRejectedLabel: "Refusée",
+                partyPendingLabel: "En attente",
+                partyPauseEnable: "Mettre en pause (hors saison)",
                 tabMerch: "Produits dérivés",
                 merchPickupNotice: "🛍️ À retirer au comptoir.",
                 merchPickupLabel: "Retrait au comptoir",
@@ -4405,6 +4781,41 @@
 
                 soldOutLabel: "ЗАКІНЧИВСЯ",
 
+                tabParty: "Свята",
+                bookParty: "Забронювати",
+                guestsLabel: "осіб",
+                party_summer: "Summer Party",
+                party_halloween: "Halloween Party",
+                party_xmas: "Xmas Party",
+                party_capodanno: "Новорічна вечірка",
+                party_compleanno: "День народження",
+
+                party_bbq: "BBQ Festival",
+                partyNotIncluded: "Не входить у цей пакет",                partyDrinksLabel: "🍹 Напої:",
+                partyFoodLabel: "🍿 Закуски:",
+                partyDessertLabel: "🍰 Десерт:",
+                partyDecorLabel: "🎈 Декор:",
+                partyGuestsLabel: "Кількість гостей:",
+                partyDateLabel: "Дата події:",
+                partyNotePlaceholder: "напр.: алергії, час, адреса",
+                partyConfirmationNotice: "📌 Бронювання дійсне лише після підтвердження Денні.",
+                sendPartyRequest: "Надіслати запит",
+                partyDateRequired: "Оберіть дату події.",
+                partyRequestedMsg: "🎉 Запит надіслано! Очікується підтвердження.",
+                partyRequestsTitle: "Запити на свята",
+                noPartyPending: "Немає запитів в очікуванні 🎉",
+                accept: "Прийняти",
+                partyUpcomingTitle: "Найближчі підтверджені події",
+                myPartyTitle: "Мої заброньовані свята",
+                confirmAcceptParty: "Підтвердити наявність для {name}?",
+                partyRejectReasonPrompt: "Причина відмови (напр.: дата недоступна):",
+                partyRejectReasonDefault: "Дата недоступна",
+                partyConfirmedAlert: "✅ Ваш запит для {name} на {date} підтверджено!",
+                partyRejectedAlert: "❌ Ваш запит для {name} відхилено: {reason}",
+                partyConfirmedLabel: "Підтверджено",
+                partyRejectedLabel: "Відхилено",
+                partyPendingLabel: "В очікуванні",
+                partyPauseEnable: "Призупинити (не в сезоні)",
                 tabMerch: "Мерч",
                 merchPickupNotice: "🛍️ Забрати на барній стійці.",
                 merchPickupLabel: "Забрати на стійці",
@@ -4631,6 +5042,41 @@
                 specialOffer: "PROMOÇÃO",
                 soldOutLabel: "ESGOTADO",
 
+                tabParty: "Festas",
+                bookParty: "Reservar",
+                guestsLabel: "pessoas",
+                party_summer: "Summer Party",
+                party_halloween: "Halloween Party",
+                party_xmas: "Xmas Party",
+                party_capodanno: "Festa de Ano Novo",
+                party_compleanno: "Festa de Aniversário",
+
+                party_bbq: "BBQ Festival",
+                partyNotIncluded: "Não incluído neste pacote",                partyDrinksLabel: "🍹 Bebidas:",
+                partyFoodLabel: "🍿 Para comer:",
+                partyDessertLabel: "🍰 Sobremesa:",
+                partyDecorLabel: "🎈 Decorações:",
+                partyGuestsLabel: "Número de convidados:",
+                partyDateLabel: "Data do evento:",
+                partyNotePlaceholder: "ex.: alergias, horário, morada",
+                partyConfirmationNotice: "📌 A reserva só é válida após a confirmação do Daniel.",
+                sendPartyRequest: "Enviar pedido",
+                partyDateRequired: "Escolha a data do evento.",
+                partyRequestedMsg: "🎉 Pedido enviado! A aguardar confirmação.",
+                partyRequestsTitle: "Pedidos de festas",
+                noPartyPending: "Sem pedidos pendentes 🎉",
+                accept: "Aceitar",
+                partyUpcomingTitle: "Próximos eventos confirmados",
+                myPartyTitle: "As minhas festas reservadas",
+                confirmAcceptParty: "Confirmar disponibilidade para {name}?",
+                partyRejectReasonPrompt: "Motivo da recusa (ex.: data indisponível):",
+                partyRejectReasonDefault: "Data indisponível",
+                partyConfirmedAlert: "✅ O seu pedido para {name} em {date} foi confirmado!",
+                partyRejectedAlert: "❌ O seu pedido para {name} foi recusado: {reason}",
+                partyConfirmedLabel: "Confirmada",
+                partyRejectedLabel: "Recusada",
+                partyPendingLabel: "Pendente",
+                partyPauseEnable: "Pausar (fora de época)",
                 tabMerch: "Merchandising",
                 merchPickupNotice: "🛍️ Para levantar no balcão.",
                 merchPickupLabel: "Levantamento no balcão",
@@ -5633,6 +6079,7 @@
                 lowStockThreshold: 2,
                 amazonLinks: {}, // link salvati per il riordino rapido su Amazon
                 choreItems: buildDefaultChorePricing(),
+                partyItems: buildDefaultPartyPricing(),
                 service: {
                     manualOverride: null,
                     hours: {
@@ -5878,6 +6325,7 @@
                     if (typeof data.lowStockThreshold === 'number') merged.lowStockThreshold = data.lowStockThreshold;
                     if (data.amazonLinks) merged.amazonLinks = data.amazonLinks;
                     if (data.choreItems) merged.choreItems = { ...merged.choreItems, ...data.choreItems };
+                    if (data.partyItems) merged.partyItems = { ...merged.partyItems, ...data.partyItems };
                     if (data.service) {
                         merged.service = {
                             manualOverride: (data.service.manualOverride === undefined) ? null : data.service.manualOverride,
@@ -7050,6 +7498,41 @@
                     </div>`;
             };
 
+            // Sezione pacchetti festa: prezzo per ciascuna delle 3 fasce
+            // di invitati, più la pausa per un tema fuori stagione.
+            const buildPartySection = () => {
+                const rows = partyPackages.map(p => {
+                    const item = (pricing.partyItems && pricing.partyItems[p.id]) || { tiers: [80, 150, 210], paused: false };
+                    const tierRows = PARTY_GUEST_TIERS.map((guests, i) => `
+                        <div class="price-row">
+                            <span class="price-variant">${guests} ${t('guestsLabel')}</span>
+                            <input type="number" step="5" min="0" data-party-tier="${p.id}" data-tier-index="${i}" value="${(item.tiers[i] ?? 0).toFixed(2)}">
+                            <span class="price-currency">€</span>
+                        </div>`).join('');
+                    return `
+                        <div class="price-card${item.paused ? ' price-card-soldout' : ''}">
+                            <div class="price-card-header">
+                                <span>${p.icon} <strong>${t('party_' + p.id)}</strong></span>
+                                <label class="soldout-toggle" style="margin:0;">
+                                    <input type="checkbox" data-party-pause="${p.id}" ${item.paused ? 'checked' : ''}>
+                                    <span>⏸️ ${t('partyPauseEnable')}</span>
+                                </label>
+                            </div>
+                            ${tierRows}
+                        </div>`;
+                }).join('');
+
+                return `
+                    <div class="price-section collapsed" id="section-party">
+                        <button type="button" class="price-section-toggle" onclick="togglePriceSection('party')">
+                            <span>🎉 ${t('tabParty')}</span>
+                            <span class="ps-count">${partyPackages.length}</span>
+                            <span class="pc-chevron">▾</span>
+                        </button>
+                        <div class="price-section-body" id="sectionBody-party">${rows}</div>
+                    </div>`;
+            };
+
             const buildIngredientsSection = () => {
                 const stock = pricing.ingredientStock || {};
                 const links = pricing.amazonLinks || {};
@@ -7098,7 +7581,8 @@
                 buildSection('tabDesserts', '🍰', desserts, false) +
                 buildSection('tabMerch', '🛍️', merch, false) +
                 buildIngredientsSection() +
-                buildChoresSection();
+                buildChoresSection() +
+                buildPartySection();
 
             const ts = pricing.timeSurcharge || {};
             document.getElementById('surchargeNow').value = (ts['Subito'] ?? 1).toFixed(2);
@@ -7189,6 +7673,21 @@
                 if (choreItems[id]) choreItems[id].paused = input.checked;
             });
             updated.choreItems = choreItems;
+
+            // Prezzi e pausa dei pacchetti festa
+            const partyItems = {};
+            partyPackages.forEach(p => { partyItems[p.id] = { tiers: [80, 150, 210], paused: false }; });
+            document.querySelectorAll('#priceListForm input[data-party-tier]').forEach(input => {
+                const id = input.getAttribute('data-party-tier');
+                const idx = parseInt(input.getAttribute('data-tier-index'), 10);
+                const val = parseFloat(input.value);
+                if (partyItems[id]) partyItems[id].tiers[idx] = isNaN(val) ? 0 : val;
+            });
+            document.querySelectorAll('#priceListForm input[data-party-pause]').forEach(input => {
+                const id = input.getAttribute('data-party-pause');
+                if (partyItems[id]) partyItems[id].paused = input.checked;
+            });
+            updated.partyItems = partyItems;
 
             const thrEl = document.getElementById('lowStockThreshold');
             if (thrEl) {
@@ -7342,6 +7841,13 @@
             // niente prezzo a fasce, solo una mancia fissa.
             if (currentCategory === 'chores') {
                 renderChoreCards(grid);
+                return;
+            }
+
+            // I pacchetti festa sono prenotazioni, non ordini immediati:
+            // catalogo e modale sono completamente diversi dal resto.
+            if (currentCategory === 'party') {
+                renderPartyCards(grid);
                 return;
             }
 
@@ -7588,6 +8094,281 @@
                     </div>
                     <span class="chore-status ${c.done ? 'chore-status-done' : ''}">${c.done ? '✅ ' + t('choreDoneLabel') : '⏳ ' + t('choreTodoLabel')}</span>
                 </div>`).join('');
+        }
+
+        // Card di un pacchetto festa: mostra cosa contiene e il prezzo
+        // di partenza (fascia più economica), pulsante "Prenota".
+        function renderPartyCards(grid) {
+            grid.innerHTML = partyPackages.map(p => {
+                const paused = isPartyPaused(p.id);
+                const fromPrice = formatPrice(getPartyTierPrice(p.id, 0));
+                const badge = paused ? `<div class="soldout-ribbon closed-ribbon">${t('choresPausedButton')}</div>` : '';
+                const openHandler = paused ? '' : ` onclick="openPartyModal('${p.id}')"`;
+                const contents = [...p.drinks, ...p.food, ...p.dessert].slice(0, 3).join(', ');
+                return `
+                <div class="cocktail-card${paused ? ' cocktail-soldout' : ''}"${openHandler}>
+                    ${badge}
+                    <div class="cocktail-icon">${p.icon}</div>
+                    <div class="cocktail-info">
+                        <div class="cocktail-name">${t('party_' + p.id)}</div>
+                        <div class="cocktail-description">${contents}...</div>
+                        <div class="cocktail-price">${t('fromPrice')} ${fromPrice}</div>
+                    </div>
+                    ${paused
+                        ? `<button class="order-btn order-btn-disabled" disabled>${t('choresPausedButton')}</button>`
+                        : `<button class="order-btn" onclick="event.stopPropagation(); openPartyModal('${p.id}')">${t('bookParty')}</button>`}
+                </div>`;
+            }).join('');
+        }
+
+        // =============================================
+        // PRENOTAZIONE PACCHETTI FESTA
+        // Diversamente da tutto il resto: qui si sceglie una data futura
+        // e la richiesta resta "in attesa" finché Daniel non conferma
+        // la disponibilità (o la rifiuta con un motivo).
+        // =============================================
+        let selectedPartyId = null;
+        let selectedPartyTier = 0;
+        let partyBookings_data = [];
+
+        function openPartyModal(partyId) {
+            const party = partyById(partyId);
+            if (!party) return;
+            selectedPartyId = partyId;
+            selectedPartyTier = 0;
+
+            document.getElementById('partyModalIcon').textContent = party.icon;
+            document.getElementById('partyModalName').textContent = t('party_' + partyId);
+            document.getElementById('partyDrinks').textContent = party.drinks.join(', ');
+            document.getElementById('partyFood').textContent = party.food.join(', ');
+            // Non tutti i pacchetti hanno un dolce (es. il BBQ): un testo
+            // di riserva invece di lasciare la riga vuota.
+            document.getElementById('partyDessert').textContent = party.dessert.length ? party.dessert.join(', ') : t('partyNotIncluded');
+            document.getElementById('partyDecor').textContent = party.decor;
+            document.getElementById('partyNote').value = '';
+
+            // Data minima: da domani in poi, non ha senso prenotare per oggi
+            const tomorrow = new Date(Date.now() + 86400000);
+            const dateInput = document.getElementById('partyDate');
+            dateInput.min = tomorrow.toISOString().split('T')[0];
+            dateInput.value = '';
+
+            renderPartyTierButtons(partyId);
+            document.getElementById('partyModal').classList.add('active');
+        }
+
+        function renderPartyTierButtons(partyId) {
+            const box = document.getElementById('partyTierButtons');
+            box.innerHTML = PARTY_GUEST_TIERS.map((guests, i) => `
+                <button type="button" class="variant-btn party-tier-btn${i === selectedPartyTier ? ' selected' : ''}"
+                        onclick="selectPartyTier(${i})">
+                    ${guests} ${t('guestsLabel')}<br><strong>${formatPrice(getPartyTierPrice(partyId, i))}</strong>
+                </button>
+            `).join('');
+        }
+
+        function selectPartyTier(tierIndex) {
+            selectedPartyTier = tierIndex;
+            renderPartyTierButtons(selectedPartyId);
+        }
+
+        function closePartyModal() {
+            document.getElementById('partyModal').classList.remove('active');
+            selectedPartyId = null;
+        }
+
+        async function confirmPartyBooking() {
+            const party = partyById(selectedPartyId);
+            if (!party) return;
+
+            const eventDate = document.getElementById('partyDate').value;
+            if (!eventDate) {
+                alert(t('partyDateRequired'));
+                return;
+            }
+
+            const note = document.getElementById('partyNote').value.trim();
+            const guests = PARTY_GUEST_TIERS[selectedPartyTier];
+            const price = formatPrice(getPartyTierPrice(selectedPartyId, selectedPartyTier));
+            const now = new Date();
+
+            const booking = {
+                id: Date.now(),
+                partyId: party.id,
+                partyName: translations.it['party_' + party.id] || party.name, // salvato in italiano: lo vede Daniel
+                icon: party.icon,
+                guests: guests,
+                price: price,
+                eventDate: eventDate,
+                note: note,
+                requestedBy: customerName,
+                userId: getUserId(customerName),
+                requestedAt: Date.now(),
+                requestedDate: now.toLocaleDateString('it-IT'),
+                status: 'pending'
+            };
+
+            partyBookings_data.unshift(booking);
+            closePartyModal();
+
+            if (cloudReady()) {
+                try {
+                    await firestoreDb.collection('partyBookings').doc(String(booking.id)).set(booking);
+                } catch (error) {
+                    console.log('Errore salvataggio prenotazione:', error);
+                }
+            }
+
+            let message = `🎉 *RICHIESTA PACCHETTO FESTA*\n\n`;
+            message += `📋 *Pacchetto:* ${booking.icon} ${booking.partyName}\n`;
+            message += `👤 *Richiesto da:* ${customerName}\n`;
+            message += `📅 *Data evento:* ${new Date(eventDate).toLocaleDateString('it-IT')}\n`;
+            message += `👥 *Invitati:* ${guests}\n`;
+            message += `💰 *Prezzo:* ${price}\n`;
+            if (note) message += `📝 *Note:* ${note}\n`;
+            message += `\n➡️ Conferma o rifiuta la disponibilità nell'app!`;
+            openWhatsApp(ADMIN_PHONE, encodeURIComponent(message));
+
+            renderPartyPanels();
+
+            const successMsg = document.getElementById('successMessage');
+            successMsg.textContent = t('partyRequestedMsg');
+            successMsg.classList.add('show');
+            setTimeout(() => successMsg.classList.remove('show'), 3500);
+        }
+
+        // Carica le prenotazioni dal cloud
+        async function loadPartyBookingsFromCloud() {
+            if (!cloudReady()) return;
+            try {
+                const snapshot = await firestoreDb.collection('partyBookings').get();
+                partyBookings_data = snapshot.docs.map(d => d.data()).sort((a, b) => b.requestedAt - a.requestedAt);
+                renderPartyPanels();
+            } catch (error) {
+                console.log('Prenotazioni feste non disponibili:', error);
+            }
+        }
+
+        // L'admin accetta: la data è confermata
+        async function acceptPartyBooking(id) {
+            const booking = partyBookings_data.find(b => b.id === id);
+            if (!booking) return;
+            if (!confirm(t('confirmAcceptParty').replace('{name}', booking.partyName))) return;
+
+            booking.status = 'confirmed';
+            renderPartyPanels();
+            if (cloudReady()) {
+                try { await firestoreDb.collection('partyBookings').doc(String(id)).update({ status: 'confirmed' }); }
+                catch (error) { console.log('Errore conferma festa:', error); }
+            }
+        }
+
+        // L'admin rifiuta: chiede un motivo breve (data non disponibile, ecc.)
+        async function rejectPartyBooking(id) {
+            const booking = partyBookings_data.find(b => b.id === id);
+            if (!booking) return;
+            const reason = prompt(t('partyRejectReasonPrompt'));
+            if (reason === null) return; // annullato
+
+            booking.status = 'rejected';
+            booking.rejectReason = reason || t('partyRejectReasonDefault');
+            renderPartyPanels();
+            if (cloudReady()) {
+                try {
+                    await firestoreDb.collection('partyBookings').doc(String(id)).update({
+                        status: 'rejected',
+                        rejectReason: booking.rejectReason
+                    });
+                } catch (error) { console.log('Errore rifiuto festa:', error); }
+            }
+        }
+
+        // Il cliente scopre l'esito (confermata/rifiutata) e la richiesta
+        // sparisce dalla sua vista dopo l'avviso, come per i pagamenti.
+        async function checkMyPartyBookingsStatus() {
+            if (!customerName || isAdmin()) return;
+            const mine = partyBookings_data.filter(b => b.userId === getUserId(customerName));
+            const seen = JSON.parse(localStorage.getItem('seenPartyResolutions') || '[]');
+
+            for (const b of mine) {
+                if (b.status === 'confirmed' && !seen.includes(b.id)) {
+                    alert(t('partyConfirmedAlert').replace('{name}', b.partyName).replace('{date}', new Date(b.eventDate).toLocaleDateString('it-IT')));
+                    seen.push(b.id);
+                } else if (b.status === 'rejected' && !seen.includes(b.id)) {
+                    alert(t('partyRejectedAlert').replace('{name}', b.partyName).replace('{reason}', b.rejectReason || ''));
+                    seen.push(b.id);
+                }
+            }
+            localStorage.setItem('seenPartyResolutions', JSON.stringify(seen));
+        }
+
+        function renderPartyPanels() {
+            renderAdminPartyPanel();
+            renderMyPartyPanel();
+        }
+
+        function renderAdminPartyPanel() {
+            const panel = document.getElementById('adminPartyPanel');
+            if (!panel) return;
+            if (!isAdmin()) { panel.style.display = 'none'; return; }
+
+            const pending = partyBookings_data.filter(b => b.status === 'pending');
+            const confirmed = partyBookings_data.filter(b => b.status === 'confirmed')
+                .sort((a, b) => new Date(a.eventDate) - new Date(b.eventDate));
+
+            if (pending.length === 0 && confirmed.length === 0) { panel.style.display = 'none'; return; }
+            panel.style.display = 'block';
+            document.getElementById('partyPendingCount').textContent = pending.length;
+
+            document.getElementById('partyPendingList').innerHTML = pending.length
+                ? pending.map(b => `
+                    <div class="chore-row">
+                        <div class="chore-row-info">
+                            <strong>${b.icon} ${b.partyName}</strong> — <span class="chore-tip">${b.price}</span><br>
+                            <small>${t('requestedBy')} ${b.requestedBy} · 📅 ${new Date(b.eventDate).toLocaleDateString('it-IT')} · 👥 ${b.guests}</small>
+                            ${b.note ? `<br><small>📝 ${b.note}</small>` : ''}
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:6px;">
+                            <button class="chore-done-btn" onclick="acceptPartyBooking(${b.id})">✓ ${t('accept')}</button>
+                            <button class="reject-btn" onclick="rejectPartyBooking(${b.id})">🚫 ${t('rejectOrder')}</button>
+                        </div>
+                    </div>`).join('')
+                : `<p class="ing-help">${t('noPartyPending')}</p>`;
+
+            const upcomingBox = document.getElementById('partyUpcomingBox');
+            if (confirmed.length > 0) {
+                upcomingBox.style.display = 'block';
+                document.getElementById('partyUpcomingList').innerHTML = confirmed.map(b =>
+                    `<div class="chore-payout-item">📅 ${new Date(b.eventDate).toLocaleDateString('it-IT')} — ${b.icon} ${b.partyName} (${b.guests} ${t('guestsLabel')}) <em>${b.requestedBy}</em></div>`
+                ).join('');
+            } else {
+                upcomingBox.style.display = 'none';
+            }
+        }
+
+        function renderMyPartyPanel() {
+            const panel = document.getElementById('myPartyPanel');
+            if (!panel) return;
+            if (isAdmin() || !customerName) { panel.style.display = 'none'; return; }
+
+            const mine = partyBookings_data.filter(b => b.userId === getUserId(customerName));
+            if (mine.length === 0) { panel.style.display = 'none'; return; }
+
+            panel.style.display = 'block';
+            document.getElementById('myPartyList').innerHTML = mine.map(b => {
+                const statusLabel = b.status === 'confirmed' ? '✅ ' + t('partyConfirmedLabel')
+                    : b.status === 'rejected' ? '❌ ' + t('partyRejectedLabel')
+                    : '⏳ ' + t('partyPendingLabel');
+                const statusClass = b.status === 'confirmed' ? 'chore-status-done' : '';
+                return `
+                <div class="chore-row">
+                    <div class="chore-row-info">
+                        <strong>${b.icon} ${t('party_' + b.partyId)}</strong> — <span class="chore-tip">${b.price}</span><br>
+                        <small>📅 ${new Date(b.eventDate).toLocaleDateString('it-IT')} · 👥 ${b.guests} ${t('guestsLabel')}</small>
+                    </div>
+                    <span class="chore-status ${statusClass}">${statusLabel}</span>
+                </div>`;
+            }).join('');
         }
 
         function openOrderModal(cocktailName) {
@@ -9048,6 +9829,9 @@
                 // se Daniel ne ha rifiutato uno.
                 loadOrdersFromCloud();
                 loadChoresFromCloud();
+                loadPartyBookingsFromCloud().then(() => {
+                    if (!isAdmin()) checkMyPartyBookingsStatus();
+                });
             };
             poll();
             setInterval(poll, 15000); // ogni 15 secondi
@@ -9085,6 +9869,7 @@
         startPaymentPolling();
         startPricingPolling(); // Tiene il listino allineato con quello dell'admin
         loadChoresFromCloud(); // Carica i lavoretti assegnati
+        loadPartyBookingsFromCloud(); // Carica le prenotazioni feste
         renderLowStockPanel(); // Avvisi scorte per l'admin
         syncPendingOrders(); // Invia gli ordini rimasti in coda da sessioni offline
         initDanny();         // Attiva il barista virtuale
@@ -9102,7 +9887,8 @@
             guideModal: closeGuide,
             choreModal: closeChoreModal,
             topupModal: closeTopupModal,
-            walletChoiceModal: closeWalletChoiceModal
+            walletChoiceModal: closeWalletChoiceModal,
+            partyModal: closePartyModal
         };
 
         Object.keys(MODAL_CLOSERS).forEach(id => {
