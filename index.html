@@ -2431,6 +2431,7 @@
                     <p><strong>💰 Il pagamento:</strong> quando tocchi <strong>✓ Accetta</strong>, l'app crea automaticamente un ordine per l'intero importo del pacchetto nello storico del cliente — esattamente come se avesse ordinato un cocktail. Lo salda con lo stesso <strong>"Paga e chiudi conto"</strong> di sempre: contanti (con la tua conferma) oppure carta prepagata, con lo sconto fedeltà del 10% se ha saldo disponibile.</p>
                     <p><strong>👀 Visibilità:</strong> gli eventi confermati compaiono in un pannello <strong>"Prossimi eventi in programma"</strong> visibile a tutta la famiglia, non solo a chi ha prenotato — così tutti sanno cosa è in calendario.</p>
                     <p><strong>🚫 Annullare un evento già confermato:</strong> per un imprevisto (maltempo, problema personale...) tocca <strong>Annulla evento</strong> sotto la scheda dell'evento. Ti viene chiesto un motivo breve: il cliente lo vede, e l'eventuale ordine di pagamento già creato viene rimosso automaticamente — non resta a dover pagare qualcosa che non si farà.</p>
+                    <p><strong>✏️ Modifiche del cliente:</strong> finché una richiesta è "in attesa", il cliente può correggere fascia invitati, data, orario e note dal suo pannello. Ricevi un WhatsApp di aggiornamento: verifica di nuovo la disponibilità sui nuovi dati prima di accettare.</p>
                     <p><strong>📋 Checklist preparazione e pulizia:</strong> ogni evento confermato ha due checklist proprie, con spunta. <em>Prepara evento</em> copre scorte, bancone, tavoli, decorazioni, bagni. <em>Pulizia e ripristino</em> copre pavimenti, bagni, bancone, spazzatura, bicchieri, disallestimento. I progressi restano salvati anche se chiudi l'app.</p>
                     <p><strong>Nel listino</strong> (sezione 🎉 Feste) puoi cambiare il prezzo di ogni fascia per ogni pacchetto, e metterne uno in pausa con ⏸️ se è fuori stagione (es. Xmas Party a luglio).</p>
                     <p class="guide-warn">⚠️ L'app non controlla automaticamente se una data è già impegnata: la verifica di disponibilità è manuale, sei tu a saperlo.</p>
@@ -2452,9 +2453,76 @@
         </div>
     </div>
 
+    <!-- Guida per i clienti (tutte le lingue, come il resto dell'app) -->
+    <div class="modal" id="userGuideModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeUserGuide()" aria-label="Chiudi">✕</button>
+            <h2 data-i18n="userGuideTitle">📖 Guida all'app</h2>
+            <p style="color:var(--dusk-soft); font-size:0.85em; margin-bottom:16px;" data-i18n="userGuideSubtitle">
+                Tutto quello che puoi fare da qui. Tocca una sezione per aprirla.
+            </p>
+
+            <div class="guide-section collapsed" id="uguide-order">
+                <button type="button" class="guide-toggle" onclick="toggleUserGuide('order')">
+                    <span data-i18n="userGuideOrderTitle">🍹 Come ordinare</span><span class="pc-chevron">▾</span>
+                </button>
+                <div class="guide-body" data-i18n="userGuideOrderBody"></div>
+            </div>
+
+            <div class="guide-section collapsed" id="uguide-pay">
+                <button type="button" class="guide-toggle" onclick="toggleUserGuide('pay')">
+                    <span data-i18n="userGuidePayTitle">💳 Come si paga</span><span class="pc-chevron">▾</span>
+                </button>
+                <div class="guide-body" data-i18n="userGuidePayBody"></div>
+            </div>
+
+            <div class="guide-section collapsed" id="uguide-chores">
+                <button type="button" class="guide-toggle" onclick="toggleUserGuide('chores')">
+                    <span data-i18n="userGuideChoresTitle">🧹 Lavoretti per Daniel</span><span class="pc-chevron">▾</span>
+                </button>
+                <div class="guide-body" data-i18n="userGuideChoresBody"></div>
+            </div>
+
+            <div class="guide-section collapsed" id="uguide-party">
+                <button type="button" class="guide-toggle" onclick="toggleUserGuide('party')">
+                    <span data-i18n="userGuidePartyTitle">🎉 Prenotare una festa</span><span class="pc-chevron">▾</span>
+                </button>
+                <div class="guide-body" data-i18n="userGuidePartyBody"></div>
+            </div>
+
+            <div class="guide-section collapsed" id="uguide-reviews">
+                <button type="button" class="guide-toggle" onclick="toggleUserGuide('reviews')">
+                    <span data-i18n="userGuideReviewsTitle">⭐ Recensioni</span><span class="pc-chevron">▾</span>
+                </button>
+                <div class="guide-body" data-i18n="userGuideReviewsBody"></div>
+            </div>
+
+            <div class="guide-section collapsed" id="uguide-share">
+                <button type="button" class="guide-toggle" onclick="toggleUserGuide('share')">
+                    <span data-i18n="userGuideShareTitle">📤 Invita un amico</span><span class="pc-chevron">▾</span>
+                </button>
+                <div class="guide-body" data-i18n="userGuideShareBody"></div>
+            </div>
+
+            <div class="guide-section collapsed" id="uguide-offline">
+                <button type="button" class="guide-toggle" onclick="toggleUserGuide('offline')">
+                    <span data-i18n="userGuideOfflineTitle">📡 Se manca la connessione</span><span class="pc-chevron">▾</span>
+                </button>
+                <div class="guide-body" data-i18n="userGuideOfflineBody"></div>
+            </div>
+
+            <div class="guide-section collapsed" id="uguide-danny">
+                <button type="button" class="guide-toggle" onclick="toggleUserGuide('danny')">
+                    <span data-i18n="userGuideDannyTitle">🍹 Danny</span><span class="pc-chevron">▾</span>
+                </button>
+                <div class="guide-body" data-i18n="userGuideDannyBody"></div>
+            </div>
+        </div>
+    </div>
+
     <div id="danny" class="danny" style="display:none;">
-        <!-- Guida admin: sopra Danny, visibile solo a Daniel -->
-        <button id="helpBtn" class="help-btn" onclick="openGuide()" style="display:none;" aria-label="Guida" title="Guida">❓</button>
+        <!-- Un solo pulsante ❓ per tutti: guida admin per Daniel, guida d'uso per i clienti -->
+        <button id="helpBtn" class="help-btn" onclick="openHelp()" style="display:none;" aria-label="Guida" title="Guida">❓</button>
         <div id="dannyBubble" class="danny-bubble" style="display:none;">
             <button class="danny-close" onclick="dismissDanny()" aria-label="Chiudi">✕</button>
             <div id="dannyText" class="danny-text"></div>
@@ -2727,15 +2795,20 @@
             </div>
 
             <div class="form-group">
-                <label data-i18n="choreNoteLabel">Note (opzionale):</label>
-                <input type="text" id="partyNote" data-i18n-placeholder="partyNotePlaceholder" placeholder="es: allergie, orario, indirizzo">
+                <label data-i18n="partyTimeLabel">Orario dell'evento:</label>
+                <input type="time" id="partyTime">
             </div>
 
-            <p style="font-size:0.78em; color:var(--dusk-soft); margin-bottom:14px;" data-i18n="partyConfirmationNotice">📌 La prenotazione sarà valida solo dopo la conferma di Daniel.</p>
+            <div class="form-group">
+                <label data-i18n="choreNoteLabel">Note (opzionale):</label>
+                <input type="text" id="partyNote" data-i18n-placeholder="partyNotePlaceholder" placeholder="es: allergie, indirizzo">
+            </div>
+
+            <p id="partyConfirmationNotice" style="font-size:0.78em; color:var(--dusk-soft); margin-bottom:14px;" data-i18n="partyConfirmationNotice">📌 La prenotazione sarà valida solo dopo la conferma di Daniel.</p>
 
             <div class="btn-group">
                 <button class="btn btn-secondary" onclick="closePartyModal()" data-i18n="cancel">Annulla</button>
-                <button class="btn btn-primary" onclick="confirmPartyBooking()" data-i18n="sendPartyRequest">Invia richiesta</button>
+                <button class="btn btn-primary" id="partyConfirmBtn" onclick="confirmPartyBooking()" data-i18n="sendPartyRequest">Invia richiesta</button>
             </div>
         </div>
     </div>
@@ -3529,6 +3602,34 @@
 
                 soldOutLabel: "ESAURITO",
 
+                rebookParty: "Proponi nuova data",
+                rebookPartyConfirm: "Invia nuova data",
+                partyRebookNotice: "🔄 Stai riproponendo questa festa con una nuova data. Daniel dovrà confermarla di nuovo.",
+                partyRebookedMsg: "🔄 Nuova data proposta! In attesa di conferma.",
+                partyTimeLabel: "Orario dell'evento:",
+                partyTimeRequired: "Scegli l'orario dell'evento.",
+                editParty: "Modifica",
+                updatePartyRequest: "Aggiorna richiesta",
+                partyEditingNotice: "✏️ Stai modificando la tua richiesta. Daniel vedrà i nuovi dati.",
+                partyUpdatedMsg: "✏️ Richiesta aggiornata!",
+                userGuideTitle: "📖 Guida all'app",
+                userGuideSubtitle: "Tutto quello che puoi fare da qui. Tocca una sezione per aprirla.",
+                userGuideOrderTitle: "🍹 Come ordinare",
+                userGuideOrderBody: "<p>Scegli una categoria dalle schede in alto (Cocktail, Snack, Soft drink, Dolci, Merchandising...) e tocca il prodotto che vuoi.</p><p>Scegli la variante, la posizione (dove sei, in casa, in giardino) e l'orario preferito, poi tocca <strong>Conferma Ordine</strong>. Il prezzo mostrato è già quello finale.</p><p>A volte compare qualche prodotto consigliato in abbinamento: puoi aggiungerlo con un tocco o ignorarlo, resta comunque opzionale.</p>",
+                userGuidePayTitle: "💳 Come si paga",
+                userGuidePayBody: "<p>I tuoi ordini restano nello <strong>storico</strong> finché non chiudi il conto. Quando hai finito, tocca <strong>Paga e chiudi conto</strong>.</p><p>Se hai un saldo sulla carta prepagata, puoi scegliere di pagare con quello e ottenere il <strong>10% di sconto</strong>. Altrimenti si paga in contanti: la richiesta parte e il conto si chiude quando Daniel conferma di aver ricevuto i soldi.</p><p>Per ricaricare la carta tocca <strong>+ Ricarica</strong> nel riquadro dorato, scegli l'importo e consegna i contanti a Daniel: il saldo comparirà appena lui conferma.</p>",
+                userGuideChoresTitle: "🧹 Lavoretti per Daniel",
+                userGuideChoresBody: "<p>Nella scheda <strong>Lavoretti</strong> puoi assegnare a Daniel piccoli compiti di casa (portare a spasso il cane, aspirapolvere...) con una mancia già indicata.</p><p>Segui lo stato nel pannello <strong>I miei lavoretti assegnati</strong>: resta \"da fare\" finché Daniel non lo segna completato.</p>",
+                userGuidePartyTitle: "🎉 Prenotare una festa",
+                userGuidePartyBody: "<p>Nella scheda <strong>Feste</strong> trovi pacchetti a tema (Summer, Halloween, Xmas, BBQ...) con drink, cibo e decorazioni già combinati.</p><p>Scegli il numero di invitati, la data e l'orario dell'evento, poi invia la richiesta: <strong>la prenotazione è valida solo dopo la conferma di Daniel</strong>, che verifica la disponibilità.</p><p>Finché la richiesta è in attesa puoi ancora <strong>modificarla</strong> (fascia, data, orario, note) dal pannello \"Le mie feste prenotate\". Una volta confermata, il conto del pacchetto compare nel tuo storico ordini come un ordine normale, e lo paghi allo stesso modo. Gli eventi confermati di tutta la famiglia si vedono nel pannello <strong>Prossimi eventi in programma</strong>.</p>",
+                userGuideReviewsTitle: "⭐ Recensioni",
+                userGuideReviewsBody: "<p>Tocca <strong>Lascia una recensione</strong> per valutare con le stelle e un commento. È pubblica: chiunque può leggerla in <strong>Leggi le recensioni</strong>.</p>",
+                userGuideShareTitle: "📤 Invita un amico",
+                userGuideShareBody: "<p>Tocca <strong>Invita un amico</strong> per condividere il link dell'app su WhatsApp o con il sistema di condivisione del telefono.</p>",
+                userGuideOfflineTitle: "📡 Se manca la connessione",
+                userGuideOfflineBody: "<p>Puoi continuare a ordinare anche senza rete: l'ordine resta segnato <strong>da inviare</strong> e parte da solo appena la connessione torna.</p>",
+                userGuideDannyTitle: "🍹 Danny",
+                userGuideDannyBody: "<p>Il barista virtuale in basso a destra suggerisce cosa ordinare, abbinamenti e promemoria. Toccalo quando vuoi un consiglio, oppure ✕ per chiuderlo.</p>",
                 publicPartyTitle: "Prossimi eventi in programma",
                 hostedBy: "Organizzato da",
                 prepChecklistBtn: "📋 Prepara evento",
@@ -3801,6 +3902,34 @@
 
                 soldOutLabel: "SOLD OUT",
 
+                rebookParty: "Propose new date",
+                rebookPartyConfirm: "Send new date",
+                partyRebookNotice: "🔄 You're re-proposing this party with a new date. Daniel will need to confirm it again.",
+                partyRebookedMsg: "🔄 New date proposed! Awaiting confirmation.",
+                partyTimeLabel: "Event time:",
+                partyTimeRequired: "Please choose the event time.",
+                editParty: "Edit",
+                updatePartyRequest: "Update request",
+                partyEditingNotice: "✏️ You're editing your request. Daniel will see the new details.",
+                partyUpdatedMsg: "✏️ Request updated!",
+                userGuideTitle: "📖 App guide",
+                userGuideSubtitle: "Everything you can do here. Tap a section to open it.",
+                userGuideOrderTitle: "🍹 How to order",
+                userGuideOrderBody: "<p>Pick a category from the tabs at the top (Cocktails, Snacks, Soft drinks, Desserts, Merchandise...) and tap the product you want.</p><p>Choose the variant, the location (where you are, at home, in the garden) and the preferred time, then tap <strong>Confirm Order</strong>. The price shown is already the final one.</p><p>Sometimes a matching product is suggested: you can add it with a tap or ignore it, it's always optional.</p>",
+                userGuidePayTitle: "💳 How to pay",
+                userGuidePayBody: "<p>Your orders stay in your <strong>history</strong> until you close the bill. When you're done, tap <strong>Pay and close bill</strong>.</p><p>If you have a balance on your prepaid card, you can choose to pay with it and get <strong>10% off</strong>. Otherwise you pay cash: the request is sent, and the bill closes once Daniel confirms he received the money.</p><p>To top up the card, tap <strong>+ Top up</strong> in the golden box, choose the amount and hand the cash to Daniel: the balance will appear as soon as he confirms.</p>",
+                userGuideChoresTitle: "🧹 Chores for Daniel",
+                userGuideChoresBody: "<p>In the <strong>Chores</strong> tab you can assign Daniel small household tasks (walking the dog, vacuuming...) with a tip already set.</p><p>Follow the status in the <strong>My assigned chores</strong> panel: it stays \"to do\" until Daniel marks it done.</p>",
+                userGuidePartyTitle: "🎉 Booking a party",
+                userGuidePartyBody: "<p>In the <strong>Parties</strong> tab you'll find themed packages (Summer, Halloween, Xmas, BBQ...) with drinks, food and decorations already bundled.</p><p>Choose the number of guests, the event date and time, then send the request: <strong>the booking is only valid once Daniel confirms it</strong>, checking availability.</p><p>While the request is pending you can still <strong>edit it</strong> (guest tier, date, time, notes) from the “My booked parties” panel. Once confirmed, the package bill appears in your order history like a normal order, and you pay it the same way. Confirmed events for the whole family are shown in the <strong>Upcoming events</strong> panel.</p>",
+                userGuideReviewsTitle: "⭐ Reviews",
+                userGuideReviewsBody: "<p>Tap <strong>Leave a review</strong> to rate with stars and a comment. It's public: anyone can read it under <strong>Read reviews</strong>.</p>",
+                userGuideShareTitle: "📤 Invite a friend",
+                userGuideShareBody: "<p>Tap <strong>Invite a friend</strong> to share the app link on WhatsApp or through your phone's share menu.</p>",
+                userGuideOfflineTitle: "📡 If the connection drops",
+                userGuideOfflineBody: "<p>You can keep ordering even without a network: the order stays marked <strong>to send</strong> and goes through on its own as soon as the connection returns.</p>",
+                userGuideDannyTitle: "🍹 Danny",
+                userGuideDannyBody: "<p>The virtual bartender in the bottom right suggests what to order, pairings and reminders. Tap it for a suggestion, or ✕ to close it.</p>",
                 publicPartyTitle: "Upcoming events",
                 hostedBy: "Hosted by",
                 prepChecklistBtn: "📋 Prepare event",
@@ -4073,6 +4202,34 @@
 
                 soldOutLabel: "AGOTADO",
 
+                rebookParty: "Proponer nueva fecha",
+                rebookPartyConfirm: "Enviar nueva fecha",
+                partyRebookNotice: "🔄 Estás reproponiendo esta fiesta con una nueva fecha. Daniel deberá confirmarla de nuevo.",
+                partyRebookedMsg: "🔄 ¡Nueva fecha propuesta! Esperando confirmación.",
+                partyTimeLabel: "Hora del evento:",
+                partyTimeRequired: "Elige la hora del evento.",
+                editParty: "Editar",
+                updatePartyRequest: "Actualizar solicitud",
+                partyEditingNotice: "✏️ Estás editando tu solicitud. Daniel verá los nuevos datos.",
+                partyUpdatedMsg: "✏️ ¡Solicitud actualizada!",
+                userGuideTitle: "📖 Guía de la app",
+                userGuideSubtitle: "Todo lo que puedes hacer aquí. Toca una sección para abrirla.",
+                userGuideOrderTitle: "🍹 Cómo pedir",
+                userGuideOrderBody: "<p>Elige una categoría en las pestañas de arriba (Cócteles, Aperitivos, Refrescos, Postres, Merchandising...) y toca el producto que quieras.</p><p>Elige la variante, la ubicación (donde estás, en casa, en el jardín) y la hora preferida, luego toca <strong>Confirmar Pedido</strong>. El precio mostrado ya es el final.</p><p>A veces aparece algún producto recomendado a juego: puedes añadirlo con un toque o ignorarlo, siempre es opcional.</p>",
+                userGuidePayTitle: "💳 Cómo se paga",
+                userGuidePayBody: "<p>Tus pedidos quedan en tu <strong>historial</strong> hasta que cierres la cuenta. Cuando termines, toca <strong>Pagar y cerrar cuenta</strong>.</p><p>Si tienes saldo en la tarjeta prepago, puedes elegir pagar con ella y obtener un <strong>10% de descuento</strong>. Si no, se paga en efectivo: la solicitud se envía y la cuenta se cierra cuando Daniel confirma que ha recibido el dinero.</p><p>Para recargar la tarjeta, toca <strong>+ Recargar</strong> en el recuadro dorado, elige el importe y entrega el efectivo a Daniel: el saldo aparecerá en cuanto confirme.</p>",
+                userGuideChoresTitle: "🧹 Tareas para Daniel",
+                userGuideChoresBody: "<p>En la pestaña <strong>Tareas</strong> puedes asignar a Daniel pequeñas tareas domésticas (pasear al perro, pasar la aspiradora...) con una propina ya indicada.</p><p>Sigue el estado en el panel <strong>Mis tareas asignadas</strong>: queda \"pendiente\" hasta que Daniel la marque como hecha.</p>",
+                userGuidePartyTitle: "🎉 Reservar una fiesta",
+                userGuidePartyBody: "<p>En la pestaña <strong>Fiestas</strong> encontrarás paquetes temáticos (Summer, Halloween, Xmas, BBQ...) con bebidas, comida y decoración ya combinadas.</p><p>Elige el número de invitados, la fecha y la hora del evento, luego envía la solicitud: <strong>la reserva solo es válida tras la confirmación de Daniel</strong>, que verifica la disponibilidad.</p><p>Mientras esté pendiente puedes <strong>editarla</strong> (aforo, fecha, hora, notas) desde el panel “Mis fiestas reservadas”. Una vez confirmada, la cuenta del paquete aparece en tu historial de pedidos como un pedido normal, y la pagas igual. Los eventos confirmados de toda la familia se ven en el panel <strong>Próximos eventos</strong>.</p>",
+                userGuideReviewsTitle: "⭐ Reseñas",
+                userGuideReviewsBody: "<p>Toca <strong>Dejar una reseña</strong> para valorar con estrellas y un comentario. Es pública: cualquiera puede leerla en <strong>Leer reseñas</strong>.</p>",
+                userGuideShareTitle: "📤 Invitar a un amigo",
+                userGuideShareBody: "<p>Toca <strong>Invitar a un amigo</strong> para compartir el enlace de la app por WhatsApp o con el menú de compartir del teléfono.</p>",
+                userGuideOfflineTitle: "📡 Si falla la conexión",
+                userGuideOfflineBody: "<p>Puedes seguir pidiendo incluso sin red: el pedido queda marcado <strong>por enviar</strong> y se envía solo en cuanto vuelva la conexión.</p>",
+                userGuideDannyTitle: "🍹 Danny",
+                userGuideDannyBody: "<p>El barman virtual abajo a la derecha sugiere qué pedir, combinaciones y recordatorios. Tócalo para un consejo, o ✕ para cerrarlo.</p>",
                 publicPartyTitle: "Próximos eventos",
                 hostedBy: "Organizado por",
                 prepChecklistBtn: "📋 Preparar evento",
@@ -4345,6 +4502,34 @@
 
                 soldOutLabel: "AUSVERKAUFT",
 
+                rebookParty: "Neuen Termin vorschlagen",
+                rebookPartyConfirm: "Neuen Termin senden",
+                partyRebookNotice: "🔄 Du schlägst für diese Party einen neuen Termin vor. Daniel muss ihn erneut bestätigen.",
+                partyRebookedMsg: "🔄 Neuer Termin vorgeschlagen! Warte auf Bestätigung.",
+                partyTimeLabel: "Uhrzeit der Veranstaltung:",
+                partyTimeRequired: "Bitte wähle die Uhrzeit der Veranstaltung.",
+                editParty: "Bearbeiten",
+                updatePartyRequest: "Anfrage aktualisieren",
+                partyEditingNotice: "✏️ Du bearbeitest deine Anfrage. Daniel sieht die neuen Angaben.",
+                partyUpdatedMsg: "✏️ Anfrage aktualisiert!",
+                userGuideTitle: "📖 App-Anleitung",
+                userGuideSubtitle: "Alles, was du hier tun kannst. Tippe auf einen Abschnitt, um ihn zu öffnen.",
+                userGuideOrderTitle: "🍹 So bestellst du",
+                userGuideOrderBody: "<p>Wähle oben eine Kategorie (Cocktails, Snacks, Softdrinks, Desserts, Merchandise...) und tippe auf das gewünschte Produkt.</p><p>Wähle die Variante, den Ort (wo du bist, zu Hause, im Garten) und die gewünschte Zeit, dann tippe auf <strong>Bestellung bestätigen</strong>. Der angezeigte Preis ist bereits der Endpreis.</p><p>Manchmal wird ein passendes Produkt vorgeschlagen: du kannst es mit einem Tipp hinzufügen oder ignorieren, es ist immer optional.</p>",
+                userGuidePayTitle: "💳 So bezahlst du",
+                userGuidePayBody: "<p>Deine Bestellungen bleiben in deinem <strong>Verlauf</strong>, bis du die Rechnung schließt. Wenn du fertig bist, tippe auf <strong>Bezahlen und Rechnung schließen</strong>.</p><p>Hast du Guthaben auf der Prepaid-Karte, kannst du damit bezahlen und erhältst <strong>10% Rabatt</strong>. Sonst zahlst du bar: die Anfrage wird gesendet, und die Rechnung schließt, sobald Daniel den Geldeingang bestätigt.</p><p>Zum Aufladen tippe auf <strong>+ Aufladen</strong> im goldenen Kasten, wähle den Betrag und gib Daniel das Bargeld: das Guthaben erscheint, sobald er bestätigt.</p>",
+                userGuideChoresTitle: "🧹 Aufgaben für Daniel",
+                userGuideChoresBody: "<p>Im Tab <strong>Aufgaben</strong> kannst du Daniel kleine Hausaufgaben zuweisen (Hund ausführen, Staubsaugen...) mit bereits festgelegtem Trinkgeld.</p><p>Verfolge den Status im Panel <strong>Meine zugewiesenen Aufgaben</strong>: bleibt „offen“, bis Daniel sie als erledigt markiert.</p>",
+                userGuidePartyTitle: "🎉 Eine Party buchen",
+                userGuidePartyBody: "<p>Im Tab <strong>Partys</strong> findest du thematische Pakete (Summer, Halloween, Xmas, BBQ...) mit bereits kombinierten Getränken, Essen und Deko.</p><p>Wähle die Gästezahl, das Datum und die Uhrzeit der Veranstaltung, dann sende die Anfrage: <strong>die Buchung gilt erst nach Bestätigung durch Daniel</strong>, der die Verfügbarkeit prüft.</p><p>Solange die Anfrage offen ist, kannst du sie im Panel „Meine gebuchten Partys“ noch <strong>bearbeiten</strong> (Gästezahl, Datum, Uhrzeit, Notizen). Nach der Bestätigung erscheint die Paketrechnung in deiner Bestellhistorie wie eine normale Bestellung, und du bezahlst sie genauso. Bestätigte Termine der ganzen Familie siehst du im Panel <strong>Anstehende Veranstaltungen</strong>.</p>",
+                userGuideReviewsTitle: "⭐ Bewertungen",
+                userGuideReviewsBody: "<p>Tippe auf <strong>Bewertung abgeben</strong>, um mit Sternen und einem Kommentar zu bewerten. Sie ist öffentlich: jeder kann sie unter <strong>Bewertungen lesen</strong> sehen.</p>",
+                userGuideShareTitle: "📤 Freund einladen",
+                userGuideShareBody: "<p>Tippe auf <strong>Freund einladen</strong>, um den App-Link über WhatsApp oder das Teilen-Menü deines Handys zu teilen.</p>",
+                userGuideOfflineTitle: "📡 Bei fehlender Verbindung",
+                userGuideOfflineBody: "<p>Du kannst auch ohne Netz weiter bestellen: die Bestellung bleibt als <strong>zu senden</strong> markiert und wird automatisch gesendet, sobald die Verbindung zurück ist.</p>",
+                userGuideDannyTitle: "🍹 Danny",
+                userGuideDannyBody: "<p>Der virtuelle Barkeeper unten rechts schlägt vor, was du bestellen könntest, Kombinationen und Erinnerungen. Tippe ihn für einen Tipp an, oder ✕ zum Schließen.</p>",
                 publicPartyTitle: "Anstehende Veranstaltungen",
                 hostedBy: "Organisiert von",
                 prepChecklistBtn: "📋 Veranstaltung vorbereiten",
@@ -4617,6 +4802,34 @@
 
                 soldOutLabel: "ÉPUISÉ",
 
+                rebookParty: "Proposer une nouvelle date",
+                rebookPartyConfirm: "Envoyer la nouvelle date",
+                partyRebookNotice: "🔄 Vous proposez une nouvelle date pour cette fête. Daniel devra la confirmer à nouveau.",
+                partyRebookedMsg: "🔄 Nouvelle date proposée ! En attente de confirmation.",
+                partyTimeLabel: "Heure de l'événement :",
+                partyTimeRequired: "Choisissez l'heure de l'événement.",
+                editParty: "Modifier",
+                updatePartyRequest: "Mettre à jour la demande",
+                partyEditingNotice: "✏️ Vous modifiez votre demande. Daniel verra les nouvelles données.",
+                partyUpdatedMsg: "✏️ Demande mise à jour !",
+                userGuideTitle: "📖 Guide de l'app",
+                userGuideSubtitle: "Tout ce que vous pouvez faire ici. Touchez une section pour l’ouvrir.",
+                userGuideOrderTitle: "🍹 Comment commander",
+                userGuideOrderBody: "<p>Choisissez une catégorie dans les onglets en haut (Cocktails, Snacks, Boissons, Desserts, Produits dérivés...) et touchez le produit voulu.</p><p>Choisissez la variante, l'emplacement (où vous êtes, à la maison, au jardin) et l'heure préférée, puis touchez <strong>Confirmer la Commande</strong>. Le prix affiché est déjà le prix final.</p><p>Parfois un produit complémentaire est suggéré : vous pouvez l'ajouter d'un geste ou l'ignorer, c'est toujours facultatif.</p>",
+                userGuidePayTitle: "💳 Comment payer",
+                userGuidePayBody: "<p>Vos commandes restent dans votre <strong>historique</strong> jusqu'à ce que vous clôturiez l'addition. Une fois terminé, touchez <strong>Payer et clôturer l'addition</strong>.</p><p>Si vous avez un solde sur la carte prépayée, vous pouvez payer avec et obtenir <strong>10% de réduction</strong>. Sinon, vous payez en espèces : la demande est envoyée, et l'addition se clôture quand Daniel confirme avoir reçu l'argent.</p><p>Pour recharger la carte, touchez <strong>+ Recharger</strong> dans l'encadré doré, choisissez le montant et remettez l'argent à Daniel : le solde apparaîtra dès sa confirmation.</p>",
+                userGuideChoresTitle: "🧹 Corvées pour Daniel",
+                userGuideChoresBody: "<p>Dans l'onglet <strong>Corvées</strong>, vous pouvez confier à Daniel de petites tâches ménagères (promener le chien, passer l'aspirateur...) avec un pourboire déjà indiqué.</p><p>Suivez le statut dans le panneau <strong>Mes corvées assignées</strong> : reste « à faire » jusqu'à ce que Daniel la marque terminée.</p>",
+                userGuidePartyTitle: "🎉 Réserver une fête",
+                userGuidePartyBody: "<p>Dans l'onglet <strong>Fêtes</strong>, vous trouverez des forfaits à thème (Summer, Halloween, Xmas, BBQ...) avec boissons, nourriture et décorations déjà combinées.</p><p>Choisissez le nombre d'invités, la date et l'heure de l'événement, puis envoyez la demande : <strong>la réservation n'est valable qu'après confirmation de Daniel</strong>, qui vérifie la disponibilité.</p><p>Tant que la demande est en attente, vous pouvez encore la <strong>modifier</strong> (nombre d'invités, date, heure, notes) depuis le panneau « Mes fêtes réservées ». Une fois confirmée, la note du forfait apparaît dans votre historique de commandes comme une commande normale, et vous la payez de la même façon. Les événements confirmés de toute la famille sont visibles dans le panneau <strong>Événements à venir</strong>.</p>",
+                userGuideReviewsTitle: "⭐ Avis",
+                userGuideReviewsBody: "<p>Touchez <strong>Laisser un avis</strong> pour noter avec des étoiles et un commentaire. C'est public : tout le monde peut le lire dans <strong>Lire les avis</strong>.</p>",
+                userGuideShareTitle: "📤 Inviter un ami",
+                userGuideShareBody: "<p>Touchez <strong>Inviter un ami</strong> pour partager le lien de l'app sur WhatsApp ou via le menu de partage de votre téléphone.</p>",
+                userGuideOfflineTitle: "📡 En cas de coupure",
+                userGuideOfflineBody: "<p>Vous pouvez continuer à commander même sans réseau : la commande reste marquée <strong>à envoyer</strong> et part toute seule dès que la connexion revient.</p>",
+                userGuideDannyTitle: "🍹 Danny",
+                userGuideDannyBody: "<p>Le barman virtuel en bas à droite suggère quoi commander, des accords et des rappels. Touchez-le pour un conseil, ou ✕ pour le fermer.</p>",
                 publicPartyTitle: "Événements à venir",
                 hostedBy: "Organisé par",
                 prepChecklistBtn: "📋 Préparer l’événement",
@@ -4889,6 +5102,34 @@
 
                 soldOutLabel: "ЗАКІНЧИВСЯ",
 
+                rebookParty: "Запропонувати нову дату",
+                rebookPartyConfirm: "Надіслати нову дату",
+                partyRebookNotice: "🔄 Ви пропонуєте нову дату для цього свята. Денні потрібно підтвердити її знову.",
+                partyRebookedMsg: "🔄 Запропоновано нову дату! Очікується підтвердження.",
+                partyTimeLabel: "Час події:",
+                partyTimeRequired: "Оберіть час події.",
+                editParty: "Редагувати",
+                updatePartyRequest: "Оновити запит",
+                partyEditingNotice: "✏️ Ви редагуєте свій запит. Денні побачить нові дані.",
+                partyUpdatedMsg: "✏️ Запит оновлено!",
+                userGuideTitle: "📖 Гід по застосунку",
+                userGuideSubtitle: "Усе, що можна тут робити. Торкніться розділу, щоб відкрити.",
+                userGuideOrderTitle: "🍹 Як замовити",
+                userGuideOrderBody: "<p>Оберіть категорію на вкладках вгорі (Коктейлі, Закуски, Напої, Десерти, Мерч...) і торкніться потрібного товару.</p><p>Оберіть варіант, місце (де ви, вдома, у саду) та бажаний час, потім торкніться <strong>Підтвердити замовлення</strong>. Показана ціна вже остаточна.</p><p>Іноді пропонується супутній товар: можна додати одним дотиком або проігнорувати — це завжди необов'язково.</p>",
+                userGuidePayTitle: "💳 Як оплатити",
+                userGuidePayBody: "<p>Ваші замовлення залишаються в <strong>історії</strong>, доки ви не закриєте рахунок. Коли готові, торкніться <strong>Оплатити і закрити рахунок</strong>.</p><p>Якщо на картці є баланс, можна оплатити ним і отримати <strong>знижку 10%</strong>. Інакше оплата готівкою: запит надсилається, і рахунок закривається, коли Денні підтвердить отримання грошей.</p><p>Щоб поповнити картку, торкніться <strong>+ Поповнити</strong> у золотистому блоці, оберіть суму й передайте готівку Денні: баланс з'явиться одразу після підтвердження.</p>",
+                userGuideChoresTitle: "🧹 Справи для Денні",
+                userGuideChoresBody: "<p>У вкладці <strong>Справи</strong> можна доручити Денні невеликі домашні справи (вигуляти собаку, попилососити...) із заздалегідь вказаними чайовими.</p><p>Стежте за статусом у панелі <strong>Мої доручені справи</strong>: залишається \"не зроблено\", доки Денні не позначить виконаним.</p>",
+                userGuidePartyTitle: "🎉 Забронювати свято",
+                userGuidePartyBody: "<p>У вкладці <strong>Свята</strong> є тематичні пакети (Summer, Halloween, Xmas, BBQ...) із напоями, їжею та декором, уже поєднаними разом.</p><p>Оберіть кількість гостей, дату та час події, потім надішліть запит: <strong>бронювання дійсне лише після підтвердження Денні</strong>, який перевіряє наявність вільної дати.</p><p>Поки запит очікує підтвердження, ви можете його <strong>редагувати</strong> (кількість гостей, дату, час, нотатки) у панелі «Мої заброньовані свята». Після підтвердження рахунок за пакет з'являється у вашій історії замовлень як звичайне замовлення, і оплачується так само. Підтверджені події всієї родини видно в панелі <strong>Найближчі події</strong>.</p>",
+                userGuideReviewsTitle: "⭐ Відгуки",
+                userGuideReviewsBody: "<p>Торкніться <strong>Залишити відгук</strong>, щоб оцінити зірками та коментарем. Відгук публічний: його може прочитати будь-хто в розділі <strong>Читати відгуки</strong>.</p>",
+                userGuideShareTitle: "📤 Запросити друга",
+                userGuideShareBody: "<p>Торкніться <strong>Запросити друга</strong>, щоб поділитися посиланням на застосунок через WhatsApp або меню обміну телефону.</p>",
+                userGuideOfflineTitle: "📡 Якщо немає з’єднання",
+                userGuideOfflineBody: "<p>Можна продовжувати замовляти навіть без мережі: замовлення залишається позначеним <strong>до надсилання</strong> і надсилається саме, щойно з'єднання відновиться.</p>",
+                userGuideDannyTitle: "🍹 Денні",
+                userGuideDannyBody: "<p>Віртуальний бармен внизу праворуч підказує, що замовити, поєднання та нагадування. Торкніться для поради або ✕, щоб закрити.</p>",
                 publicPartyTitle: "Найближчі події",
                 hostedBy: "Організовано",
                 prepChecklistBtn: "📋 Підготовка події",
@@ -5160,6 +5401,34 @@
                 specialOffer: "PROMOÇÃO",
                 soldOutLabel: "ESGOTADO",
 
+                rebookParty: "Propor nova data",
+                rebookPartyConfirm: "Enviar nova data",
+                partyRebookNotice: "🔄 Está a propor uma nova data para esta festa. O Daniel terá de a confirmar novamente.",
+                partyRebookedMsg: "🔄 Nova data proposta! A aguardar confirmação.",
+                partyTimeLabel: "Horário do evento:",
+                partyTimeRequired: "Escolha o horário do evento.",
+                editParty: "Editar",
+                updatePartyRequest: "Atualizar pedido",
+                partyEditingNotice: "✏️ Está a editar o seu pedido. O Daniel verá os novos dados.",
+                partyUpdatedMsg: "✏️ Pedido atualizado!",
+                userGuideTitle: "📖 Guia da aplicação",
+                userGuideSubtitle: "Tudo o que pode fazer aqui. Toque numa secção para a abrir.",
+                userGuideOrderTitle: "🍹 Como encomendar",
+                userGuideOrderBody: "<p>Escolha uma categoria nos separadores no topo (Cocktails, Snacks, Bebidas, Sobremesas, Merchandising...) e toque no produto que quer.</p><p>Escolha a variante, a localização (onde está, em casa, no jardim) e o horário preferido, depois toque em <strong>Confirmar Pedido</strong>. O preço mostrado já é o final.</p><p>Por vezes surge um produto sugerido a condizer: pode adicioná-lo com um toque ou ignorar, é sempre opcional.</p>",
+                userGuidePayTitle: "💳 Como se paga",
+                userGuidePayBody: "<p>Os seus pedidos ficam no <strong>histórico</strong> até fechar a conta. Quando terminar, toque em <strong>Pagar e fechar conta</strong>.</p><p>Se tiver saldo no cartão pré-pago, pode optar por pagar com ele e obter <strong>10% de desconto</strong>. Caso contrário paga-se em dinheiro: o pedido é enviado e a conta fecha quando o Daniel confirmar que recebeu o dinheiro.</p><p>Para carregar o cartão, toque em <strong>+ Carregar</strong> na caixa dourada, escolha o valor e entregue o dinheiro ao Daniel: o saldo aparece assim que ele confirmar.</p>",
+                userGuideChoresTitle: "🧹 Tarefas para o Daniel",
+                userGuideChoresBody: "<p>No separador <strong>Tarefas</strong> pode atribuir ao Daniel pequenas tarefas domésticas (passear o cão, aspirar...) com uma gorjeta já indicada.</p><p>Acompanhe o estado no painel <strong>As minhas tarefas atribuídas</strong>: fica \"por fazer\" até o Daniel a marcar como feita.</p>",
+                userGuidePartyTitle: "🎉 Reservar uma festa",
+                userGuidePartyBody: "<p>No separador <strong>Festas</strong> encontra pacotes temáticos (Summer, Halloween, Xmas, BBQ...) com bebidas, comida e decorações já combinadas.</p><p>Escolha o número de convidados, a data e o horário do evento, depois envie o pedido: <strong>a reserva só é válida após a confirmação do Daniel</strong>, que verifica a disponibilidade.</p><p>Enquanto o pedido estiver pendente, ainda pode <strong>editá-lo</strong> (número de convidados, data, horário, notas) no painel “As minhas festas reservadas”. Depois de confirmada, a conta do pacote aparece no seu histórico de pedidos como um pedido normal, e paga-a da mesma forma. Os eventos confirmados de toda a família veem-se no painel <strong>Próximos eventos</strong>.</p>",
+                userGuideReviewsTitle: "⭐ Avaliações",
+                userGuideReviewsBody: "<p>Toque em <strong>Deixar uma avaliação</strong> para avaliar com estrelas e um comentário. É pública: qualquer pessoa pode lê-la em <strong>Ler avaliações</strong>.</p>",
+                userGuideShareTitle: "📤 Convidar um amigo",
+                userGuideShareBody: "<p>Toque em <strong>Convidar um amigo</strong> para partilhar o link da app no WhatsApp ou através do menu de partilha do telemóvel.</p>",
+                userGuideOfflineTitle: "📡 Sem ligação",
+                userGuideOfflineBody: "<p>Pode continuar a encomendar mesmo sem rede: o pedido fica marcado <strong>por enviar</strong> e é enviado sozinho assim que a ligação voltar.</p>",
+                userGuideDannyTitle: "🍹 Danny",
+                userGuideDannyBody: "<p>O barman virtual em baixo à direita sugere o que encomendar, combinações e lembretes. Toque nele para um conselho, ou ✕ para fechar.</p>",
                 publicPartyTitle: "Próximos eventos",
                 hostedBy: "Organizado por",
                 prepChecklistBtn: "📋 Preparar evento",
@@ -6264,6 +6533,18 @@
             return price;
         }
 
+        // Formatta una data "YYYY-MM-DD" (come arriva da un campo <input
+        // type="date">) senza passare per UTC. "new Date('2026-09-16')"
+        // viene interpretata come mezzanotte UTC: con un fuso orario
+        // indietro rispetto a UTC, mostrarla in locale può farla scivolare
+        // al giorno prima (16 settembre diventa 15). Costruendo la data
+        // dai singoli numeri, invece, resta sempre quella scritta.
+        function formatEventDate(dateStr) {
+            if (!dateStr) return '';
+            const [y, m, d] = dateStr.split('-').map(Number);
+            return new Date(y, m - 1, d).toLocaleDateString('it-IT');
+        }
+
         function formatPrice(value) {
             return value.toFixed(2).replace('.', ',') + '€';
         }
@@ -6739,7 +7020,7 @@
             const avatar = document.getElementById('adminAvatar');
             if (avatar) avatar.style.display = isAdmin() ? 'inline-block' : 'none';
             const helpBtn = document.getElementById('helpBtn');
-            if (helpBtn) helpBtn.style.display = isAdmin() ? 'flex' : 'none';
+            if (helpBtn) helpBtn.style.display = 'flex'; // guida disponibile per tutti, admin e clienti
             renderWalletPanel();
         }
 
@@ -7343,6 +7624,14 @@
         // GUIDA ADMIN
         // Solo in italiano: è pensata per Daniel e la famiglia.
         // =============================================
+        // Un solo pulsante ❓, due guide diverse: Daniel vede quella
+        // amministrativa (solo italiano), i clienti quella d'uso
+        // (tradotta come il resto dell'app).
+        function openHelp() {
+            if (isAdmin()) openGuide();
+            else openUserGuide();
+        }
+
         function openGuide() {
             if (!isAdmin()) return;
             document.getElementById('guideModal').classList.add('active');
@@ -7354,6 +7643,19 @@
 
         function toggleGuide(id) {
             const s = document.getElementById('guide-' + id);
+            if (s) s.classList.toggle('collapsed');
+        }
+
+        function openUserGuide() {
+            document.getElementById('userGuideModal').classList.add('active');
+        }
+
+        function closeUserGuide() {
+            document.getElementById('userGuideModal').classList.remove('active');
+        }
+
+        function toggleUserGuide(id) {
+            const s = document.getElementById('uguide-' + id);
             if (s) s.classList.toggle('collapsed');
         }
 
@@ -8259,11 +8561,26 @@
         let selectedPartyTier = 0;
         let partyBookings_data = [];
 
-        function openPartyModal(partyId) {
+        let editingPartyBookingId = null; // se valorizzato, si sta modificando una richiesta esistente
+        let rebookingCancelledParty = false; // true se si sta riproponendo una festa annullata
+
+        // Una festa annullata può essere riaperta: il cliente propone una
+        // nuova data/orario e la richiesta torna "in attesa" di conferma,
+        // senza dover ricominciare la prenotazione da zero.
+        function openRebookPartyModal(bookingId) {
+            const booking = partyBookings_data.find(b => b.id === bookingId);
+            if (!booking || booking.status !== 'cancelled') return;
+            editingPartyBookingId = bookingId;
+            rebookingCancelledParty = true;
+            openPartyModal(booking.partyId, booking);
+        }
+
+        function openPartyModal(partyId, prefill) {
             const party = partyById(partyId);
             if (!party) return;
             selectedPartyId = partyId;
-            selectedPartyTier = 0;
+            selectedPartyTier = prefill ? PARTY_GUEST_TIERS.indexOf(prefill.guests) : 0;
+            if (selectedPartyTier < 0) selectedPartyTier = 0;
 
             document.getElementById('partyModalIcon').textContent = party.icon;
             document.getElementById('partyModalName').textContent = t('party_' + partyId);
@@ -8273,16 +8590,40 @@
             // di riserva invece di lasciare la riga vuota.
             document.getElementById('partyDessert').textContent = party.dessert.length ? party.dessert.join(', ') : t('partyNotIncluded');
             document.getElementById('partyDecor').textContent = party.decor;
-            document.getElementById('partyNote').value = '';
+            document.getElementById('partyNote').value = prefill ? (prefill.note || '') : '';
 
-            // Data minima: da domani in poi, non ha senso prenotare per oggi
+            // Data minima: da domani in poi, non ha senso prenotare per oggi.
+            // toISOString() userebbe l'UTC (stesso rischio di sfasamento
+            // della funzione qui sopra): calcoliamo la data locale a mano.
             const tomorrow = new Date(Date.now() + 86400000);
+            const yyyy = tomorrow.getFullYear();
+            const mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
+            const dd = String(tomorrow.getDate()).padStart(2, '0');
             const dateInput = document.getElementById('partyDate');
-            dateInput.min = tomorrow.toISOString().split('T')[0];
-            dateInput.value = '';
+            dateInput.min = `${yyyy}-${mm}-${dd}`;
+            dateInput.value = prefill ? prefill.eventDate : '';
+            document.getElementById('partyTime').value = prefill ? (prefill.eventTime || '') : '';
+
+            // Il pulsante e l'avviso cambiano testo a seconda del caso:
+            // nuova richiesta, modifica di una in attesa, oppure nuova
+            // data proposta per una festa annullata.
+            const btnLabel = rebookingCancelledParty ? t('rebookPartyConfirm') : (prefill ? t('updatePartyRequest') : t('sendPartyRequest'));
+            const noticeLabel = rebookingCancelledParty ? t('partyRebookNotice') : (prefill ? t('partyEditingNotice') : t('partyConfirmationNotice'));
+            document.getElementById('partyConfirmBtn').textContent = btnLabel;
+            document.getElementById('partyConfirmationNotice').textContent = noticeLabel;
 
             renderPartyTierButtons(partyId);
             document.getElementById('partyModal').classList.add('active');
+        }
+
+        // Finché la richiesta è "in attesa", il cliente può ancora
+        // correggere fascia, data, orario o note. Una volta confermata o
+        // rifiutata, non si può più modificare (bisogna farne una nuova).
+        function openEditPartyModal(bookingId) {
+            const booking = partyBookings_data.find(b => b.id === bookingId);
+            if (!booking || booking.status !== 'pending') return;
+            editingPartyBookingId = bookingId;
+            openPartyModal(booking.partyId, booking);
         }
 
         function renderPartyTierButtons(partyId) {
@@ -8303,6 +8644,8 @@
         function closePartyModal() {
             document.getElementById('partyModal').classList.remove('active');
             selectedPartyId = null;
+            editingPartyBookingId = null;
+            rebookingCancelledParty = false;
         }
 
         async function confirmPartyBooking() {
@@ -8310,8 +8653,13 @@
             if (!party) return;
 
             const eventDate = document.getElementById('partyDate').value;
+            const eventTime = document.getElementById('partyTime').value;
             if (!eventDate) {
                 alert(t('partyDateRequired'));
+                return;
+            }
+            if (!eventTime) {
+                alert(t('partyTimeRequired'));
                 return;
             }
 
@@ -8319,6 +8667,70 @@
             const guests = PARTY_GUEST_TIERS[selectedPartyTier];
             const price = formatPrice(getPartyTierPrice(selectedPartyId, selectedPartyTier));
             const now = new Date();
+
+            if (editingPartyBookingId) {
+                // Due casi condividono questo ramo: la modifica di una
+                // richiesta ancora in attesa, e il "riproponi" di una festa
+                // annullata (che torna in attesa con la nuova data/orario).
+                const booking = partyBookings_data.find(b => b.id === editingPartyBookingId);
+                if (!booking) { closePartyModal(); return; }
+
+                const wasRebook = rebookingCancelledParty;
+
+                booking.guests = guests;
+                booking.price = price;
+                booking.eventDate = eventDate;
+                booking.eventTime = eventTime;
+                booking.note = note;
+                if (wasRebook) {
+                    booking.status = 'pending';
+                    booking.cancelReason = '';
+                }
+
+                const editedId = editingPartyBookingId;
+                closePartyModal();
+                renderPartyPanels();
+
+                if (cloudReady()) {
+                    try {
+                        const updateData = { guests, price, eventDate, eventTime, note };
+                        if (wasRebook) { updateData.status = 'pending'; updateData.cancelReason = ''; }
+                        await firestoreDb.collection('partyBookings').doc(String(editedId)).update(updateData);
+                    } catch (error) { console.log('Errore aggiornamento prenotazione:', error); }
+                }
+
+                // Se in futuro questa festa venisse confermata o annullata
+                // di nuovo, deve poter generare un nuovo avviso: puliamo i
+                // riferimenti alla vecchia risoluzione già vista.
+                if (wasRebook) {
+                    try {
+                        let seen = JSON.parse(localStorage.getItem('seenPartyResolutions') || '[]');
+                        seen = seen.filter(s => s !== editedId && s !== ('cancel-' + editedId));
+                        localStorage.setItem('seenPartyResolutions', JSON.stringify(seen));
+                    } catch (e) { /* nessun problema se non c'era nulla da pulire */ }
+                }
+
+                let updateMsg = wasRebook
+                    ? `🎉 *NUOVA DATA PROPOSTA (evento annullato in precedenza)*\n\n`
+                    : `🎉 *RICHIESTA FESTA AGGIORNATA*\n\n`;
+                updateMsg += `📋 *Pacchetto:* ${booking.icon} ${booking.partyName}\n`;
+                updateMsg += `👤 *Richiesto da:* ${customerName}\n`;
+                updateMsg += `📅 *Data evento:* ${formatEventDate(eventDate)}\n`;
+                updateMsg += `⏰ *Orario:* ${eventTime}\n`;
+                updateMsg += `👥 *Invitati:* ${guests}\n`;
+                updateMsg += `💰 *Prezzo:* ${price}\n`;
+                if (note) updateMsg += `📝 *Note:* ${note}\n`;
+                updateMsg += wasRebook
+                    ? `\n➡️ Verifica la disponibilità per la nuova data e conferma o rifiuta!`
+                    : `\n➡️ I dati della richiesta sono cambiati, verifica di nuovo la disponibilità!`;
+                openWhatsApp(ADMIN_PHONE, encodeURIComponent(updateMsg));
+
+                const successMsg = document.getElementById('successMessage');
+                successMsg.textContent = wasRebook ? t('partyRebookedMsg') : t('partyUpdatedMsg');
+                successMsg.classList.add('show');
+                setTimeout(() => successMsg.classList.remove('show'), 3500);
+                return;
+            }
 
             const booking = {
                 id: Date.now(),
@@ -8328,6 +8740,7 @@
                 guests: guests,
                 price: price,
                 eventDate: eventDate,
+                eventTime: eventTime,
                 note: note,
                 requestedBy: customerName,
                 userId: getUserId(customerName),
@@ -8347,10 +8760,11 @@
                 }
             }
 
-            let message = `🎉 *RICHIESTA PACCHETTO FESTA*\n\n`;
+            let message = `🎉 *NUOVA RICHIESTA PACCHETTO FESTA*\n\n`;
             message += `📋 *Pacchetto:* ${booking.icon} ${booking.partyName}\n`;
             message += `👤 *Richiesto da:* ${customerName}\n`;
-            message += `📅 *Data evento:* ${new Date(eventDate).toLocaleDateString('it-IT')}\n`;
+            message += `📅 *Data evento:* ${formatEventDate(eventDate)}\n`;
+            message += `⏰ *Orario:* ${eventTime}\n`;
             message += `👥 *Invitati:* ${guests}\n`;
             message += `💰 *Prezzo:* ${price}\n`;
             if (note) message += `📝 *Note:* ${note}\n`;
@@ -8399,7 +8813,7 @@
                 cocktail: `${booking.icon} ${booking.partyName}`,
                 variant: `${booking.guests} ${t('guestsLabel')}`,
                 location: 'Evento',
-                time: new Date(booking.eventDate).toLocaleDateString('it-IT'),
+                time: `${formatEventDate(booking.eventDate)}, ore ${booking.eventTime || '-'}`,
                 orderTime: new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }),
                 orderDate: new Date().toLocaleDateString('it-IT'),
                 notes: booking.note || '',
@@ -8448,7 +8862,7 @@
 
             for (const b of mine) {
                 if (b.status === 'confirmed' && !seen.includes(b.id)) {
-                    alert(t('partyConfirmedAlert').replace('{name}', b.partyName).replace('{date}', new Date(b.eventDate).toLocaleDateString('it-IT')));
+                    alert(t('partyConfirmedAlert').replace('{name}', b.partyName).replace('{date}', formatEventDate(b.eventDate)));
                     seen.push(b.id);
                 } else if (b.status === 'rejected' && !seen.includes(b.id)) {
                     alert(t('partyRejectedAlert').replace('{name}', b.partyName).replace('{reason}', b.rejectReason || ''));
@@ -8457,7 +8871,9 @@
                 } else if (b.status === 'cancelled' && !seen.includes('cancel-' + b.id)) {
                     alert(t('partyCancelledAlert').replace('{name}', b.partyName).replace('{reason}', b.cancelReason || ''));
                     seen.push('cancel-' + b.id);
-                    toRemove.push(b.id);
+                    // Non la rimuoviamo: il cliente potrebbe volerla riaprire
+                    // e proporre una nuova data, invece di dover ricominciare
+                    // da capo scegliendo di nuovo il pacchetto.
                 }
             }
             localStorage.setItem('seenPartyResolutions', JSON.stringify(seen));
@@ -8618,7 +9034,7 @@
                 <div class="chore-row">
                     <div class="chore-row-info">
                         <strong>${b.icon} ${t('party_' + b.partyId)}</strong><br>
-                        <small>📅 ${new Date(b.eventDate).toLocaleDateString('it-IT')} · 👥 ${b.guests} ${t('guestsLabel')} · ${t('hostedBy')} ${b.requestedBy}</small>
+                        <small>📅 ${formatEventDate(b.eventDate)} · ⏰ ${b.eventTime || '-'} · 👥 ${b.guests} ${t('guestsLabel')} · ${t('hostedBy')} ${b.requestedBy}</small>
                     </div>
                 </div>
             `).join('');
@@ -8642,7 +9058,7 @@
                     <div class="chore-row">
                         <div class="chore-row-info">
                             <strong>${b.icon} ${b.partyName}</strong> — <span class="chore-tip">${b.price}</span><br>
-                            <small>${t('requestedBy')} ${b.requestedBy} · 📅 ${new Date(b.eventDate).toLocaleDateString('it-IT')} · 👥 ${b.guests}</small>
+                            <small>${t('requestedBy')} ${b.requestedBy} · 📅 ${formatEventDate(b.eventDate)} · ⏰ ${b.eventTime || '-'} · 👥 ${b.guests}</small>
                             ${b.note ? `<br><small>📝 ${b.note}</small>` : ''}
                         </div>
                         <div style="display:flex; flex-direction:column; gap:6px;">
@@ -8665,7 +9081,7 @@
                 document.getElementById('partyUpcomingList').innerHTML = confirmed.map(b => `
                     <div class="party-confirmed-card">
                         <div class="chore-payout-item">
-                            📅 ${new Date(b.eventDate).toLocaleDateString('it-IT')} — ${b.icon} ${b.partyName}
+                            📅 ${formatEventDate(b.eventDate)} ⏰ ${b.eventTime || '-'} — ${b.icon} ${b.partyName}
                             (${b.guests} ${t('guestsLabel')}) <em>${b.requestedBy}</em>
                         </div>
                         ${renderChecklistBlock(b, 'prep')}
@@ -8693,13 +9109,25 @@
                     : b.status === 'cancelled' ? '🚫 ' + t('partyCancelledLabel')
                     : '⏳ ' + t('partyPendingLabel');
                 const statusClass = b.status === 'confirmed' ? 'chore-status-done' : '';
+                // Finché è in attesa, il cliente può ancora correggere i dati.
+                // Se è stata annullata, può riproporre una nuova data.
+                const editBtn = b.status === 'pending'
+                    ? `<button class="chore-done-btn" style="margin-top:4px;" onclick="openEditPartyModal(${b.id})">✏️ ${t('editParty')}</button>`
+                    : b.status === 'cancelled'
+                    ? `<button class="chore-done-btn" style="margin-top:4px;" onclick="openRebookPartyModal(${b.id})">🔄 ${t('rebookParty')}</button>`
+                    : '';
+                const reasonNote = (b.status === 'cancelled' && b.cancelReason)
+                    ? `<br><small>📝 ${b.cancelReason}</small>` : '';
                 return `
                 <div class="chore-row">
                     <div class="chore-row-info">
                         <strong>${b.icon} ${t('party_' + b.partyId)}</strong> — <span class="chore-tip">${b.price}</span><br>
-                        <small>📅 ${new Date(b.eventDate).toLocaleDateString('it-IT')} · 👥 ${b.guests} ${t('guestsLabel')}</small>
+                        <small>📅 ${formatEventDate(b.eventDate)} · ⏰ ${b.eventTime || '-'} · 👥 ${b.guests} ${t('guestsLabel')}</small>${reasonNote}
                     </div>
-                    <span class="chore-status ${statusClass}">${statusLabel}</span>
+                    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
+                        <span class="chore-status ${statusClass}">${statusLabel}</span>
+                        ${editBtn}
+                    </div>
                 </div>`;
             }).join('');
         }
@@ -10218,6 +10646,7 @@
             priceListModal: closePriceList,
             rejectModal: closeRejectModal,
             guideModal: closeGuide,
+            userGuideModal: closeUserGuide,
             choreModal: closeChoreModal,
             topupModal: closeTopupModal,
             walletChoiceModal: closeWalletChoiceModal,
