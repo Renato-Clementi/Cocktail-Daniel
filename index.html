@@ -2423,7 +2423,7 @@
                     <span>🎉 Pacchetti festa</span><span class="pc-chevron">▾</span>
                 </button>
                 <div class="guide-body">
-                    <p>Settima scheda del catalogo: 6 pacchetti a tema (Summer, Halloween, Xmas, Capodanno, Compleanno, BBQ Festival), ognuno con drink, cibo, dolce e decorazioni già combinati, su 3 fasce di invitati (10/20/30 persone) a prezzo fisso.</p>
+                    <p>Settima scheda del catalogo: 6 pacchetti a tema (Summer, Halloween, Xmas, Capodanno, Compleanno, BBQ Festival), ognuno con drink, cibo, dolce e decorazioni già combinati, su 3 fasce di invitati (5/10/15 persone) a prezzo fisso.</p>
                     <p>Il <strong>BBQ Festival</strong> segue lo stesso schema ma senza dolce (birra alla spina, carne alla griglia, salsicce, crauti, patate arrosto, insalate): il modale mostra "Non incluso" al posto del dolce, invece di lasciare la riga vuota. Parte da 7€ a persona.</p>
                     <p><strong>Diversamente da tutto il resto: qui non si ordina per il ritiro immediato.</strong> Chi prenota sceglie una data futura e la richiesta resta <em>in attesa</em> finché tu non la confermi o rifiuti. Non è un "conferma sempre": stai davvero verificando la tua disponibilità per quella data.</p>
                     <p>Le richieste in attesa compaiono nel pannello <strong>🎉 Richieste feste</strong>. Per ognuna hai due pulsanti: <strong>✓ Accetta</strong> (la data è confermata) o <strong>🚫 Rifiuta</strong> (ti chiede un motivo breve, es. "data non disponibile", che il cliente vede).</p>
@@ -2431,6 +2431,7 @@
                     <p><strong>💰 Il pagamento:</strong> quando tocchi <strong>✓ Accetta</strong>, l'app crea automaticamente un ordine per l'intero importo del pacchetto nello storico del cliente — esattamente come se avesse ordinato un cocktail. Lo salda con lo stesso <strong>"Paga e chiudi conto"</strong> di sempre: contanti (con la tua conferma) oppure carta prepagata, con lo sconto fedeltà del 10% se ha saldo disponibile.</p>
                     <p><strong>👀 Visibilità:</strong> gli eventi confermati compaiono in un pannello <strong>"Prossimi eventi in programma"</strong> visibile a tutta la famiglia, non solo a chi ha prenotato — così tutti sanno cosa è in calendario.</p>
                     <p><strong>🚫 Annullare un evento già confermato:</strong> per un imprevisto (maltempo, problema personale...) tocca <strong>Annulla evento</strong> sotto la scheda dell'evento. Ti viene chiesto un motivo breve: il cliente lo vede, e l'eventuale ordine di pagamento già creato viene rimosso automaticamente — non resta a dover pagare qualcosa che non si farà.</p>
+                    <p>Il cliente può riaprire una festa annullata e proporre una nuova data: torna "in attesa" come una richiesta normale. Se nessuno la riprende, <strong>dopo 10 giorni viene eliminata da sola</strong> — non si accumulano richieste annullate dimenticate.</p>
                     <p><strong>✏️ Modifiche del cliente:</strong> finché una richiesta è "in attesa", il cliente può correggere fascia invitati, data, orario e note dal suo pannello. Ricevi un WhatsApp di aggiornamento: verifica di nuovo la disponibilità sui nuovi dati prima di accettare.</p>
                     <p><strong>📋 Checklist preparazione e pulizia:</strong> ogni evento confermato ha due checklist proprie, con spunta. <em>Prepara evento</em> copre scorte, bancone, tavoli, decorazioni, bagni. <em>Pulizia e ripristino</em> copre pavimenti, bagni, bancone, spazzatura, bicchieri, disallestimento. I progressi restano salvati anche se chiudi l'app.</p>
                     <p><strong>Nel listino</strong> (sezione 🎉 Feste) puoi cambiare il prezzo di ogni fascia per ogni pacchetto, e metterne uno in pausa con ⏸️ se è fuori stagione (es. Xmas Party a luglio).</p>
@@ -3353,13 +3354,16 @@
         // Prezzi predefiniti per fascia di invitati (10 / 20 / 30 persone).
         // L'admin può cambiarli dal listino.
         function buildDefaultPartyPricing() {
+            // Prezzi ricalcolati per le fasce 5/10/15 (prima erano 10/20/30):
+            // stesso costo a persona di prima, leggermente decrescente
+            // all'aumentare degli invitati.
             const defaults = {
-                summer: [80, 150, 210],
-                halloween: [85, 160, 220],
-                xmas: [90, 170, 230],
-                capodanno: [95, 180, 250],
-                compleanno: [75, 140, 195],
-                bbq: [70, 140, 210] // almeno 7€ a persona (10/20/30 invitati)
+                summer: [45, 80, 110],
+                halloween: [48, 85, 115],
+                xmas: [50, 90, 120],
+                capodanno: [55, 95, 130],
+                compleanno: [40, 75, 100],
+                bbq: [35, 70, 105] // 7€ a persona su tutte le fasce (5/10/15 invitati)
             };
             const items = {};
             partyPackages.forEach(p => {
@@ -3368,7 +3372,7 @@
             return items;
         }
 
-        const PARTY_GUEST_TIERS = [10, 20, 30];
+        const PARTY_GUEST_TIERS = [5, 10, 15];
 
         function partyById(id) {
             return partyPackages.find(p => p.id === id);
@@ -8685,6 +8689,7 @@
                 if (wasRebook) {
                     booking.status = 'pending';
                     booking.cancelReason = '';
+                    booking.cancelledAt = null; // non è più annullata: non deve scadere
                 }
 
                 const editedId = editingPartyBookingId;
@@ -8694,7 +8699,7 @@
                 if (cloudReady()) {
                     try {
                         const updateData = { guests, price, eventDate, eventTime, note };
-                        if (wasRebook) { updateData.status = 'pending'; updateData.cancelReason = ''; }
+                        if (wasRebook) { updateData.status = 'pending'; updateData.cancelReason = ''; updateData.cancelledAt = null; }
                         await firestoreDb.collection('partyBookings').doc(String(editedId)).update(updateData);
                     } catch (error) { console.log('Errore aggiornamento prenotazione:', error); }
                 }
@@ -8780,11 +8785,36 @@
         }
 
         // Carica le prenotazioni dal cloud
+        // Una festa annullata resta visibile per poterla riproporre con
+        // una nuova data. Ma se restano annullate per troppo tempo senza
+        // che nessuno le riprenda, si accumulano inutilmente: dopo 10
+        // giorni vengono eliminate da sole.
+        const CANCELLED_PARTY_CLEANUP_MS = 10 * 24 * 60 * 60 * 1000;
+
+        async function cleanupOldCancelledParties() {
+            const now = Date.now();
+            const stale = partyBookings_data.filter(b =>
+                b.status === 'cancelled' && (now - (b.cancelledAt || b.requestedAt || 0)) > CANCELLED_PARTY_CLEANUP_MS
+            );
+            if (stale.length === 0) return;
+
+            const staleIds = stale.map(b => b.id);
+            partyBookings_data = partyBookings_data.filter(b => !staleIds.includes(b.id));
+
+            if (cloudReady()) {
+                for (const id of staleIds) {
+                    try { await firestoreDb.collection('partyBookings').doc(String(id)).delete(); }
+                    catch (error) { console.log('Errore pulizia festa annullata scaduta:', error); }
+                }
+            }
+        }
+
         async function loadPartyBookingsFromCloud() {
             if (!cloudReady()) return;
             try {
                 const snapshot = await firestoreDb.collection('partyBookings').get();
                 partyBookings_data = snapshot.docs.map(d => d.data()).sort((a, b) => b.requestedAt - a.requestedAt);
+                await cleanupOldCancelledParties();
                 renderPartyPanels();
             } catch (error) {
                 console.log('Prenotazioni feste non disponibili:', error);
@@ -8996,6 +9026,7 @@
 
             booking.status = 'cancelled';
             booking.cancelReason = reason.trim() || t('partyCancelReasonDefault');
+            booking.cancelledAt = Date.now(); // serve per la pulizia automatica dopo 10 giorni
             renderPartyPanels();
 
             orders = orders.filter(o => o.id !== booking.orderId);
@@ -9006,7 +9037,8 @@
                 try {
                     await firestoreDb.collection('partyBookings').doc(String(id)).update({
                         status: 'cancelled',
-                        cancelReason: booking.cancelReason
+                        cancelReason: booking.cancelReason,
+                        cancelledAt: booking.cancelledAt
                     });
                     if (booking.orderId) {
                         await firestoreDb.collection('orders').doc(String(booking.orderId)).delete();
