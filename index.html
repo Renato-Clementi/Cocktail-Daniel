@@ -1836,6 +1836,47 @@
         .upsell-selected .upsell-add { background: #1FA396; }
         .upsell-add:active { transform: scale(0.94); }
 
+        .chip-buy {
+            border: none;
+            background: rgba(255,255,255,0.7);
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.85em;
+            line-height: 1;
+            padding: 0;
+            margin-left: 2px;
+            cursor: pointer;
+            vertical-align: middle;
+        }
+
+        .chip-buy:active { transform: scale(0.9); }
+
+        .amazon-link-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin: 4px 0 8px;
+        }
+
+        .amazon-link-label { font-size: 0.85em; }
+
+        .amazon-link-row input {
+            flex: 1;
+            padding: 6px 8px;
+            border: 2px dashed var(--sand-deep);
+            border-radius: 6px;
+            font-size: 12px;
+            font-family: var(--font-body);
+            color: var(--dusk-soft);
+        }
+
+        .amazon-link-row input:focus {
+            border-style: solid;
+            border-color: var(--sand-gold);
+            outline: none;
+        }
+
         .pagination {
             display: flex;
             justify-content: center;
@@ -1968,6 +2009,7 @@
                     <p>Dentro ogni scheda cocktail trovi la riga <em>"Usa: Rum 4cl, Menta 8pz, Lime 0.5pz..."</em> con le quantità della ricetta.</p>
                     <p><strong>Il valore -1 significa "non tracciare".</strong> Serve per non doverti censire tutto subito: puoi iniziare mettendo la quantità solo su rum e gin, e lasciare -1 sul resto.</p>
                     <p><strong>⚠️ Avvisi:</strong> imposta la soglia (di base 2). Quando qualcosa scende sotto, in cima all'app ti compare il pannello <strong>Scorte in esaurimento</strong>: giallo se sta finendo, rosso se è finito.</p>
+                    <p><strong>🛒 Riordino su Amazon:</strong> ogni pillola del pannello ha un carrellino. Toccalo per aprire Amazon: se hai salvato il link del prodotto che compri di solito (campo tratteggiato sotto ogni ingrediente/prodotto nel listino), apre direttamente quello; altrimenti apre una ricerca col nome.</p>
                     <p class="guide-tip">💡 Quando riordini le bottiglie, riapri il magazzino e aggiorna i numeri: i prodotti tornano disponibili da soli.</p>
                 </div>
             </div>
@@ -2764,6 +2806,8 @@
 
                 soldOutLabel: "ESAURITO",
 
+                reorderOn: "Riordina su",
+                amazonLinkPlaceholder: "Incolla qui il link Amazon del prodotto (facoltativo)",
                 upsellTitle: "✨ Completa il tuo ordine",
                 upsellAdd: "Aggiungi",
                 upsellAdded: "Aggiunto",
@@ -2937,6 +2981,8 @@
 
                 soldOutLabel: "SOLD OUT",
 
+                reorderOn: "Reorder on",
+                amazonLinkPlaceholder: "Paste the Amazon product link here (optional)",
                 upsellTitle: "✨ Complete your order",
                 upsellAdd: "Add",
                 upsellAdded: "Added",
@@ -3110,6 +3156,8 @@
 
                 soldOutLabel: "AGOTADO",
 
+                reorderOn: "Reponer en",
+                amazonLinkPlaceholder: "Pega aquí el enlace de Amazon del producto (opcional)",
                 upsellTitle: "✨ Completa tu pedido",
                 upsellAdd: "Añadir",
                 upsellAdded: "Añadido",
@@ -3283,6 +3331,8 @@
 
                 soldOutLabel: "AUSVERKAUFT",
 
+                reorderOn: "Nachbestellen bei",
+                amazonLinkPlaceholder: "Amazon-Produktlink hier einfügen (optional)",
                 upsellTitle: "✨ Bestellung ergänzen",
                 upsellAdd: "Hinzufügen",
                 upsellAdded: "Hinzugefügt",
@@ -3456,6 +3506,8 @@
 
                 soldOutLabel: "ÉPUISÉ",
 
+                reorderOn: "Recommander sur",
+                amazonLinkPlaceholder: "Collez ici le lien Amazon du produit (facultatif)",
                 upsellTitle: "✨ Complétez votre commande",
                 upsellAdd: "Ajouter",
                 upsellAdded: "Ajouté",
@@ -3629,6 +3681,8 @@
 
                 soldOutLabel: "ЗАКІНЧИВСЯ",
 
+                reorderOn: "Замовити на",
+                amazonLinkPlaceholder: "Вставте сюди посилання на товар Amazon (необов’язково)",
                 upsellTitle: "✨ Доповніть замовлення",
                 upsellAdd: "Додати",
                 upsellAdded: "Додано",
@@ -3801,6 +3855,8 @@
                 specialOffer: "PROMOÇÃO",
                 soldOutLabel: "ESGOTADO",
 
+                reorderOn: "Reencomendar na",
+                amazonLinkPlaceholder: "Cole aqui o link do produto na Amazon (opcional)",
                 upsellTitle: "✨ Complete o seu pedido",
                 upsellAdd: "Adicionar",
                 upsellAdded: "Adicionado",
@@ -4647,6 +4703,7 @@
                     return s;
                 })(),
                 lowStockThreshold: 2,
+                amazonLinks: {}, // link salvati per il riordino rapido su Amazon
                 service: {
                     manualOverride: null,
                     hours: {
@@ -4888,6 +4945,7 @@
                     if (data.timeSurcharge) merged.timeSurcharge = data.timeSurcharge;
                     if (data.ingredientStock) merged.ingredientStock = data.ingredientStock;
                     if (typeof data.lowStockThreshold === 'number') merged.lowStockThreshold = data.lowStockThreshold;
+                    if (data.amazonLinks) merged.amazonLinks = data.amazonLinks;
                     if (data.service) {
                         merged.service = {
                             manualOverride: (data.service.manualOverride === undefined) ? null : data.service.manualOverride,
@@ -5470,6 +5528,26 @@
         }
 
         // Pannello avvisi: cosa sta finendo (solo admin)
+        // =============================================
+        // RIORDINO SU AMAZON
+        // Se Daniel ha salvato il link del prodotto preferito, lo usa.
+        // Altrimenti apre una ricerca Amazon.it col nome del prodotto:
+        // un tocco in meno rispetto a doverlo cercare da soli.
+        // =============================================
+        function amazonSearchUrl(query) {
+            return 'https://www.amazon.it/s?k=' + encodeURIComponent(query);
+        }
+
+        function getAmazonLink(id) {
+            const links = pricing.amazonLinks || {};
+            return links[id] || '';
+        }
+
+        function openAmazonFor(id, fallbackName) {
+            const saved = getAmazonLink(id);
+            window.open(saved || amazonSearchUrl(fallbackName), '_blank');
+        }
+
         function renderLowStockPanel() {
             const panel = document.getElementById('lowStockPanel');
             if (!panel) return;
@@ -5486,15 +5564,19 @@
 
             // Pillola compatta: icona + quantità, il nome completo sta nel
             // title (tooltip) invece che occupare spazio in riga.
-            const chip = (icon, name, qty, unit) => {
+            // Il carrello 🛒 apre Amazon per riordinare quel prodotto.
+            const chip = (id, icon, name, qty, unit) => {
                 const out = qty === 0;
                 const label = out ? t('stockZero') : formatQty(qty, unit || '');
-                return `<span class="stock-chip${out ? ' stock-chip-out' : ''}" title="${name}">${icon} ${label}</span>`;
+                return `<span class="stock-chip${out ? ' stock-chip-out' : ''}" title="${name}">
+                    ${icon} ${label}
+                    <button type="button" class="chip-buy" onclick="openAmazonFor('${id}', '${name.replace(/'/g, "\\'")}')" title="${t('reorderOn')} Amazon">🛒</button>
+                </span>`;
             };
 
             document.getElementById('lowStockList').innerHTML =
-                lowIng.map(i => chip(i.icon, i.name, getIngredientStock(i.id), i.unit)).join('') +
-                lowProd.map(p => chip(p.icon, p.name, getStock(p.name), '')).join('');
+                lowIng.map(i => chip('ing_' + i.id, i.icon, i.name, getIngredientStock(i.id), i.unit)).join('') +
+                lowProd.map(p => chip('prod_' + p.name, p.icon, p.name, getStock(p.name), '')).join('');
 
             panel.style.display = 'block';
         }
@@ -5651,6 +5733,12 @@
                                        value="${item.stock ?? -1}">
                                 <span class="stock-hint">${t('stockUnlimited')}</span>
                             </div>
+                            <div class="amazon-link-row">
+                                <span class="amazon-link-label">🛒</span>
+                                <input type="url" data-amazon="prod_${c.name}"
+                                       placeholder="${t('amazonLinkPlaceholder')}"
+                                       value="${(pricing.amazonLinks && pricing.amazonLinks['prod_' + c.name] || '').replace(/"/g, '&quot;')}">
+                            </div>
                             ${recipes[c.name] ? `<div class="recipe-note">🧪 ${t('usesIngredients')}: ${Object.keys(recipes[c.name]).map(id => {
                                 const ing = ingredientById(id);
                                 return ing ? `${ing.name} ${formatQty(recipes[c.name][id], ing.unit)}` : id;
@@ -5678,6 +5766,7 @@
             // Magazzino ingredienti: una riga per bottiglia/confezione
             const buildIngredientsSection = () => {
                 const stock = pricing.ingredientStock || {};
+                const links = pricing.amazonLinks || {};
                 const rows = ingredients.map(i => {
                     const q = (typeof stock[i.id] === 'number') ? stock[i.id] : -1;
                     const out = q === 0;
@@ -5688,6 +5777,12 @@
                                    data-ingredient="${i.id}" value="${q}">
                             <span class="ing-unit">${i.unit}</span>
                             ${out ? `<span class="ing-flag">🚫</span>` : ''}
+                        </div>
+                        <div class="amazon-link-row">
+                            <span class="amazon-link-label">🛒</span>
+                            <input type="url" data-amazon="ing_${i.id}"
+                                   placeholder="${t('amazonLinkPlaceholder')}"
+                                   value="${(links['ing_' + i.id] || '').replace(/"/g, '&quot;')}">
                         </div>`;
                 }).join('');
 
@@ -5783,6 +5878,15 @@
                 ingStock[id] = isNaN(val) ? -1 : val;
             });
             if (Object.keys(ingStock).length) updated.ingredientStock = ingStock;
+
+            // Link Amazon per il riordino rapido
+            const amazonLinks = {};
+            document.querySelectorAll('#priceListForm input[data-amazon]').forEach(input => {
+                const key = input.getAttribute('data-amazon');
+                const url = input.value.trim();
+                if (url) amazonLinks[key] = url;
+            });
+            updated.amazonLinks = amazonLinks;
 
             const thrEl = document.getElementById('lowStockThreshold');
             if (thrEl) {
