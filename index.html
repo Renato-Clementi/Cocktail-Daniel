@@ -1611,6 +1611,12 @@
             margin: 0;
         }
 
+        .ing-unit {
+            font-size: 0.72em;
+            color: var(--dusk-soft);
+            width: 22px;
+        }
+
         .ing-flag { font-size: 0.9em; }
 
         .low-stock-row {
@@ -1856,7 +1862,8 @@
                     <p>Ci sono <strong>due modi</strong> di tenere il conto, perché i prodotti sono di due tipi diversi.</p>
                     <p><strong>1. Scorta per prodotto</strong> (campo 📦 in ogni scheda). Per snack, bibite e dolci: una lattina è una lattina. Metti quante ne hai, cala a ogni ordine, a zero il prodotto si esaurisce da solo.</p>
                     <p><strong>2. Magazzino ingredienti</strong> (ultima sezione del listino, 🧪). Per i cocktail, che condividono le bottiglie: se il <strong>rum</strong> finisce, si esauriscono insieme Mojito, Piña Colada e tutti quelli che lo usano.</p>
-                    <p>Dentro ogni scheda cocktail trovi la riga <em>"Usa: ..."</em> che ti ricorda quali ingredienti servono.</p>
+                    <p>Le quantità sono <strong>reali</strong>, non un conteggio simbolico: inserisci i cl per i liquidi (una bottiglia di rum da 70cl → scrivi 70), i grammi per lo zucchero, i pezzi per lime/limone/menta. Ogni ordine scala esattamente quanto previsto dalla ricetta — un Mojito consuma 4cl di rum, un Negroni non lo tocca.</p>
+                    <p>Dentro ogni scheda cocktail trovi la riga <em>"Usa: Rum 4cl, Menta 8pz, Lime 0.5pz..."</em> con le quantità della ricetta.</p>
                     <p><strong>Il valore -1 significa "non tracciare".</strong> Serve per non doverti censire tutto subito: puoi iniziare mettendo la quantità solo su rum e gin, e lasciare -1 sul resto.</p>
                     <p><strong>⚠️ Avvisi:</strong> imposta la soglia (di base 2). Quando qualcosa scende sotto, in cima all'app ti compare il pannello <strong>Scorte in esaurimento</strong>: giallo se sta finendo, rosso se è finito.</p>
                     <p class="guide-tip">💡 Quando riordini le bottiglie, riapri il magazzino e aggiorna i numeri: i prodotti tornano disponibili da soli.</p>
@@ -2493,43 +2500,51 @@
         // per prodotto (vedi stock più sotto).
         // =============================================
         const ingredients = [
-            { id: 'rum',        name: 'Rum',            icon: '🥃' },
-            { id: 'gin',        name: 'Gin',            icon: '🍸' },
-            { id: 'tequila',    name: 'Tequila',        icon: '🌵' },
-            { id: 'cachaca',    name: 'Cachaça',        icon: '🇧🇷' },
-            { id: 'vino_rosso', name: 'Vino rosso',     icon: '🍷' },
-            { id: 'campari',    name: 'Campari',        icon: '🔴' },
-            { id: 'aperol',     name: 'Aperol',         icon: '🟠' },
-            { id: 'vermouth',   name: 'Vermouth rosso', icon: '🍾' },
-            { id: 'prosecco',   name: 'Prosecco',       icon: '🥂' },
-            { id: 'triple_sec', name: 'Triple sec',     icon: '🍊' },
-            { id: 'sambuco',    name: 'Sciroppo sambuco', icon: '🌼' },
-            { id: 'cocco',      name: 'Crema di cocco', icon: '🥥' },
-            { id: 'tonica',     name: 'Acqua tonica',   icon: '💧' },
-            { id: 'soda',       name: 'Soda',           icon: '🫧' },
-            { id: 'lime',       name: 'Lime',           icon: '🟢' },
-            { id: 'limone',     name: 'Limone',         icon: '🍋' },
-            { id: 'ananas',     name: 'Succo ananas',   icon: '🍍' },
-            { id: 'menta',      name: 'Menta',          icon: '🌿' },
-            { id: 'zucchero',   name: 'Zucchero',       icon: '🧂' }
+            { id: 'rum',        name: 'Rum',            icon: '🥃', unit: 'cl' },
+            { id: 'gin',        name: 'Gin',            icon: '🍸', unit: 'cl' },
+            { id: 'tequila',    name: 'Tequila',        icon: '🌵', unit: 'cl' },
+            { id: 'cachaca',    name: 'Cachaça',        icon: '🇧🇷', unit: 'cl' },
+            { id: 'vino_rosso', name: 'Vino rosso',     icon: '🍷', unit: 'cl' },
+            { id: 'campari',    name: 'Campari',        icon: '🔴', unit: 'cl' },
+            { id: 'aperol',     name: 'Aperol',         icon: '🟠', unit: 'cl' },
+            { id: 'vermouth',   name: 'Vermouth rosso', icon: '🍾', unit: 'cl' },
+            { id: 'prosecco',   name: 'Prosecco',       icon: '🥂', unit: 'cl' },
+            { id: 'triple_sec', name: 'Triple sec',     icon: '🍊', unit: 'cl' },
+            { id: 'sambuco',    name: 'Sciroppo sambuco', icon: '🌼', unit: 'cl' },
+            { id: 'cocco',      name: 'Crema di cocco', icon: '🥥', unit: 'cl' },
+            { id: 'tonica',     name: 'Acqua tonica',   icon: '💧', unit: 'cl' },
+            { id: 'soda',       name: 'Soda',           icon: '🫧', unit: 'cl' },
+            { id: 'lime',       name: 'Lime',           icon: '🟢', unit: 'pz' },
+            { id: 'limone',     name: 'Limone',         icon: '🍋', unit: 'pz' },
+            { id: 'ananas',     name: 'Succo ananas',   icon: '🍍', unit: 'cl' },
+            { id: 'menta',      name: 'Menta',          icon: '🌿', unit: 'pz' },
+            { id: 'zucchero',   name: 'Zucchero',       icon: '🧂', unit: 'g' }
         ];
 
-        // Quali ingredienti servono per ogni cocktail
+        // Quanto usa ogni cocktail, in unità reali: cl per i liquidi,
+        // g per lo zucchero, pz per frutta/foglie (lime, limone, menta).
+        // Sono le quantità di una ricetta da bar standard, non un conteggio
+        // simbolico: consumano il magazzino in proporzione al vero utilizzo.
         const recipes = {
-            'Mojito':        ['rum', 'menta', 'lime', 'zucchero', 'soda'],
-            'Margarita':     ['tequila', 'triple_sec', 'lime'],
-            'Negroni':       ['gin', 'campari', 'vermouth'],
-            'Aperol Spritz': ['aperol', 'prosecco', 'soda'],
-            'Gin Tonic':     ['gin', 'tonica', 'lime'],
-            'Gin Lemon':     ['gin', 'limone', 'soda'],
-            'Hugo Spritz':   ['prosecco', 'sambuco', 'menta', 'soda'],
-            'Piña Colada':   ['rum', 'cocco', 'ananas'],
-            'Caipirinha':    ['cachaca', 'lime', 'zucchero'],
-            'Sangria':       ['vino_rosso', 'triple_sec', 'limone', 'zucchero']
+            'Mojito':        { rum: 4,  menta: 8,  lime: 0.5, zucchero: 10, soda: 6 },
+            'Margarita':     { tequila: 4, triple_sec: 2, lime: 1 },
+            'Negroni':       { gin: 3, campari: 3, vermouth: 3 },
+            'Aperol Spritz': { aperol: 6, prosecco: 9, soda: 3 },
+            'Gin Tonic':     { gin: 4, tonica: 12, lime: 0.3 },
+            'Gin Lemon':     { gin: 4, limone: 0.5, soda: 10 },
+            'Hugo Spritz':   { prosecco: 9, sambuco: 2, menta: 6, soda: 3 },
+            'Piña Colada':   { rum: 4, cocco: 3, ananas: 9 },
+            'Caipirinha':    { cachaca: 5, lime: 1, zucchero: 8 },
+            'Sangria':       { vino_rosso: 15, triple_sec: 2, limone: 0.5, zucchero: 8 }
         };
 
         function ingredientById(id) {
             return ingredients.find(i => i.id === id);
+        }
+
+        function formatQty(qty, unit) {
+            const n = (qty % 1 === 0) ? qty : qty.toFixed(1);
+            return `${n}${unit}`;
         }
 
         function findProduct(name) {
@@ -2642,7 +2657,7 @@
                 tabIngredients: "Magazzino ingredienti",
                 stockLabel: "Scorta",
                 stockUnlimited: "-1 = illimitato",
-                stockUnlimitedHelp: "Imposta la quantità disponibile. Lascia -1 per non gestire la scorta di quell’ingrediente.",
+                stockUnlimitedHelp: "Imposta la quantità disponibile in cl / g / pz (es. una bottiglia di rum da 70cl → scrivi 70). Lascia -1 per non gestire la scorta di quell’ingrediente.",
                 lowStockThreshold: "Avvisa sotto",
                 lowStockTitle: "Scorte in esaurimento",
                 stockZero: "ESAURITO",
@@ -2812,7 +2827,7 @@
                 tabIngredients: "Ingredient stock",
                 stockLabel: "Stock",
                 stockUnlimited: "-1 = unlimited",
-                stockUnlimitedHelp: "Set the available quantity. Leave -1 to not track that ingredient.",
+                stockUnlimitedHelp: "Set the available quantity in cl / g / pcs (e.g. a 70cl rum bottle → enter 70). Leave -1 to not track that ingredient.",
                 lowStockThreshold: "Warn below",
                 lowStockTitle: "Running low",
                 stockZero: "OUT",
@@ -2982,7 +2997,7 @@
                 tabIngredients: "Almacén de ingredientes",
                 stockLabel: "Existencias",
                 stockUnlimited: "-1 = ilimitado",
-                stockUnlimitedHelp: "Indica la cantidad disponible. Deja -1 para no controlar ese ingrediente.",
+                stockUnlimitedHelp: "Indica la cantidad disponible en cl / g / uds (ej. una botella de ron de 70cl → escribe 70). Deja -1 para no controlar ese ingrediente.",
                 lowStockThreshold: "Avisar por debajo de",
                 lowStockTitle: "Existencias bajas",
                 stockZero: "AGOTADO",
@@ -3152,7 +3167,7 @@
                 tabIngredients: "Zutatenlager",
                 stockLabel: "Bestand",
                 stockUnlimited: "-1 = unbegrenzt",
-                stockUnlimitedHelp: "Verfügbare Menge eintragen. -1 lassen, um die Zutat nicht zu verfolgen.",
+                stockUnlimitedHelp: "Verfügbare Menge in cl / g / Stk eintragen (z.B. eine 70cl-Rumflasche → 70 eingeben). -1 lassen, um die Zutat nicht zu verfolgen.",
                 lowStockThreshold: "Warnen unter",
                 lowStockTitle: "Bestand geht zur Neige",
                 stockZero: "LEER",
@@ -3322,7 +3337,7 @@
                 tabIngredients: "Stock ingrédients",
                 stockLabel: "Stock",
                 stockUnlimited: "-1 = illimité",
-                stockUnlimitedHelp: "Indiquez la quantité disponible. Laissez -1 pour ne pas suivre cet ingrédient.",
+                stockUnlimitedHelp: "Indiquez la quantité disponible en cl / g / pièces (ex. une bouteille de rhum de 70cl → écrivez 70). Laissez -1 pour ne pas suivre cet ingrédient.",
                 lowStockThreshold: "Alerter en dessous de",
                 lowStockTitle: "Stock faible",
                 stockZero: "ÉPUISÉ",
@@ -3492,7 +3507,7 @@
                 tabIngredients: "Склад інгредієнтів",
                 stockLabel: "Запас",
                 stockUnlimited: "-1 = необмежено",
-                stockUnlimitedHelp: "Вкажіть доступну кількість. Залиште -1, щоб не відстежувати цей інгредієнт.",
+                stockUnlimitedHelp: "Вкажіть доступну кількість у мл / г / шт (напр. пляшка рому 70cl → введіть 70). Залиште -1, щоб не відстежувати цей інгредієнт.",
                 lowStockThreshold: "Попереджати нижче",
                 lowStockTitle: "Запаси закінчуються",
                 stockZero: "НЕМАЄ",
@@ -3661,7 +3676,7 @@
                 tabIngredients: "Stock de ingredientes",
                 stockLabel: "Stock",
                 stockUnlimited: "-1 = ilimitado",
-                stockUnlimitedHelp: "Indique a quantidade disponível. Deixe -1 para não controlar esse ingrediente.",
+                stockUnlimitedHelp: "Indique a quantidade disponível em cl / g / unid. (ex.: garrafa de rum de 70cl → escreva 70). Deixe -1 para não controlar esse ingrediente.",
                 lowStockThreshold: "Avisar abaixo de",
                 lowStockTitle: "Stock a acabar",
                 stockZero: "ESGOTADO",
@@ -4580,11 +4595,15 @@
             return (typeof s === 'number') ? s : -1;
         }
 
-        // Ingredienti mancanti per un dato cocktail
+        // Ingredienti che non bastano per una dose di questo cocktail
+        // (non solo "a zero": anche "meno di quanto serve alla ricetta")
         function missingIngredients(name) {
             const recipe = recipes[baseNameOf(name)];
             if (!recipe) return [];
-            return recipe.filter(id => getIngredientStock(id) === 0);
+            return Object.keys(recipe).filter(id => {
+                const have = getIngredientStock(id);
+                return have >= 0 && have < recipe[id];
+            });
         }
 
         function isSoldOut(name) {
@@ -4633,13 +4652,16 @@
                 changed = true;
             }
 
-            // Ingredienti della ricetta
+            // Ingredienti della ricetta: si scala la quantità reale usata,
+            // non genericamente "1 unità". Non si va mai sotto zero:
+            // se restano 3cl e la ricetta ne chiede 4, si azzera a 0
+            // (l'ultima dose "consuma il fondo bottiglia").
             const recipe = recipes[base];
             if (recipe && pricing.ingredientStock) {
-                recipe.forEach(id => {
+                Object.keys(recipe).forEach(id => {
                     const q = pricing.ingredientStock[id];
-                    if (typeof q === 'number' && q > 0) {
-                        pricing.ingredientStock[id] = q - 1;
+                    if (typeof q === 'number' && q >= 0) {
+                        pricing.ingredientStock[id] = Math.max(0, q - recipe[id]);
                         changed = true;
                     }
                 });
@@ -5495,7 +5517,10 @@
                                        value="${item.stock ?? -1}">
                                 <span class="stock-hint">${t('stockUnlimited')}</span>
                             </div>
-                            ${recipes[c.name] ? `<div class="recipe-note">🧪 ${t('usesIngredients')}: ${recipes[c.name].map(id => ingredientById(id)?.name || id).join(', ')}</div>` : ''}
+                            ${recipes[c.name] ? `<div class="recipe-note">🧪 ${t('usesIngredients')}: ${Object.keys(recipes[c.name]).map(id => {
+                                const ing = ingredientById(id);
+                                return ing ? `${ing.name} ${formatQty(recipes[c.name][id], ing.unit)}` : id;
+                            }).join(', ')}</div>` : ''}
                             ${rows}
                             ${premiumBlock}
                         </div>
@@ -5525,8 +5550,9 @@
                     return `
                         <div class="ingredient-row${out ? ' ingredient-out' : ''}">
                             <span class="ing-name">${i.icon} ${i.name}</span>
-                            <input type="number" step="1" min="-1"
+                            <input type="number" step="0.5" min="-1"
                                    data-ingredient="${i.id}" value="${q}">
+                            <span class="ing-unit">${i.unit}</span>
                             ${out ? `<span class="ing-flag">🚫</span>` : ''}
                         </div>`;
                 }).join('');
