@@ -1619,31 +1619,66 @@
 
         .ing-flag { font-size: 0.9em; }
 
-        .low-stock-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        /* =============================================
+           SCORTE IN ESAURIMENTO — pannello compatto
+           Chip invece di righe: molti elementi stanno nello
+           stesso spazio di prima, e il pannello è richiudibile.
+           ============================================= */
+        .low-stock-panel {
             background: rgba(245, 166, 35, 0.14);
-            border-left: 4px solid var(--sand-gold);
+            border: 2px solid var(--sand-gold);
             border-radius: var(--radius-sm);
             padding: 10px 12px;
-            margin-bottom: 7px;
+            margin-bottom: 16px;
+        }
+
+        .low-stock-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            border: none;
+            background: transparent;
+            padding: 2px 0;
+            font-family: var(--font-body);
             font-size: 0.88em;
+            font-weight: 600;
             color: var(--dusk);
+            cursor: pointer;
         }
 
-        .low-stock-row.low-stock-out {
-            background: rgba(176, 58, 46, 0.12);
-            border-left-color: #B03A2E;
+        .low-stock-toggle .pc-chevron { margin-left: auto; }
+
+        .low-stock-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 10px;
         }
 
-        .low-stock-qty {
+        .low-stock-panel.collapsed .low-stock-chips { display: none; }
+        .low-stock-panel.collapsed .pc-chevron { transform: rotate(-90deg); }
+
+        .stock-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #fff;
+            border: 1px solid rgba(245, 166, 35, 0.5);
+            border-radius: 999px;
+            padding: 4px 10px;
             font-family: var(--font-mono);
+            font-size: 0.75em;
             font-weight: 700;
             color: var(--coral-deep);
+            cursor: default;
         }
 
-        .low-stock-out .low-stock-qty { color: #B03A2E; }
+        .stock-chip-out {
+            background: rgba(176, 58, 46, 0.10);
+            border-color: #B03A2E;
+            color: #B03A2E;
+        }
 
         /* =============================================
            GUIDA ADMIN
@@ -1733,6 +1768,73 @@
             border-radius: 6px;
             padding: 9px 11px;
         }
+
+        /* =============================================
+           UPSELLING NEL MODALE ORDINE
+           ============================================= */
+        .upsell-section { margin-bottom: 20px; }
+
+        .upsell-title {
+            font-family: var(--font-display);
+            font-size: 0.9em;
+            color: var(--dusk);
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .upsell-cards {
+            display: flex;
+            gap: 10px;
+        }
+
+        .upsell-card {
+            flex: 1;
+            background: rgba(46, 196, 182, 0.08);
+            border: 2px solid var(--sand-deep);
+            border-radius: var(--radius-sm);
+            padding: 12px 8px;
+            text-align: center;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+
+        .upsell-card.upsell-selected {
+            border-color: var(--lagoon);
+            background: rgba(46, 196, 182, 0.16);
+        }
+
+        .upsell-icon { font-size: 1.8em; margin-bottom: 4px; }
+
+        .upsell-name {
+            font-size: 0.78em;
+            font-weight: 600;
+            color: var(--dusk);
+            margin-bottom: 3px;
+            line-height: 1.2;
+        }
+
+        .upsell-price {
+            font-family: var(--font-mono);
+            font-size: 0.75em;
+            color: var(--coral-deep);
+            margin-bottom: 8px;
+        }
+
+        .upsell-add {
+            width: 100%;
+            border: none;
+            border-radius: 6px;
+            background: var(--lagoon);
+            color: #fff;
+            padding: 6px 4px;
+            font-family: var(--font-body);
+            font-size: 0.72em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .upsell-selected .upsell-add { background: #1FA396; }
+        .upsell-add:active { transform: scale(0.94); }
 
         .pagination {
             display: flex;
@@ -1993,12 +2095,13 @@
         </div>
 
         <!-- Avviso scorte in esaurimento (solo admin) -->
-        <div id="lowStockPanel" class="orders-section" style="display:none; margin-bottom:20px;">
-            <h2 style="margin-bottom:12px;">
-                ⚠️ <span data-i18n="lowStockTitle">Scorte in esaurimento</span>
+        <div id="lowStockPanel" class="low-stock-panel collapsed" style="display:none;">
+            <button type="button" class="low-stock-toggle" onclick="document.getElementById('lowStockPanel').classList.toggle('collapsed')">
+                <span>⚠️ <span data-i18n="lowStockTitle">Scorte in esaurimento</span></span>
                 <span class="badge" id="lowStockCount">0</span>
-            </h2>
-            <div id="lowStockList"></div>
+                <span class="pc-chevron">▾</span>
+            </button>
+            <div id="lowStockList" class="low-stock-chips"></div>
         </div>
 
         <!-- Sezione admin: richieste di pagamento da confermare -->
@@ -2244,6 +2347,13 @@
                 <div style="font-size: 0.9em; color: #666; margin-bottom: 5px;" data-i18n="priceToPay">💰 Prezzo da pagare alla consegna:</div>
                 <div id="priceDisplay" style="font-size: 1.8em; font-weight: bold; color: var(--coral);">0,50€</div>
             </div>
+
+            <!-- Upselling: proposte legate a ciò che si sta ordinando -->
+            <div id="upsellSection" class="upsell-section" style="display:none;">
+                <div class="upsell-title" data-i18n="upsellTitle">✨ Completa il tuo ordine</div>
+                <div id="upsellCards" class="upsell-cards"></div>
+            </div>
+
             <div class="btn-group">
                 <button class="btn btn-secondary" onclick="closeModal()" data-i18n="cancel">Annulla</button>
                 <button class="btn btn-primary" onclick="confirmOrder()" data-i18n="confirmOrderBtn">Conferma Ordine</button>
@@ -2654,6 +2764,9 @@
 
                 soldOutLabel: "ESAURITO",
 
+                upsellTitle: "✨ Completa il tuo ordine",
+                upsellAdd: "Aggiungi",
+                upsellAdded: "Aggiunto",
                 tabIngredients: "Magazzino ingredienti",
                 stockLabel: "Scorta",
                 stockUnlimited: "-1 = illimitato",
@@ -2824,6 +2937,9 @@
 
                 soldOutLabel: "SOLD OUT",
 
+                upsellTitle: "✨ Complete your order",
+                upsellAdd: "Add",
+                upsellAdded: "Added",
                 tabIngredients: "Ingredient stock",
                 stockLabel: "Stock",
                 stockUnlimited: "-1 = unlimited",
@@ -2994,6 +3110,9 @@
 
                 soldOutLabel: "AGOTADO",
 
+                upsellTitle: "✨ Completa tu pedido",
+                upsellAdd: "Añadir",
+                upsellAdded: "Añadido",
                 tabIngredients: "Almacén de ingredientes",
                 stockLabel: "Existencias",
                 stockUnlimited: "-1 = ilimitado",
@@ -3164,6 +3283,9 @@
 
                 soldOutLabel: "AUSVERKAUFT",
 
+                upsellTitle: "✨ Bestellung ergänzen",
+                upsellAdd: "Hinzufügen",
+                upsellAdded: "Hinzugefügt",
                 tabIngredients: "Zutatenlager",
                 stockLabel: "Bestand",
                 stockUnlimited: "-1 = unbegrenzt",
@@ -3334,6 +3456,9 @@
 
                 soldOutLabel: "ÉPUISÉ",
 
+                upsellTitle: "✨ Complétez votre commande",
+                upsellAdd: "Ajouter",
+                upsellAdded: "Ajouté",
                 tabIngredients: "Stock ingrédients",
                 stockLabel: "Stock",
                 stockUnlimited: "-1 = illimité",
@@ -3504,6 +3629,9 @@
 
                 soldOutLabel: "ЗАКІНЧИВСЯ",
 
+                upsellTitle: "✨ Доповніть замовлення",
+                upsellAdd: "Додати",
+                upsellAdded: "Додано",
                 tabIngredients: "Склад інгредієнтів",
                 stockLabel: "Запас",
                 stockUnlimited: "-1 = необмежено",
@@ -3673,6 +3801,9 @@
                 specialOffer: "PROMOÇÃO",
                 soldOutLabel: "ESGOTADO",
 
+                upsellTitle: "✨ Complete o seu pedido",
+                upsellAdd: "Adicionar",
+                upsellAdded: "Adicionado",
                 tabIngredients: "Stock de ingredientes",
                 stockLabel: "Stock",
                 stockUnlimited: "-1 = ilimitado",
@@ -5352,15 +5483,18 @@
             if (total === 0) { panel.style.display = 'none'; return; }
 
             document.getElementById('lowStockCount').textContent = total;
-            const line = (icon, name, qty) => `
-                <div class="low-stock-row${qty === 0 ? ' low-stock-out' : ''}">
-                    <span>${icon} ${name}</span>
-                    <span class="low-stock-qty">${qty === 0 ? t('stockZero') : qty}</span>
-                </div>`;
+
+            // Pillola compatta: icona + quantità, il nome completo sta nel
+            // title (tooltip) invece che occupare spazio in riga.
+            const chip = (icon, name, qty, unit) => {
+                const out = qty === 0;
+                const label = out ? t('stockZero') : formatQty(qty, unit || '');
+                return `<span class="stock-chip${out ? ' stock-chip-out' : ''}" title="${name}">${icon} ${label}</span>`;
+            };
 
             document.getElementById('lowStockList').innerHTML =
-                lowIng.map(i => line(i.icon, i.name, getIngredientStock(i.id))).join('') +
-                lowProd.map(p => line(p.icon, p.name, getStock(p.name))).join('');
+                lowIng.map(i => chip(i.icon, i.name, getIngredientStock(i.id), i.unit)).join('') +
+                lowProd.map(p => chip(p.icon, p.name, getStock(p.name), '')).join('');
 
             panel.style.display = 'block';
         }
@@ -5801,6 +5935,7 @@
             
             document.getElementById('modalCocktail').value = cocktailName;
             document.getElementById('orderModal').classList.add('active');
+            renderUpsell(cocktailName);
             
             // Render variant buttons
             const variantButtons = document.getElementById('variantButtons');
@@ -5844,6 +5979,94 @@
         }
 
         // Update price display based on selected variant
+        // =============================================
+        // UPSELLING NEL MODALE ORDINE
+        // Propone fino a 2 prodotti complementari a ciò che si sta
+        // ordinando. Stessa logica di abbinamento già usata da Danny
+        // (cocktail↔snack, cibo↔bibita), per restare coerenti:
+        // non deve sembrare un secondo consiglio in contraddizione.
+        // =============================================
+        let upsellSelection = {}; // { nomeProdotto: true } — extra scelti in questo ordine
+
+        // Prodotti disponibili di una categoria, esclusi esauriti e quello
+        // che si sta già ordinando
+        function availableIn(list, excludeName) {
+            const excludeBase = baseNameOf(excludeName || '');
+            return list.filter(p => p.name !== excludeBase && !isSoldOut(p.name));
+        }
+
+        function pickUpsellSuggestions(orderingName) {
+            if (!isServiceOpen()) return [];
+
+            const base = baseNameOf(orderingName);
+            const isCocktailOrder = cocktails.some(c => c.name === base);
+            const isSnackOrder = snacks.some(s => s.name === base);
+            const isDrinkOrder = softdrinks.some(d => d.name === base);
+            const isDessertOrder = desserts.some(d => d.name === base);
+
+            let pool = [];
+            if (isCocktailOrder) {
+                // Un cocktail si abbina bene a uno snack e a un dolce
+                pool = availableIn(snacks, base).slice(0, 1)
+                    .concat(availableIn(desserts, base).slice(0, 1));
+            } else if (isSnackOrder) {
+                // Uno snack chiama una bibita, poi eventualmente un altro snack
+                pool = availableIn(softdrinks, base).slice(0, 1)
+                    .concat(availableIn(snacks, base).slice(0, 1));
+            } else if (isDrinkOrder) {
+                pool = availableIn(snacks, base).slice(0, 2);
+            } else if (isDessertOrder) {
+                // Chi ordina un dolce ha già chiuso bene da solo:
+                // niente da proporre, come da regola.
+                pool = [];
+            }
+
+            return pool.filter(Boolean).slice(0, 2);
+        }
+
+        function renderUpsell(orderingName) {
+            upsellSelection = {};
+            const section = document.getElementById('upsellSection');
+            const cardsBox = document.getElementById('upsellCards');
+            const suggestions = pickUpsellSuggestions(orderingName);
+
+            if (suggestions.length === 0) {
+                section.style.display = 'none';
+                cardsBox.innerHTML = '';
+                return;
+            }
+
+            cardsBox.innerHTML = suggestions.map(p => {
+                const price = formatPrice(getBasePrice(p.name, 0));
+                const safeId = p.name.replace(/\s+/g, '_');
+                return `
+                    <div class="upsell-card" id="upsell-${safeId}">
+                        <div class="upsell-icon">${p.icon}</div>
+                        <div class="upsell-name">${p.name}</div>
+                        <div class="upsell-price">${price}</div>
+                        <button type="button" class="upsell-add" onclick="toggleUpsell('${p.name}', '${safeId}')">
+                            + ${t('upsellAdd')}
+                        </button>
+                    </div>`;
+            }).join('');
+
+            section.style.display = 'block';
+        }
+
+        function toggleUpsell(productName, safeId) {
+            const card = document.getElementById('upsell-' + safeId);
+            const btn = card.querySelector('.upsell-add');
+            if (upsellSelection[productName]) {
+                delete upsellSelection[productName];
+                card.classList.remove('upsell-selected');
+                btn.textContent = '+ ' + t('upsellAdd');
+            } else {
+                upsellSelection[productName] = true;
+                card.classList.add('upsell-selected');
+                btn.textContent = '✓ ' + t('upsellAdded');
+            }
+        }
+
         function updatePriceDisplay() {
             const cocktail = findProduct(selectedCocktail);
             if (!cocktail) return;
@@ -6037,12 +6260,37 @@
                 gps: gpsCoordinates
             };
 
+            // Gli extra scelti nell'upselling diventano ordini a sé stanti,
+            // stessa posizione e orario del prodotto principale.
+            const extraNames = Object.keys(upsellSelection);
+            const extraOrders = extraNames.map((name, i) => {
+                const product = findProduct(name);
+                const variant = product ? product.variants[0] : '';
+                return {
+                    id: order.id + 1 + i,
+                    userId: order.userId,
+                    customerName: customerName,
+                    cocktail: name,
+                    variant: variant,
+                    location: selectedLocation,
+                    time: selectedDeliveryTime,
+                    orderTime: orderTime,
+                    orderDate: orderDate,
+                    notes: '',
+                    price: formatPrice(computePrice(name, variant, selectedDeliveryTime)),
+                    gps: gpsCoordinates
+                };
+            });
+
             // Save order persistently
             orders.unshift(order);
+            extraOrders.forEach(o => orders.unshift(o));
             ordersPage = 1; // Torna alla prima pagina per mostrare il nuovo ordine
             saveOrders();
             await saveOrderToCloud(order);
+            for (const o of extraOrders) await saveOrderToCloud(o);
             await decrementStock(selectedCocktail); // Scala scorte e ingredienti
+            for (const o of extraOrders) await decrementStock(o.cocktail);
 
             // Show success message
             const successMsg = document.getElementById('successMessage');
@@ -6058,14 +6306,17 @@
             resetDannyIdle(15000); // Danny riproverà dopo la pausa post-ordine
 
             // Passa a WhatsApp per ultimo: su mobile interrompe l'esecuzione
-            sendWhatsAppMessage(order, ADMIN_PHONE);
+            sendWhatsAppMessage(order, ADMIN_PHONE, extraOrders);
         }
 
         // Send WhatsApp message
-        function sendWhatsAppMessage(order, phone) {
+        function sendWhatsAppMessage(order, phone, extraOrders) {
             let message = `🍹 *NUOVO ORDINE COCKTAIL*\n\n`;
             message += `👤 *Cliente:* ${order.customerName}\n`;
             message += `📋 *Cocktail:* ${order.cocktail} - ${order.variant}\n`;
+            (extraOrders || []).forEach(extra => {
+                message += `➕ *Extra:* ${extra.cocktail}${extra.variant ? ' - ' + extra.variant : ''} (${extra.price})\n`;
+            });
             message += `📍 *Posizione:* ${order.location}\n`;
             
             // Add GPS coordinates if available
@@ -6078,7 +6329,18 @@
             
             message += `⏰ *Da servire:* ${order.time}\n`;
             message += `🕐 *Ordinato alle:* ${order.orderTime}\n`;
-            message += `💰 *Prezzo:* ${order.price}\n`;
+
+            const extrasTotal = (extraOrders || []).reduce((sum, e) => {
+                const n = parseFloat(String(e.price).replace(',', '.').replace('€', ''));
+                return sum + (isNaN(n) ? 0 : n);
+            }, 0);
+            const mainTotal = parseFloat(String(order.price).replace(',', '.').replace('€', '')) || 0;
+
+            if (extraOrders && extraOrders.length) {
+                message += `💰 *Totale:* ${formatPrice(mainTotal + extrasTotal)}\n`;
+            } else {
+                message += `💰 *Prezzo:* ${order.price}\n`;
+            }
             if (order.notes) {
                 message += `📝 *Note:* ${order.notes}\n`;
             }
