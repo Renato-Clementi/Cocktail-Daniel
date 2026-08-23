@@ -1625,11 +1625,14 @@
            stesso spazio di prima, e il pannello è richiudibile.
            ============================================= */
         .low-stock-panel {
-            background: rgba(245, 166, 35, 0.14);
+            background: rgba(255, 244, 230, 0.92);
+            backdrop-filter: blur(14px) saturate(1.15);
+            -webkit-backdrop-filter: blur(14px) saturate(1.15);
             border: 2px solid var(--sand-gold);
             border-radius: var(--radius-sm);
             padding: 10px 12px;
             margin-bottom: 16px;
+            box-shadow: var(--shadow-card);
         }
 
         .low-stock-toggle {
@@ -1875,6 +1878,74 @@
             border-style: solid;
             border-color: var(--sand-gold);
             outline: none;
+        }
+
+        /* =============================================
+           LAVORETTI DOMESTICI
+           ============================================= */
+        .chore-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            background: #fff;
+            border-left: 4px solid var(--lagoon);
+            border-radius: var(--radius-sm);
+            padding: 12px 14px;
+            margin-bottom: 10px;
+        }
+
+        .chore-row-info { font-size: 0.88em; color: var(--dusk); line-height: 1.4; }
+
+        .chore-tip {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            color: var(--coral-deep);
+        }
+
+        .chore-done-btn {
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #43a047 0%, #2e7d32 100%);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 9px 14px;
+            font-family: var(--font-body);
+            font-size: 0.8em;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .chore-done-btn:active { transform: scale(0.95); }
+
+        .chore-status {
+            flex-shrink: 0;
+            font-size: 0.78em;
+            font-weight: 700;
+            color: var(--sand-gold);
+            white-space: nowrap;
+        }
+
+        .chore-status-done { color: #2e7d32; }
+
+        .chore-payout-box {
+            margin-top: 14px;
+            background: rgba(245, 166, 35, 0.14);
+            border: 2px solid var(--sand-gold);
+            border-radius: var(--radius-sm);
+            padding: 14px;
+        }
+
+        .chore-payout-header {
+            font-size: 0.9em;
+            color: var(--dusk);
+            margin-bottom: 8px;
+        }
+
+        .chore-payout-item {
+            font-size: 0.82em;
+            color: var(--dusk-soft);
+            padding: 3px 0;
         }
 
         .pagination {
@@ -2146,6 +2217,30 @@
             <div id="lowStockList" class="low-stock-chips"></div>
         </div>
 
+        <!-- Lavoretti da fare (solo admin) -->
+        <div id="adminChoresPanel" class="orders-section" style="display:none; margin-bottom:20px;">
+            <h2 style="margin-bottom:12px;">
+                🧹 <span data-i18n="choresTodoTitle">Lavoretti da fare</span>
+                <span class="badge" id="choresTodoCount">0</span>
+            </h2>
+            <div id="choresTodoList"></div>
+
+            <div id="chorePayoutBox" class="chore-payout-box" style="display:none;">
+                <div class="chore-payout-header">
+                    💰 <span data-i18n="chorePayoutTitle">Mance da pagare</span>:
+                    <strong id="chorePayoutTotal">0,00€</strong>
+                </div>
+                <div id="chorePayoutList"></div>
+                <button class="btn btn-primary" style="width:100%; margin-top:10px;" onclick="settleChorePayouts()" data-i18n="settleChoresBtn">Ho pagato tutto</button>
+            </div>
+        </div>
+
+        <!-- I miei lavoretti assegnati (clienti/famiglia) -->
+        <div id="myChoresPanel" class="orders-section" style="display:none; margin-bottom:20px;">
+            <h2 style="margin-bottom:12px;">🧹 <span data-i18n="myChoresTitle">I miei lavoretti assegnati</span></h2>
+            <div id="myChoresList"></div>
+        </div>
+
         <!-- Sezione admin: richieste di pagamento da confermare -->
         <div id="pendingPaymentsSection" class="orders-section" style="display:none; margin-bottom:20px;">
             <h2 style="margin-bottom:15px;">
@@ -2168,6 +2263,9 @@
             </button>
             <button class="category-tab" id="tabDesserts" onclick="setCategory('desserts')">
                 🍰 <span data-i18n="tabDesserts">Dolci</span>
+            </button>
+            <button class="category-tab" id="tabChores" onclick="setCategory('chores')">
+                🧹 <span data-i18n="tabChores">Lavoretti</span>
             </button>
         </div>
 
@@ -2202,6 +2300,28 @@
     </div>
 
     <!-- Reviews Page Modal (pubblica) -->
+    <!-- Modale assegnazione lavoretto -->
+    <div class="modal" id="choreModal">
+        <div class="modal-content" style="max-width:400px; text-align:center;">
+            <button class="modal-close" onclick="closeChoreModal()" aria-label="Chiudi">✕</button>
+            <div style="font-size:2.4em; margin-bottom:6px;" id="choreModalIcon"></div>
+            <h2 id="choreModalName" style="margin-bottom:8px;"></h2>
+            <p style="color:var(--dusk-soft); font-size:0.85em; margin-bottom:14px;" data-i18n="choreModalSubtitle">Assegna questo lavoretto a Daniel.</p>
+            <div style="background:rgba(46,196,182,0.12); border:2px solid var(--lagoon); border-radius:10px; padding:14px; margin-bottom:16px;">
+                <div style="font-size:0.85em; color:var(--dusk-soft); margin-bottom:4px;" data-i18n="choreTipLabel">💰 Mancia per Daniel:</div>
+                <div id="choreModalTip" style="font-family:var(--font-mono); font-size:1.6em; font-weight:700; color:var(--coral-deep);"></div>
+            </div>
+            <div class="form-group" style="text-align:left;">
+                <label data-i18n="choreNoteLabel">Note (opzionale):</label>
+                <input type="text" id="choreNote" data-i18n-placeholder="choreNotePlaceholder" placeholder="es: entro stasera">
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="closeChoreModal()" data-i18n="cancel">Annulla</button>
+                <button class="btn btn-primary" onclick="confirmChoreAssign()" data-i18n="assignChoreConfirm">Assegna a Daniel</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modale rifiuto ordine (admin) -->
     <div class="modal" id="rejectModal">
         <div class="modal-content" style="max-width:420px;">
@@ -2645,6 +2765,59 @@
         const allProducts = cocktails.concat(snacks, softdrinks, desserts);
 
         // =============================================
+        // LAVORETTI DOMESTICI
+        // Sistema separato dai prodotti da bar: qui è la famiglia
+        // ad "ordinare" qualcosa a Daniel, e il compenso (mancia) lo
+        // deve Daniel a chi ha assegnato il lavoretto — è un debito
+        // inverso rispetto al conto dei cocktail.
+        // =============================================
+        const chores = [
+            { id: 'aspirapolvere',  name: 'Aspirapolvere',            icon: '🧹', category: 'Casa' },
+            { id: 'spolverare',     name: 'Spolverare',               icon: '🪶', category: 'Casa' },
+            { id: 'pavimenti',      name: 'Lavare i pavimenti',       icon: '🧽', category: 'Casa' },
+            { id: 'letto',          name: 'Rifare il letto',          icon: '🛏️', category: 'Casa' },
+            { id: 'sparecchiare',   name: 'Sparecchiare',             icon: '🍽️', category: 'Cucina' },
+            { id: 'lavastoviglie',  name: 'Lavastoviglie',            icon: '🍴', category: 'Cucina' },
+            { id: 'spazzatura',     name: 'Buttare la spazzatura',    icon: '🗑️', category: 'Cucina' },
+            { id: 'cane',          name: 'Portare a spasso il cane',  icon: '🐕', category: 'Animali' },
+            { id: 'mangiare_pet',  name: 'Dare da mangiare',          icon: '🐾', category: 'Animali' },
+            { id: 'piante',        name: 'Innaffiare le piante',      icon: '🌱', category: 'Esterno' },
+            { id: 'erba',          name: "Tagliare l'erba",           icon: '🌿', category: 'Esterno' },
+            { id: 'cameretta',     name: 'Riordinare la cameretta',   icon: '📦', category: 'Ordine' },
+            { id: 'bucato',        name: 'Piegare il bucato',         icon: '👕', category: 'Ordine' },
+            { id: 'auto',          name: 'Lavare la macchina',        icon: '🚗', category: 'Altro' }
+        ];
+
+        // Mance predefinite (l'admin può cambiarle dal listino)
+        function buildDefaultChorePricing() {
+            const defaults = {
+                aspirapolvere: 2.00, spolverare: 1.50, pavimenti: 3.00, letto: 0.50,
+                sparecchiare: 1.00, lavastoviglie: 1.50, spazzatura: 1.00,
+                cane: 2.00, mangiare_pet: 0.50,
+                piante: 1.00, erba: 4.00,
+                cameretta: 2.00, bucato: 1.50,
+                auto: 3.00
+            };
+            const items = {};
+            chores.forEach(c => { items[c.id] = { tip: defaults[c.id] ?? 1.00, paused: false }; });
+            return items;
+        }
+
+        function getChoreTip(id) {
+            const item = pricing.choreItems && pricing.choreItems[id];
+            return (item && typeof item.tip === 'number') ? item.tip : 1.00;
+        }
+
+        function isChorePaused(id) {
+            const item = pricing.choreItems && pricing.choreItems[id];
+            return !!(item && item.paused);
+        }
+
+        function choreById(id) {
+            return chores.find(c => c.id === id);
+        }
+
+        // =============================================
         // MAGAZZINO INGREDIENTI (solo cocktail)
         // I cocktail sono composizioni: se finisce il rum cadono
         // Mojito, Piña Colada e Caipirinha insieme. Snack, bibite e
@@ -2806,6 +2979,33 @@
 
                 soldOutLabel: "ESAURITO",
 
+                tabChores: "Lavoretti",
+                assignChore: "Assegna",
+                choresPausedButton: "In pausa",
+                chorePausedLabel: "IN PAUSA",
+                choreCat_Casa: "Casa",
+                choreCat_Cucina: "Cucina",
+                choreCat_Animali: "Animali",
+                choreCat_Esterno: "Esterno",
+                choreCat_Ordine: "Ordine",
+                choreCat_Altro: "Altro",
+                choreModalSubtitle: "Assegna questo lavoretto a Daniel.",
+                choreTipLabel: "💰 Mancia per Daniel:",
+                choreNoteLabel: "Note (opzionale):",
+                choreNotePlaceholder: "es: entro stasera",
+                assignChoreConfirm: "Assegna a Daniel",
+                choreAssignedMsg: "🧹 Lavoretto assegnato: {name}",
+                choresTodoTitle: "Lavoretti da fare",
+                requestedBy: "Richiesto da",
+                choreDone: "Fatto",
+                noChoresTodo: "Nessun lavoretto da fare al momento 🎉",
+                chorePayoutTitle: "Mance da pagare",
+                settleChoresBtn: "Ho pagato tutto",
+                confirmSettleChores: "Confermi di aver pagato {total} in mance?",
+                myChoresTitle: "I miei lavoretti assegnati",
+                choreDoneLabel: "Fatto",
+                choreTodoLabel: "Da fare",
+                choresPauseEnable: "Metti in pausa",
                 reorderOn: "Riordina su",
                 amazonLinkPlaceholder: "Incolla qui il link Amazon del prodotto (facoltativo)",
                 upsellTitle: "✨ Completa il tuo ordine",
@@ -2981,6 +3181,33 @@
 
                 soldOutLabel: "SOLD OUT",
 
+                tabChores: "Chores",
+                assignChore: "Assign",
+                choresPausedButton: "Paused",
+                chorePausedLabel: "PAUSED",
+                choreCat_Casa: "Home",
+                choreCat_Cucina: "Kitchen",
+                choreCat_Animali: "Pets",
+                choreCat_Esterno: "Outdoor",
+                choreCat_Ordine: "Tidying",
+                choreCat_Altro: "Other",
+                choreModalSubtitle: "Assign this chore to Daniel.",
+                choreTipLabel: "💰 Tip for Daniel:",
+                choreNoteLabel: "Notes (optional):",
+                choreNotePlaceholder: "e.g: by tonight",
+                assignChoreConfirm: "Assign to Daniel",
+                choreAssignedMsg: "🧹 Chore assigned: {name}",
+                choresTodoTitle: "Chores to do",
+                requestedBy: "Requested by",
+                choreDone: "Done",
+                noChoresTodo: "No chores right now 🎉",
+                chorePayoutTitle: "Tips to pay",
+                settleChoresBtn: "I've paid it all",
+                confirmSettleChores: "Confirm you paid {total} in tips?",
+                myChoresTitle: "My assigned chores",
+                choreDoneLabel: "Done",
+                choreTodoLabel: "To do",
+                choresPauseEnable: "Pause",
                 reorderOn: "Reorder on",
                 amazonLinkPlaceholder: "Paste the Amazon product link here (optional)",
                 upsellTitle: "✨ Complete your order",
@@ -3156,6 +3383,33 @@
 
                 soldOutLabel: "AGOTADO",
 
+                tabChores: "Tareas",
+                assignChore: "Asignar",
+                choresPausedButton: "En pausa",
+                chorePausedLabel: "EN PAUSA",
+                choreCat_Casa: "Casa",
+                choreCat_Cucina: "Cocina",
+                choreCat_Animali: "Mascotas",
+                choreCat_Esterno: "Exterior",
+                choreCat_Ordine: "Orden",
+                choreCat_Altro: "Otro",
+                choreModalSubtitle: "Asigna esta tarea a Daniel.",
+                choreTipLabel: "💰 Propina para Daniel:",
+                choreNoteLabel: "Notas (opcional):",
+                choreNotePlaceholder: "ej.: esta noche",
+                assignChoreConfirm: "Asignar a Daniel",
+                choreAssignedMsg: "🧹 Tarea asignada: {name}",
+                choresTodoTitle: "Tareas pendientes",
+                requestedBy: "Pedido por",
+                choreDone: "Hecho",
+                noChoresTodo: "No hay tareas pendientes 🎉",
+                chorePayoutTitle: "Propinas a pagar",
+                settleChoresBtn: "Ya he pagado todo",
+                confirmSettleChores: "¿Confirmas que pagaste {total} en propinas?",
+                myChoresTitle: "Mis tareas asignadas",
+                choreDoneLabel: "Hecho",
+                choreTodoLabel: "Pendiente",
+                choresPauseEnable: "Pausar",
                 reorderOn: "Reponer en",
                 amazonLinkPlaceholder: "Pega aquí el enlace de Amazon del producto (opcional)",
                 upsellTitle: "✨ Completa tu pedido",
@@ -3331,6 +3585,33 @@
 
                 soldOutLabel: "AUSVERKAUFT",
 
+                tabChores: "Aufgaben",
+                assignChore: "Zuweisen",
+                choresPausedButton: "Pausiert",
+                chorePausedLabel: "PAUSIERT",
+                choreCat_Casa: "Haus",
+                choreCat_Cucina: "Küche",
+                choreCat_Animali: "Haustiere",
+                choreCat_Esterno: "Außen",
+                choreCat_Ordine: "Ordnung",
+                choreCat_Altro: "Sonstiges",
+                choreModalSubtitle: "Weise Daniel diese Aufgabe zu.",
+                choreTipLabel: "💰 Trinkgeld für Daniel:",
+                choreNoteLabel: "Notizen (optional):",
+                choreNotePlaceholder: "z.B.: bis heute Abend",
+                assignChoreConfirm: "Daniel zuweisen",
+                choreAssignedMsg: "🧹 Aufgabe zugewiesen: {name}",
+                choresTodoTitle: "Anstehende Aufgaben",
+                requestedBy: "Angefragt von",
+                choreDone: "Erledigt",
+                noChoresTodo: "Momentan keine Aufgaben 🎉",
+                chorePayoutTitle: "Trinkgeld zu zahlen",
+                settleChoresBtn: "Alles bezahlt",
+                confirmSettleChores: "Bestätigst du, {total} Trinkgeld bezahlt zu haben?",
+                myChoresTitle: "Meine zugewiesenen Aufgaben",
+                choreDoneLabel: "Erledigt",
+                choreTodoLabel: "Offen",
+                choresPauseEnable: "Pausieren",
                 reorderOn: "Nachbestellen bei",
                 amazonLinkPlaceholder: "Amazon-Produktlink hier einfügen (optional)",
                 upsellTitle: "✨ Bestellung ergänzen",
@@ -3506,6 +3787,33 @@
 
                 soldOutLabel: "ÉPUISÉ",
 
+                tabChores: "Corvées",
+                assignChore: "Assigner",
+                choresPausedButton: "En pause",
+                chorePausedLabel: "EN PAUSE",
+                choreCat_Casa: "Maison",
+                choreCat_Cucina: "Cuisine",
+                choreCat_Animali: "Animaux",
+                choreCat_Esterno: "Extérieur",
+                choreCat_Ordine: "Rangement",
+                choreCat_Altro: "Autre",
+                choreModalSubtitle: "Assignez cette corvée à Daniel.",
+                choreTipLabel: "💰 Pourboire pour Daniel :",
+                choreNoteLabel: "Notes (facultatif) :",
+                choreNotePlaceholder: "ex : ce soir",
+                assignChoreConfirm: "Assigner à Daniel",
+                choreAssignedMsg: "🧹 Corvée assignée : {name}",
+                choresTodoTitle: "Corvées à faire",
+                requestedBy: "Demandé par",
+                choreDone: "Fait",
+                noChoresTodo: "Aucune corvée pour le moment 🎉",
+                chorePayoutTitle: "Pourboires à payer",
+                settleChoresBtn: "Tout est payé",
+                confirmSettleChores: "Confirmez avoir payé {total} de pourboires ?",
+                myChoresTitle: "Mes corvées assignées",
+                choreDoneLabel: "Fait",
+                choreTodoLabel: "À faire",
+                choresPauseEnable: "Mettre en pause",
                 reorderOn: "Recommander sur",
                 amazonLinkPlaceholder: "Collez ici le lien Amazon du produit (facultatif)",
                 upsellTitle: "✨ Complétez votre commande",
@@ -3681,6 +3989,33 @@
 
                 soldOutLabel: "ЗАКІНЧИВСЯ",
 
+                tabChores: "Справи",
+                assignChore: "Доручити",
+                choresPausedButton: "Призупинено",
+                chorePausedLabel: "ПРИЗУПИНЕНО",
+                choreCat_Casa: "Дім",
+                choreCat_Cucina: "Кухня",
+                choreCat_Animali: "Тварини",
+                choreCat_Esterno: "Двір",
+                choreCat_Ordine: "Порядок",
+                choreCat_Altro: "Інше",
+                choreModalSubtitle: "Доручіть цю справу Денні.",
+                choreTipLabel: "💰 Чайові для Денні:",
+                choreNoteLabel: "Нотатки (необов’язково):",
+                choreNotePlaceholder: "напр.: до вечора",
+                assignChoreConfirm: "Доручити Денні",
+                choreAssignedMsg: "🧹 Справу доручено: {name}",
+                choresTodoTitle: "Справи на сьогодні",
+                requestedBy: "Замовив(ла)",
+                choreDone: "Зроблено",
+                noChoresTodo: "Наразі немає справ 🎉",
+                chorePayoutTitle: "Чайові до сплати",
+                settleChoresBtn: "Все сплачено",
+                confirmSettleChores: "Підтверджуєте сплату {total} чайових?",
+                myChoresTitle: "Мої доручені справи",
+                choreDoneLabel: "Зроблено",
+                choreTodoLabel: "Не зроблено",
+                choresPauseEnable: "Призупинити",
                 reorderOn: "Замовити на",
                 amazonLinkPlaceholder: "Вставте сюди посилання на товар Amazon (необов’язково)",
                 upsellTitle: "✨ Доповніть замовлення",
@@ -3855,6 +4190,33 @@
                 specialOffer: "PROMOÇÃO",
                 soldOutLabel: "ESGOTADO",
 
+                tabChores: "Tarefas",
+                assignChore: "Atribuir",
+                choresPausedButton: "Em pausa",
+                chorePausedLabel: "EM PAUSA",
+                choreCat_Casa: "Casa",
+                choreCat_Cucina: "Cozinha",
+                choreCat_Animali: "Animais",
+                choreCat_Esterno: "Exterior",
+                choreCat_Ordine: "Arrumação",
+                choreCat_Altro: "Outro",
+                choreModalSubtitle: "Atribua esta tarefa ao Daniel.",
+                choreTipLabel: "💰 Gorjeta para o Daniel:",
+                choreNoteLabel: "Notas (opcional):",
+                choreNotePlaceholder: "ex.: até hoje à noite",
+                assignChoreConfirm: "Atribuir ao Daniel",
+                choreAssignedMsg: "🧹 Tarefa atribuída: {name}",
+                choresTodoTitle: "Tarefas por fazer",
+                requestedBy: "Pedido por",
+                choreDone: "Feito",
+                noChoresTodo: "Sem tarefas de momento 🎉",
+                chorePayoutTitle: "Gorjetas a pagar",
+                settleChoresBtn: "Já paguei tudo",
+                confirmSettleChores: "Confirma que pagou {total} em gorjetas?",
+                myChoresTitle: "As minhas tarefas atribuídas",
+                choreDoneLabel: "Feito",
+                choreTodoLabel: "Por fazer",
+                choresPauseEnable: "Pausar",
                 reorderOn: "Reencomendar na",
                 amazonLinkPlaceholder: "Cole aqui o link do produto na Amazon (opcional)",
                 upsellTitle: "✨ Complete o seu pedido",
@@ -4704,6 +5066,7 @@
                 })(),
                 lowStockThreshold: 2,
                 amazonLinks: {}, // link salvati per il riordino rapido su Amazon
+                choreItems: buildDefaultChorePricing(),
                 service: {
                     manualOverride: null,
                     hours: {
@@ -4946,6 +5309,7 @@
                     if (data.ingredientStock) merged.ingredientStock = data.ingredientStock;
                     if (typeof data.lowStockThreshold === 'number') merged.lowStockThreshold = data.lowStockThreshold;
                     if (data.amazonLinks) merged.amazonLinks = data.amazonLinks;
+                    if (data.choreItems) merged.choreItems = { ...merged.choreItems, ...data.choreItems };
                     if (data.service) {
                         merged.service = {
                             manualOverride: (data.service.manualOverride === undefined) ? null : data.service.manualOverride,
@@ -5764,6 +6128,38 @@
                 </div>`;
 
             // Magazzino ingredienti: una riga per bottiglia/confezione
+            // Sezione lavoretti: mancia modificabile + pausa
+            const buildChoresSection = () => {
+                const rows = chores.map(c => {
+                    const item = (pricing.choreItems && pricing.choreItems[c.id]) || { tip: 1, paused: false };
+                    return `
+                        <div class="price-card${item.paused ? ' price-card-soldout' : ''}">
+                            <div class="price-card-header">
+                                <span>${c.icon} <strong>${c.name}</strong></span>
+                                <label class="soldout-toggle" style="margin:0;">
+                                    <input type="checkbox" data-chore-pause="${c.id}" ${item.paused ? 'checked' : ''}>
+                                    <span>⏸️ ${t('choresPauseEnable')}</span>
+                                </label>
+                            </div>
+                            <div class="price-row">
+                                <span class="price-variant">💰 ${t('choreTipLabel')}</span>
+                                <input type="number" step="0.10" min="0" data-chore-tip="${c.id}" value="${(item.tip ?? 1).toFixed(2)}">
+                                <span class="price-currency">€</span>
+                            </div>
+                        </div>`;
+                }).join('');
+
+                return `
+                    <div class="price-section collapsed" id="section-chores">
+                        <button type="button" class="price-section-toggle" onclick="togglePriceSection('chores')">
+                            <span>🧹 ${t('tabChores')}</span>
+                            <span class="ps-count">${chores.length}</span>
+                            <span class="pc-chevron">▾</span>
+                        </button>
+                        <div class="price-section-body" id="sectionBody-chores">${rows}</div>
+                    </div>`;
+            };
+
             const buildIngredientsSection = () => {
                 const stock = pricing.ingredientStock || {};
                 const links = pricing.amazonLinks || {};
@@ -5810,7 +6206,8 @@
                 buildSection('tabSnacks', '🍿', snacks, false) +
                 buildSection('tabSoftdrinks', '🥤', softdrinks, false) +
                 buildSection('tabDesserts', '🍰', desserts, false) +
-                buildIngredientsSection();
+                buildIngredientsSection() +
+                buildChoresSection();
 
             const ts = pricing.timeSurcharge || {};
             document.getElementById('surchargeNow').value = (ts['Subito'] ?? 1).toFixed(2);
@@ -5887,6 +6284,20 @@
                 if (url) amazonLinks[key] = url;
             });
             updated.amazonLinks = amazonLinks;
+
+            // Mance e pausa dei lavoretti
+            const choreItems = {};
+            chores.forEach(c => { choreItems[c.id] = { tip: 1, paused: false }; });
+            document.querySelectorAll('#priceListForm input[data-chore-tip]').forEach(input => {
+                const id = input.getAttribute('data-chore-tip');
+                const val = parseFloat(input.value);
+                if (choreItems[id]) choreItems[id].tip = isNaN(val) ? 1 : val;
+            });
+            document.querySelectorAll('#priceListForm input[data-chore-pause]').forEach(input => {
+                const id = input.getAttribute('data-chore-pause');
+                if (choreItems[id]) choreItems[id].paused = input.checked;
+            });
+            updated.choreItems = choreItems;
 
             const thrEl = document.getElementById('lowStockThreshold');
             if (thrEl) {
@@ -5974,6 +6385,14 @@
         // Render cocktails
         function renderCocktails() {
             const grid = document.getElementById('cocktailGrid');
+
+            // I lavoretti sono un catalogo a parte: niente varianti,
+            // niente prezzo a fasce, solo una mancia fissa.
+            if (currentCategory === 'chores') {
+                renderChoreCards(grid);
+                return;
+            }
+
             grid.innerHTML = getCatalogItems().map(item => {
                 const baseName = item.name;
                 const closed = !isServiceOpen();
@@ -6015,6 +6434,210 @@
         }
 
         // Open order modal
+        // Card semplificata per un lavoretto: icona, nome, mancia,
+        // pulsante "Assegna" invece di "Ordina".
+        function renderChoreCards(grid) {
+            const closed = !isServiceOpen(); // i lavoretti seguono comunque gli orari di servizio? No: sempre disponibili
+            grid.innerHTML = chores.map(c => {
+                const paused = isChorePaused(c.id);
+                const tip = formatPrice(getChoreTip(c.id));
+                const badge = paused ? `<div class="soldout-ribbon closed-ribbon">${t('chorePausedLabel')}</div>` : '';
+                const openHandler = paused ? '' : ` onclick="openChoreModal('${c.id}')"`;
+                return `
+                <div class="cocktail-card${paused ? ' cocktail-soldout' : ''}"${openHandler}>
+                    ${badge}
+                    <div class="cocktail-icon">${c.icon}</div>
+                    <div class="cocktail-info">
+                        <div class="cocktail-name">${c.name}</div>
+                        <div class="cocktail-description">${t('choreCat_' + c.category) || c.category}</div>
+                        <div class="cocktail-price">${tip}</div>
+                    </div>
+                    ${paused
+                        ? `<button class="order-btn order-btn-disabled" disabled>${t('choresPausedButton')}</button>`
+                        : `<button class="order-btn" onclick="event.stopPropagation(); openChoreModal('${c.id}')">${t('assignChore')}</button>`}
+                </div>`;
+            }).join('');
+        }
+
+        // =============================================
+        // ASSEGNAZIONE LAVORETTI
+        // =============================================
+        let selectedChoreId = null;
+        let chores_data = []; // lavoretti caricati dal cloud
+
+        function openChoreModal(choreId) {
+            const chore = choreById(choreId);
+            if (!chore) return;
+            selectedChoreId = choreId;
+            document.getElementById('choreModalIcon').textContent = chore.icon;
+            document.getElementById('choreModalName').textContent = chore.name;
+            document.getElementById('choreModalTip').textContent = formatPrice(getChoreTip(choreId));
+            document.getElementById('choreNote').value = '';
+            document.getElementById('choreModal').classList.add('active');
+        }
+
+        function closeChoreModal() {
+            document.getElementById('choreModal').classList.remove('active');
+            selectedChoreId = null;
+        }
+
+        async function confirmChoreAssign() {
+            const chore = choreById(selectedChoreId);
+            if (!chore) return;
+
+            const note = document.getElementById('choreNote').value.trim();
+            const now = new Date();
+            const choreOrder = {
+                id: Date.now(),
+                choreId: chore.id,
+                name: chore.name,
+                icon: chore.icon,
+                tip: formatPrice(getChoreTip(chore.id)),
+                assignedBy: customerName,
+                userId: getUserId(customerName),
+                note: note,
+                date: now.toLocaleDateString('it-IT'),
+                time: now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }),
+                done: false
+            };
+
+            chores_data.unshift(choreOrder);
+            closeChoreModal();
+
+            if (cloudReady()) {
+                try {
+                    await firestoreDb.collection('chores').doc(String(choreOrder.id)).set(choreOrder);
+                } catch (error) {
+                    console.log('Errore salvataggio lavoretto:', error);
+                }
+            }
+
+            // Notifica Daniel via WhatsApp
+            let message = `🧹 *NUOVO LAVORETTO*\n\n`;
+            message += `📋 *Cosa:* ${chore.icon} ${chore.name}\n`;
+            message += `👤 *Richiesto da:* ${customerName}\n`;
+            message += `💰 *Mancia:* ${choreOrder.tip}\n`;
+            if (note) message += `📝 *Note:* ${note}\n`;
+            message += `\n➡️ Segna come fatto nell'app quando lo hai completato!`;
+            openWhatsApp(ADMIN_PHONE, encodeURIComponent(message));
+
+            renderChoresPanels();
+
+            const successMsg = document.getElementById('successMessage');
+            successMsg.textContent = t('choreAssignedMsg').replace('{name}', chore.name);
+            successMsg.classList.add('show');
+            setTimeout(() => successMsg.classList.remove('show'), 3000);
+        }
+
+        // Carica i lavoretti dal cloud
+        async function loadChoresFromCloud() {
+            if (!cloudReady()) return;
+            try {
+                const snapshot = await firestoreDb.collection('chores').get();
+                chores_data = snapshot.docs.map(d => d.data()).sort((a, b) => b.id - a.id);
+                renderChoresPanels();
+            } catch (error) {
+                console.log('Lavoretti non disponibili:', error);
+            }
+        }
+
+        // L'admin spunta un lavoretto come fatto: resta "da pagare"
+        async function markChoreDone(id) {
+            const chore = chores_data.find(c => c.id === id);
+            if (!chore) return;
+            chore.done = true;
+            chore.doneDate = new Date().toLocaleDateString('it-IT');
+            renderChoresPanels();
+            if (cloudReady()) {
+                try {
+                    await firestoreDb.collection('chores').doc(String(id)).update({ done: true, doneDate: chore.doneDate });
+                } catch (error) {
+                    console.log('Errore aggiornamento lavoretto:', error);
+                }
+            }
+        }
+
+        // Daniel salda tutte le mance dei lavoretti fatti
+        async function settleChorePayouts() {
+            const done = chores_data.filter(c => c.done);
+            if (done.length === 0) return;
+            const total = done.reduce((s, c) => s + (parseFloat(String(c.tip).replace(',', '.').replace('€', '')) || 0), 0);
+            if (!confirm(t('confirmSettleChores').replace('{total}', formatPrice(total)))) return;
+
+            chores_data = chores_data.filter(c => !c.done);
+            renderChoresPanels();
+
+            if (cloudReady()) {
+                for (const c of done) {
+                    try { await firestoreDb.collection('chores').doc(String(c.id)).delete(); }
+                    catch (error) { console.log('Errore rimozione lavoretto pagato:', error); }
+                }
+            }
+        }
+
+        // Aggiorna sia il pannello admin che la mini-lista personale
+        function renderChoresPanels() {
+            renderAdminChoresPanel();
+            renderMyChoresPanel();
+        }
+
+        function renderAdminChoresPanel() {
+            const panel = document.getElementById('adminChoresPanel');
+            if (!panel) return;
+            if (!isAdmin()) { panel.style.display = 'none'; return; }
+
+            const todo = chores_data.filter(c => !c.done);
+            const done = chores_data.filter(c => c.done);
+
+            if (todo.length === 0 && done.length === 0) { panel.style.display = 'none'; return; }
+            panel.style.display = 'block';
+
+            document.getElementById('choresTodoCount').textContent = todo.length;
+
+            document.getElementById('choresTodoList').innerHTML = todo.length
+                ? todo.map(c => `
+                    <div class="chore-row">
+                        <div class="chore-row-info">
+                            <strong>${c.icon} ${c.name}</strong> — <span class="chore-tip">${c.tip}</span><br>
+                            <small>${t('requestedBy')} ${c.assignedBy} · ${c.date} ${c.time}</small>
+                            ${c.note ? `<br><small>📝 ${c.note}</small>` : ''}
+                        </div>
+                        <button class="chore-done-btn" onclick="markChoreDone(${c.id})">✓ ${t('choreDone')}</button>
+                    </div>`).join('')
+                : `<p class="ing-help">${t('noChoresTodo')}</p>`;
+
+            const totalOwed = done.reduce((s, c) => s + (parseFloat(String(c.tip).replace(',', '.').replace('€', '')) || 0), 0);
+            const payoutBox = document.getElementById('chorePayoutBox');
+            if (done.length > 0) {
+                payoutBox.style.display = 'block';
+                document.getElementById('chorePayoutTotal').textContent = formatPrice(totalOwed);
+                document.getElementById('chorePayoutList').innerHTML = done.map(c =>
+                    `<div class="chore-payout-item">${c.icon} ${c.name} — ${c.tip} <em>(${c.assignedBy})</em></div>`
+                ).join('');
+            } else {
+                payoutBox.style.display = 'none';
+            }
+        }
+
+        // Mini-lista personale: cosa ho assegnato io e a che punto è
+        function renderMyChoresPanel() {
+            const panel = document.getElementById('myChoresPanel');
+            if (!panel) return;
+            if (isAdmin() || !customerName) { panel.style.display = 'none'; return; }
+
+            const mine = chores_data.filter(c => c.userId === getUserId(customerName));
+            if (mine.length === 0) { panel.style.display = 'none'; return; }
+
+            panel.style.display = 'block';
+            document.getElementById('myChoresList').innerHTML = mine.map(c => `
+                <div class="chore-row">
+                    <div class="chore-row-info">
+                        <strong>${c.icon} ${c.name}</strong> — <span class="chore-tip">${c.tip}</span>
+                    </div>
+                    <span class="chore-status ${c.done ? 'chore-status-done' : ''}">${c.done ? '✅ ' + t('choreDoneLabel') : '⏳ ' + t('choreTodoLabel')}</span>
+                </div>`).join('');
+        }
+
         function openOrderModal(cocktailName) {
             // cocktailName può essere "Mojito" o "Mojito Premium"
             const cocktail = findProduct(cocktailName);
@@ -6169,6 +6792,7 @@
                 card.classList.add('upsell-selected');
                 btn.textContent = '✓ ' + t('upsellAdded');
             }
+            updatePriceDisplay(); // Il totale mostrato include ora anche gli extra
         }
 
         function updatePriceDisplay() {
@@ -6176,7 +6800,16 @@
             if (!cocktail) return;
 
             const totalPrice = computePrice(selectedCocktail, selectedVariant, selectedDeliveryTime);
-            const priceFormatted = formatPrice(totalPrice);
+
+            // Gli extra scelti nell'upselling si sommano al prezzo mostrato:
+            // il cliente deve vedere subito quanto pagherà in totale.
+            const extrasTotal = Object.keys(upsellSelection).reduce((sum, name) => {
+                const product = findProduct(name);
+                if (!product) return sum;
+                return sum + getBasePrice(baseNameOf(name), 0);
+            }, 0);
+
+            const priceFormatted = formatPrice(totalPrice + extrasTotal);
             
             const priceDisplay = document.getElementById('priceDisplay');
             if (priceDisplay) {
@@ -7444,6 +8077,7 @@
                 // Ricarica gli ordini: è così che il cliente scopre
                 // se Daniel ne ha rifiutato uno.
                 loadOrdersFromCloud();
+                loadChoresFromCloud();
             };
             poll();
             setInterval(poll, 15000); // ogni 15 secondi
@@ -7479,6 +8113,7 @@
         checkRegistration(); // Mostra il popup nome oppure carica gli ordini dell'utente dal cloud
         startPaymentPolling();
         startPricingPolling(); // Tiene il listino allineato con quello dell'admin
+        loadChoresFromCloud(); // Carica i lavoretti assegnati
         renderLowStockPanel(); // Avvisi scorte per l'admin
         syncPendingOrders(); // Invia gli ordini rimasti in coda da sessioni offline
         initDanny();         // Attiva il barista virtuale
@@ -7493,7 +8128,8 @@
             reviewsModal: closeReviewsPage,
             priceListModal: closePriceList,
             rejectModal: closeRejectModal,
-            guideModal: closeGuide
+            guideModal: closeGuide,
+            choreModal: closeChoreModal
         };
 
         Object.keys(MODAL_CLOSERS).forEach(id => {
