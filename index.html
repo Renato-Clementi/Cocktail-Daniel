@@ -6143,17 +6143,14 @@
             if (newName && newName.trim()) {
                 customerName = newName.trim();
                 localStorage.setItem('customerName', customerName);
-                showGreeting();
-                // Cambiando identità, svuota la cache locale e ricarica gli ordini del nuovo utente
-                orders = [];
-                ordersPage = 1;
-                myPaymentPending = false;
-                pendingPayments = [];
-                document.getElementById('paymentPendingBanner').style.display = 'none';
-                saveOrders();
-                renderOrders();
-                loadOrdersFromCloud();
-                if (isAdmin()) { loadPendingPayments(); } else { checkMyPaymentStatus(); }
+
+                // Cambiando identità (magari da admin a cliente o viceversa)
+                // ricarichiamo l'intera app invece di ripulire a mano ogni
+                // singola variabile in memoria (ordini, saldo carta,
+                // lavoretti, magazzino...): con tante funzionalità aggiunte
+                // nel tempo, un elenco manuale rischia sempre di dimenticarne
+                // una e lasciare in giro dati del vecchio utente.
+                location.reload();
             }
         }
 
