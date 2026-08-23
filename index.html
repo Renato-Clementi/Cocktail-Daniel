@@ -2356,6 +2356,9 @@
             <button class="category-tab" id="tabChores" onclick="setCategory('chores')">
                 🧹 <span data-i18n="tabChores">Lavoretti</span>
             </button>
+            <button class="category-tab" id="tabMerch" onclick="setCategory('merch')">
+                🛍️ <span data-i18n="tabMerch">Merchandising</span>
+            </button>
         </div>
 
         <!-- Catalogo prodotti -->
@@ -2616,7 +2619,7 @@
                 <label data-i18n="chooseVariant">Scegli la variante:</label>
                 <div class="variant-buttons" id="variantButtons"></div>
             </div>
-            <div class="form-group">
+            <div class="form-group" id="locationFormGroup">
                 <label data-i18n="tablePosition">Tavolo / Posizione:</label>
                 <div class="variant-buttons" id="locationButtons">
                     <button type="button" class="variant-btn location-btn" data-value="Dove Sono io" onclick="selectLocation('Dove Sono io')" data-i18n="locWhereIAm">
@@ -2630,7 +2633,7 @@
                     </button>
                 </div>
             </div>
-            <div class="form-group">
+            <div class="form-group" id="timeFormGroup">
                 <label data-i18n="preferredTime">Orario preferito:</label>
                 <div class="variant-buttons" id="deliveryTimeButtons">
                     <button type="button" class="variant-btn delivery-time-btn" data-value="Subito" onclick="selectDeliveryTime('Subito')" data-i18n="timeNow">
@@ -2643,6 +2646,9 @@
                         30 min
                     </button>
                 </div>
+            </div>
+            <div class="form-group" id="merchPickupNotice" style="display:none;">
+                <p style="background:rgba(46,196,182,0.12); border-left:3px solid var(--lagoon); border-radius:6px; padding:10px 12px; font-size:0.85em; color:var(--dusk); margin:0;" data-i18n="merchPickupNotice">🛍️ Da ritirare al banco.</p>
             </div>
             <div class="form-group">
                 <label data-i18n="additionalNotes">Note aggiuntive (opzionale):</label>
@@ -2905,7 +2911,26 @@
 
         // Catalogo completo: serve alle funzioni che devono ritrovare
         // un prodotto per nome, senza sapere a quale categoria appartiene.
-        const allProducts = cocktails.concat(snacks, softdrinks, desserts);
+        // =============================================
+        // MERCHANDISING
+        // Prodotti da ritirare al banco: niente posizione né orario di
+        // consegna, non ha senso chiedere "dove sei" per una maglietta.
+        // =============================================
+        const merch = [
+            { name: "Libro dei Cocktail di Daniel", icon: "📖", description: "Le ricette originali, autografate", variants: ["Copia singola", "Con dedica"] },
+            { name: "Cappellino", icon: "🧢", description: "Ricamato, taglia unica", variants: ["Nero", "Corallo", "Turchese"] },
+            { name: "Maglietta", icon: "👕", description: "100% cotone, stampa esclusiva", variants: ["S", "M", "L", "XL"] },
+            { name: "Bicchiere Firmato", icon: "🥃", description: "Lo stesso dei nostri cocktail", variants: ["Mojito", "Margarita"] },
+            { name: "Adesivi", icon: "🎨", description: "Il logo di Cocktail Daniel", variants: ["Set da 3", "Set da 6"] },
+            { name: "Borsa Tote", icon: "🛍️", description: "Tela resistente, fatta con amore", variants: ["Standard"] }
+        ];
+
+        function isMerch(name) {
+            const base = baseNameOf(name);
+            return merch.some(m => m.name === base);
+        }
+
+        const allProducts = cocktails.concat(snacks, softdrinks, desserts, merch);
 
         // =============================================
         // LAVORETTI DOMESTICI
@@ -3032,7 +3057,8 @@
             cocktails: cocktails,
             snacks: snacks,
             softdrinks: softdrinks,
-            desserts: desserts
+            desserts: desserts,
+            merch: merch
         };
 
         function currentProducts() {
@@ -3122,6 +3148,9 @@
 
                 soldOutLabel: "ESAURITO",
 
+                tabMerch: "Merchandising",
+                merchPickupNotice: "🛍️ Da ritirare al banco.",
+                merchPickupLabel: "Ritiro al banco",
                 walletTitle: "💳 La mia carta",
                 topupBtn: "+ Ricarica",
                 topupPendingNote: "⏳ Richiesta di {amount} in attesa di conferma",
@@ -3346,6 +3375,9 @@
 
                 soldOutLabel: "SOLD OUT",
 
+                tabMerch: "Merchandise",
+                merchPickupNotice: "🛍️ To pick up at the counter.",
+                merchPickupLabel: "Counter pickup",
                 walletTitle: "💳 My card",
                 topupBtn: "+ Top up",
                 topupPendingNote: "⏳ {amount} top-up awaiting confirmation",
@@ -3570,6 +3602,9 @@
 
                 soldOutLabel: "AGOTADO",
 
+                tabMerch: "Merchandising",
+                merchPickupNotice: "🛍️ Para recoger en el mostrador.",
+                merchPickupLabel: "Recogida en el mostrador",
                 walletTitle: "💳 Mi tarjeta",
                 topupBtn: "+ Recargar",
                 topupPendingNote: "⏳ Recarga de {amount} pendiente de confirmación",
@@ -3794,6 +3829,9 @@
 
                 soldOutLabel: "AUSVERKAUFT",
 
+                tabMerch: "Merchandise",
+                merchPickupNotice: "🛍️ Abholung am Tresen.",
+                merchPickupLabel: "Abholung am Tresen",
                 walletTitle: "💳 Meine Karte",
                 topupBtn: "+ Aufladen",
                 topupPendingNote: "⏳ Aufladung von {amount} wartet auf Bestätigung",
@@ -4018,6 +4056,9 @@
 
                 soldOutLabel: "ÉPUISÉ",
 
+                tabMerch: "Produits dérivés",
+                merchPickupNotice: "🛍️ À retirer au comptoir.",
+                merchPickupLabel: "Retrait au comptoir",
                 walletTitle: "💳 Ma carte",
                 topupBtn: "+ Recharger",
                 topupPendingNote: "⏳ Recharge de {amount} en attente de confirmation",
@@ -4242,6 +4283,9 @@
 
                 soldOutLabel: "ЗАКІНЧИВСЯ",
 
+                tabMerch: "Мерч",
+                merchPickupNotice: "🛍️ Забрати на барній стійці.",
+                merchPickupLabel: "Забрати на стійці",
                 walletTitle: "💳 Моя картка",
                 topupBtn: "+ Поповнити",
                 topupPendingNote: "⏳ Поповнення на {amount} очікує підтвердження",
@@ -4465,6 +4509,9 @@
                 specialOffer: "PROMOÇÃO",
                 soldOutLabel: "ESGOTADO",
 
+                tabMerch: "Merchandising",
+                merchPickupNotice: "🛍️ Para levantar no balcão.",
+                merchPickupLabel: "Levantamento no balcão",
                 walletTitle: "💳 O meu cartão",
                 topupBtn: "+ Carregar",
                 topupPendingNote: "⏳ Carregamento de {amount} a aguardar confirmação",
@@ -4654,7 +4701,13 @@
                     "Cioccolato fondente": "Dark chocolate",
                     "Frutta fresca di stagione": "Fresh seasonal fruit",
                     "Soffici e appena fritti": "Soft and freshly fried",
-                    "Ghiaccio tritato e sciroppo": "Crushed ice with syrup"
+                    "Ghiaccio tritato e sciroppo": "Crushed ice with syrup",
+                    "Le ricette originali, autografate": "Original recipes, autographed",
+                    "Ricamato, taglia unica": "Embroidered, one size",
+                    "100% cotone, stampa esclusiva": "100% cotton, exclusive print",
+                    "Lo stesso dei nostri cocktail": "The same one used for our cocktails",
+                    "Il logo di Cocktail Daniel": "The Cocktail Daniel logo",
+                    "Tela resistente, fatta con amore": "Sturdy canvas, made with love"
                 },
                 variants: {
                     "Classico": "Classic",
@@ -4728,7 +4781,14 @@
                     "Crema": "Custard",
                     "Nutella": "Nutella",
                     "Caffè": "Coffee",
-                    "Mandorla": "Almond"
+                    "Mandorla": "Almond",
+                    "Copia singola": "Single copy",
+                    "Con dedica": "With dedication",
+                    "Nero": "Black",
+                    "Corallo": "Coral",
+                    "Turchese": "Turquoise",
+                    "Set da 3": "Set of 3",
+                    "Set da 6": "Set of 6"
                 }
             },
             es: {
@@ -4767,7 +4827,13 @@
                     "Cioccolato fondente": "Chocolate negro",
                     "Frutta fresca di stagione": "Fruta fresca de temporada",
                     "Soffici e appena fritti": "Esponjosos y recién fritos",
-                    "Ghiaccio tritato e sciroppo": "Hielo picado con sirope"
+                    "Ghiaccio tritato e sciroppo": "Hielo picado con sirope",
+                    "Le ricette originali, autografate": "Las recetas originales, autografiadas",
+                    "Ricamato, taglia unica": "Bordada, talla única",
+                    "100% cotone, stampa esclusiva": "100% algodón, estampado exclusivo",
+                    "Lo stesso dei nostri cocktail": "El mismo que usamos para nuestros cócteles",
+                    "Il logo di Cocktail Daniel": "El logo de Cocktail Daniel",
+                    "Tela resistente, fatta con amore": "Lona resistente, hecha con cariño"
                 },
                 variants: {
                     "Classico": "Clásico",
@@ -4841,7 +4907,14 @@
                     "Crema": "Crema",
                     "Nutella": "Nutella",
                     "Caffè": "Café",
-                    "Mandorla": "Almendra"
+                    "Mandorla": "Almendra",
+                    "Copia singola": "Copia individual",
+                    "Con dedica": "Con dedicatoria",
+                    "Nero": "Negro",
+                    "Corallo": "Coral",
+                    "Turchese": "Turquesa",
+                    "Set da 3": "Set de 3",
+                    "Set da 6": "Set de 6"
                 }
             },
             de: {
@@ -4880,7 +4953,13 @@
                     "Cioccolato fondente": "Zartbitterschokolade",
                     "Frutta fresca di stagione": "Frisches Obst der Saison",
                     "Soffici e appena fritti": "Weich und frisch frittiert",
-                    "Ghiaccio tritato e sciroppo": "Crushed Ice mit Sirup"
+                    "Ghiaccio tritato e sciroppo": "Crushed Ice mit Sirup",
+                    "Le ricette originali, autografate": "Die Originalrezepte, signiert",
+                    "Ricamato, taglia unica": "Bestickt, Einheitsgröße",
+                    "100% cotone, stampa esclusiva": "100% Baumwolle, exklusiver Print",
+                    "Lo stesso dei nostri cocktail": "Das gleiche Glas wie bei unseren Cocktails",
+                    "Il logo di Cocktail Daniel": "Das Cocktail-Daniel-Logo",
+                    "Tela resistente, fatta con amore": "Robustes Segeltuch, mit Liebe gemacht"
                 },
                 variants: {
                     "Classico": "Klassisch",
@@ -4954,7 +5033,14 @@
                     "Crema": "Vanillecreme",
                     "Nutella": "Nutella",
                     "Caffè": "Kaffee",
-                    "Mandorla": "Mandel"
+                    "Mandorla": "Mandel",
+                    "Copia singola": "Einzelexemplar",
+                    "Con dedica": "Mit Widmung",
+                    "Nero": "Schwarz",
+                    "Corallo": "Koralle",
+                    "Turchese": "Türkis",
+                    "Set da 3": "3er-Set",
+                    "Set da 6": "6er-Set"
                 }
             },
             fr: {
@@ -4993,7 +5079,13 @@
                     "Cioccolato fondente": "Chocolat noir",
                     "Frutta fresca di stagione": "Fruits frais de saison",
                     "Soffici e appena fritti": "Moelleux et frits minute",
-                    "Ghiaccio tritato e sciroppo": "Glace pilée et sirop"
+                    "Ghiaccio tritato e sciroppo": "Glace pilée et sirop",
+                    "Le ricette originali, autografate": "Les recettes originales, dédicacées",
+                    "Ricamato, taglia unica": "Brodée, taille unique",
+                    "100% cotone, stampa esclusiva": "100% coton, impression exclusive",
+                    "Lo stesso dei nostri cocktail": "Le même que celui de nos cocktails",
+                    "Il logo di Cocktail Daniel": "Le logo de Cocktail Daniel",
+                    "Tela resistente, fatta con amore": "Toile résistante, faite avec amour"
                 },
                 variants: {
                     "Classico": "Classique",
@@ -5067,7 +5159,14 @@
                     "Crema": "Crème",
                     "Nutella": "Nutella",
                     "Caffè": "Café",
-                    "Mandorla": "Amande"
+                    "Mandorla": "Amande",
+                    "Copia singola": "Exemplaire simple",
+                    "Con dedica": "Avec dédicace",
+                    "Nero": "Noir",
+                    "Corallo": "Corail",
+                    "Turchese": "Turquoise",
+                    "Set da 3": "Lot de 3",
+                    "Set da 6": "Lot de 6"
                 }
             },
             uk: {
@@ -5106,7 +5205,13 @@
                     "Cioccolato fondente": "Чорний шоколад",
                     "Frutta fresca di stagione": "Свіжі сезонні фрукти",
                     "Soffici e appena fritti": "М'які, щойно смажені",
-                    "Ghiaccio tritato e sciroppo": "Подрібнений лід із сиропом"
+                    "Ghiaccio tritato e sciroppo": "Подрібнений лід із сиропом",
+                    "Le ricette originali, autografate": "Оригінальні рецепти з автографом",
+                    "Ricamato, taglia unica": "Вишитий, один розмір",
+                    "100% cotone, stampa esclusiva": "100% бавовна, ексклюзивний принт",
+                    "Lo stesso dei nostri cocktail": "Той самий, що й для наших коктейлів",
+                    "Il logo di Cocktail Daniel": "Логотип Cocktail Daniel",
+                    "Tela resistente, fatta con amore": "Міцна тканина, зроблено з любов'ю"
                 },
                 variants: {
                     "Classico": "Класичний",
@@ -5180,7 +5285,14 @@
                     "Crema": "Заварний крем",
                     "Nutella": "Нутелла",
                     "Caffè": "Кава",
-                    "Mandorla": "Мигдаль"
+                    "Mandorla": "Мигдаль",
+                    "Copia singola": "Один примірник",
+                    "Con dedica": "З автографом",
+                    "Nero": "Чорний",
+                    "Corallo": "Кораловий",
+                    "Turchese": "Бірюзовий",
+                    "Set da 3": "Набір із 3",
+                    "Set da 6": "Набір із 6"
                 }
             },
             pt: {
@@ -5219,7 +5331,13 @@
                     "Cioccolato fondente": "Chocolate negro",
                     "Frutta fresca di stagione": "Fruta fresca da época",
                     "Soffici e appena fritti": "Fofos e acabados de fritar",
-                    "Ghiaccio tritato e sciroppo": "Gelo picado com xarope"
+                    "Ghiaccio tritato e sciroppo": "Gelo picado com xarope",
+                    "Le ricette originali, autografate": "As receitas originais, autografadas",
+                    "Ricamato, taglia unica": "Bordado, tamanho único",
+                    "100% cotone, stampa esclusiva": "100% algodão, estampa exclusiva",
+                    "Lo stesso dei nostri cocktail": "O mesmo que usamos nos nossos cocktails",
+                    "Il logo di Cocktail Daniel": "O logótipo do Cocktail Daniel",
+                    "Tela resistente, fatta con amore": "Lona resistente, feita com carinho"
                 },
                 variants: {
                     "Classico": "Clássico",
@@ -5292,7 +5410,14 @@
                     "Crema": "Creme",
                     "Nutella": "Nutella",
                     "Caffè": "Café",
-                    "Mandorla": "Amêndoa"
+                    "Mandorla": "Amêndoa",
+                    "Copia singola": "Exemplar único",
+                    "Con dedica": "Com dedicatória",
+                    "Nero": "Preto",
+                    "Corallo": "Coral",
+                    "Turchese": "Turquesa",
+                    "Set da 3": "Conjunto de 3",
+                    "Set da 6": "Conjunto de 6"
                 }
             }
         };
@@ -5340,6 +5465,28 @@
             desserts.forEach(d => {
                 items[d.name] = {
                     prices: [3.00, 4.00, 5.00].slice(0, d.variants.length),
+                    special: false,
+                    soldOut: false,
+                    stock: -1,
+                    premium: false,
+                    premiumSurcharge: 0
+                };
+            });
+            // Merchandising: ogni prodotto ha un suo prezzo fisso, uguale
+            // per tutte le varianti (una taglia non deve costare di più).
+            // Eccezione naturale: gli adesivi, dove il set più grande costa
+            // di più — lì sì che la quantità giustifica un prezzo diverso.
+            const merchDefaults = {
+                'Libro dei Cocktail di Daniel': [12.00, 12.00],
+                'Cappellino': [15.00, 15.00, 15.00],
+                'Maglietta': [18.00, 18.00, 18.00, 18.00],
+                'Bicchiere Firmato': [8.00, 8.00],
+                'Adesivi': [3.00, 5.00],
+                'Borsa Tote': [10.00]
+            };
+            merch.forEach(m => {
+                items[m.name] = {
+                    prices: (merchDefaults[m.name] || [10.00]).slice(0, m.variants.length),
                     special: false,
                     soldOut: false,
                     stock: -1,
@@ -5411,7 +5558,9 @@
             const cocktail = findProduct(base);
             if (!cocktail) return 0;
             const variantIndex = cocktail.variants.indexOf(variant);
-            let price = getBasePrice(base, variantIndex) + getTimeSurcharge(time);
+            // Il merchandising si ritira al banco: niente supplemento orario,
+            // non ha senso far pagare di più una maglietta "urgente".
+            let price = getBasePrice(base, variantIndex) + (isMerch(base) ? 0 : getTimeSurcharge(time));
             if (isPremiumName(cocktailName)) {
                 price += getPremiumSurcharge(base);
             }
@@ -6828,6 +6977,7 @@
                 buildSection('tabSnacks', '🍿', snacks, false) +
                 buildSection('tabSoftdrinks', '🥤', softdrinks, false) +
                 buildSection('tabDesserts', '🍰', desserts, false) +
+                buildSection('tabMerch', '🛍️', merch, false) +
                 buildIngredientsSection() +
                 buildChoresSection();
 
@@ -7296,16 +7446,24 @@
             
             // Reset form
             document.getElementById('orderNotes').value = '';
-            
+
+            // Il merchandising si ritira al banco: niente posizione né orario.
+            const merchandise = isMerch(cocktailName);
+            document.getElementById('locationFormGroup').style.display = merchandise ? 'none' : 'block';
+            document.getElementById('timeFormGroup').style.display = merchandise ? 'none' : 'block';
+            document.getElementById('merchPickupNotice').style.display = merchandise ? 'block' : 'none';
+
             // Reset selections to defaults
-            selectedDeliveryTime = 'Subito';
-            selectedLocation = 'Dove Sono io';
+            selectedDeliveryTime = merchandise ? '' : 'Subito';
+            selectedLocation = merchandise ? '' : 'Dove Sono io';
             
             // Pre-select default buttons after a short delay to ensure buttons are rendered
             setTimeout(() => {
                 selectVariant(cocktail.variants[0]); // Select first variant (also updates price)
-                selectDeliveryTime('Subito');
-                selectLocation('Dove Sono io');
+                if (!merchandise) {
+                    selectDeliveryTime('Subito');
+                    selectLocation('Dove Sono io');
+                }
             }, 10);
         }
 
@@ -7670,23 +7828,29 @@
 
         // Send WhatsApp message
         function sendWhatsAppMessage(order, phone, extraOrders) {
-            let message = `🍹 *NUOVO ORDINE COCKTAIL*\n\n`;
+            const merchOrder = isMerch(order.cocktail);
+            let message = merchOrder ? `🛍️ *NUOVO ORDINE MERCHANDISING*\n\n` : `🍹 *NUOVO ORDINE COCKTAIL*\n\n`;
             message += `👤 *Cliente:* ${order.customerName}\n`;
-            message += `📋 *Cocktail:* ${order.cocktail} - ${order.variant}\n`;
+            message += `📋 *${merchOrder ? 'Prodotto' : 'Cocktail'}:* ${order.cocktail} - ${order.variant}\n`;
             (extraOrders || []).forEach(extra => {
                 message += `➕ *Extra:* ${extra.cocktail}${extra.variant ? ' - ' + extra.variant : ''} (${extra.price})\n`;
             });
-            message += `📍 *Posizione:* ${order.location}\n`;
-            
-            // Add GPS coordinates if available
-            if (order.gps) {
-                const lat = order.gps.latitude.toFixed(6);
-                const lng = order.gps.longitude.toFixed(6);
-                message += `🌍 *Coordinate GPS:*\n`;
-                message += `https://www.google.com/maps?q=${lat},${lng}\n`;
+
+            if (merchOrder) {
+                message += `🛍️ *Ritiro:* al banco\n`;
+            } else {
+                message += `📍 *Posizione:* ${order.location}\n`;
+
+                // Add GPS coordinates if available
+                if (order.gps) {
+                    const lat = order.gps.latitude.toFixed(6);
+                    const lng = order.gps.longitude.toFixed(6);
+                    message += `🌍 *Coordinate GPS:*\n`;
+                    message += `https://www.google.com/maps?q=${lat},${lng}\n`;
+                }
+
+                message += `⏰ *Da servire:* ${order.time}\n`;
             }
-            
-            message += `⏰ *Da servire:* ${order.time}\n`;
             message += `🕐 *Ordinato alle:* ${order.orderTime}\n`;
 
             const extrasTotal = (extraOrders || []).reduce((sum, e) => {
@@ -7771,13 +7935,14 @@
                 // L'admin può rifiutare, ma non un ordine già incluso in una
                 // richiesta di pagamento in attesa: il conto è già stato chiesto.
                 const canReject = isAdmin() && !needsSync;
+                const merchOrder = isMerch(order.cocktail);
                 return `
                 <div class="order-item${isPending ? ' order-pending' : ''}">
                     <strong>${order.cocktail}</strong> - <em>${translateVariant(order.variant)}</em> - <strong style="color: var(--coral);">${order.price}</strong>
                     ${isPending ? `<span class="pending-tag">⏳ ${t('pendingTag')}</span>` : ''}
                     ${needsSync ? `<span class="sync-tag">📡 ${t('syncTag')}</span>` : ''}<br>
                     👤 ${order.customerName || '-'}<br>
-                    📍 ${translateLocation(order.location)} | ⏰ ${translateTime(order.time)}<br>
+                    ${merchOrder ? `🛍️ ${t('merchPickupLabel')}<br>` : `📍 ${translateLocation(order.location)} | ⏰ ${translateTime(order.time)}<br>`}
                     <small style="color: var(--dusk-soft);">${t('orderedLabel')} ${order.orderDate} ${order.orderTime}</small>
                     ${order.notes ? `<br><small>📝 ${order.notes}</small>` : ''}
                     ${canReject ? `<div class="order-actions"><button class="reject-btn" onclick="openRejectModal(${order.id})">🚫 ${t('rejectOrder')}</button></div>` : ''}
