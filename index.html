@@ -1553,6 +1553,181 @@
         .reject-reason:hover  { border-color: #B03A2E; background: rgba(176,58,46,0.06); }
         .reject-reason:active { transform: scale(0.98); }
 
+        /* =============================================
+           MAGAZZINO E SCORTE
+           ============================================= */
+        .stock-row input { width: 90px; }
+
+        .stock-hint {
+            font-size: 0.68em;
+            color: var(--dusk-soft);
+            max-width: 90px;
+            line-height: 1.2;
+        }
+
+        .recipe-note {
+            margin-top: 8px;
+            padding: 8px 10px;
+            background: rgba(46, 196, 182, 0.10);
+            border-radius: 6px;
+            font-size: 0.72em;
+            color: var(--dusk-soft);
+            line-height: 1.4;
+        }
+
+        .ing-help {
+            font-size: 0.75em;
+            color: var(--dusk-soft);
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .ingredient-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #fff;
+            border-left: 4px solid var(--lagoon);
+            border-radius: var(--radius-sm);
+            padding: 8px 12px;
+            margin-bottom: 6px;
+        }
+
+        .ingredient-row.ingredient-out {
+            border-left-color: #B03A2E;
+            background: rgba(176, 58, 46, 0.08);
+        }
+
+        .ing-name { flex: 1; font-size: 0.85em; color: var(--dusk); }
+
+        .ingredient-row input {
+            width: 80px;
+            padding: 7px;
+            border: 2px solid var(--sand-deep);
+            border-radius: 6px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            text-align: right;
+            margin: 0;
+        }
+
+        .ing-flag { font-size: 0.9em; }
+
+        .low-stock-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(245, 166, 35, 0.14);
+            border-left: 4px solid var(--sand-gold);
+            border-radius: var(--radius-sm);
+            padding: 10px 12px;
+            margin-bottom: 7px;
+            font-size: 0.88em;
+            color: var(--dusk);
+        }
+
+        .low-stock-row.low-stock-out {
+            background: rgba(176, 58, 46, 0.12);
+            border-left-color: #B03A2E;
+        }
+
+        .low-stock-qty {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            color: var(--coral-deep);
+        }
+
+        .low-stock-out .low-stock-qty { color: #B03A2E; }
+
+        /* =============================================
+           GUIDA ADMIN
+           ============================================= */
+        .help-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            align-self: flex-end;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 3px solid var(--sand);
+            background: linear-gradient(140deg, var(--lagoon) 0%, #1FA396 100%);
+            color: #fff;
+            font-size: 1.05em;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(46, 196, 182, 0.5);
+            transition: transform 0.2s var(--ease-bounce);
+        }
+
+        .help-btn:active { transform: scale(0.9); }
+        .help-btn:hover  { transform: translateY(-2px); }
+
+        .guide-section { margin-bottom: 8px; }
+
+        .guide-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            width: 100%;
+            padding: 13px 14px;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, var(--dusk) 0%, #2C5578 100%);
+            color: #fff;
+            font-family: var(--font-body);
+            font-size: 0.92em;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .guide-toggle:active { transform: scale(0.99); }
+
+        .guide-body {
+            background: #fff;
+            border-radius: var(--radius-sm);
+            padding: 14px;
+            margin-top: 6px;
+        }
+
+        .guide-section.collapsed .guide-body { display: none; }
+        .guide-section.collapsed .pc-chevron { transform: rotate(-90deg); }
+
+        .guide-body p {
+            font-size: 0.85em;
+            line-height: 1.55;
+            color: var(--dusk);
+            margin-bottom: 10px;
+        }
+
+        .guide-body p:last-child { margin-bottom: 0; }
+        .guide-body strong { color: var(--coral-deep); }
+        .guide-body em { color: var(--dusk-soft); }
+
+        .guide-body code {
+            background: var(--sand-deep);
+            border-radius: 4px;
+            padding: 1px 5px;
+            font-family: var(--font-mono);
+            font-size: 0.9em;
+        }
+
+        .guide-tip {
+            background: rgba(46, 196, 182, 0.12);
+            border-left: 3px solid var(--lagoon);
+            border-radius: 6px;
+            padding: 9px 11px;
+        }
+
+        .guide-warn {
+            background: rgba(245, 166, 35, 0.14);
+            border-left: 3px solid var(--sand-gold);
+            border-radius: 6px;
+            padding: 9px 11px;
+        }
+
         .pagination {
             display: flex;
             justify-content: center;
@@ -1636,7 +1811,127 @@
 </head>
 <body>
     <!-- Danny, il barista virtuale: suggerimenti contestuali -->
+    <!-- Guida admin (solo italiano: è per Daniel e famiglia) -->
+    <div class="modal" id="guideModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeGuide()" aria-label="Chiudi">✕</button>
+            <h2>📖 Guida di Daniel</h2>
+            <p style="color:var(--dusk-soft); font-size:0.85em; margin-bottom:16px;">
+                Tutto quello che puoi fare come amministratore. Tocca una sezione per aprirla.
+            </p>
+
+            <div class="guide-section collapsed" id="guide-start">
+                <button type="button" class="guide-toggle" onclick="toggleGuide('start')">
+                    <span>🏁 Primi passi</span><span class="pc-chevron">▾</span>
+                </button>
+                <div class="guide-body">
+                    <p><strong>Come entri come admin:</strong> al primo avvio l'app chiede un nome. Scrivi <strong>Daniel</strong> (maiuscole e spazi non contano) e ottieni i poteri di amministratore.</p>
+                    <p>Riconosci la modalità admin da tre segni: la tua illustrazione accanto al nome, la scritta <strong>(ADMIN)</strong>, e i pulsanti <strong>💵 Listino</strong> e <strong>❓</strong>.</p>
+                    <p>Se sbagli nome, tocca la matita <strong>✏️</strong> accanto al nome per cambiarlo.</p>
+                    <p class="guide-warn">⚠️ Chiunque scriva "Daniel" diventa admin. Va bene in famiglia; se un domani servisse più protezione, si può aggiungere una password.</p>
+                </div>
+            </div>
+
+            <div class="guide-section collapsed" id="guide-prices">
+                <button type="button" class="guide-toggle" onclick="toggleGuide('prices')">
+                    <span>💵 Listino e prezzi</span><span class="pc-chevron">▾</span>
+                </button>
+                <div class="guide-body">
+                    <p>Il pulsante <strong>💵 Listino</strong> apre tutto: prezzi, offerte, scorte e orari.</p>
+                    <p><strong>Come è organizzato:</strong> le categorie (Cocktail, Snack, Soft drink, Dolci) sono chiuse. Toccane una per aprirla, poi tocca un prodotto per vederne i prezzi.</p>
+                    <p><strong>Prezzi:</strong> ogni variante ha il suo prezzo. Il cliente paga il prezzo della variante più il supplemento orario.</p>
+                    <p><strong>🔥 Offerta:</strong> mette il badge arancione e fa pulsare la scheda nel catalogo.</p>
+                    <p><strong>⭐ Premium:</strong> solo per i cocktail. Attivandolo compare una <em>seconda scheda</em> nel catalogo (es. "Mojito Premium") col prezzo maggiorato dell'importo che indichi.</p>
+                    <p><strong>🚫 Segna come esaurito:</strong> blocca subito il prodotto. Utile quando la scorta risulta a posto ma il prodotto non c'è (bottiglia rotta, ingrediente andato a male).</p>
+                    <p><strong>⏱️ Supplementi orario:</strong> quanto si aggiunge per Subito / 10 min / 30 min.</p>
+                    <p class="guide-tip">💡 Ricordati di premere <strong>Salva listino</strong> in fondo. Le modifiche nelle schede chiuse vengono salvate lo stesso, non serve riaprirle.</p>
+                </div>
+            </div>
+
+            <div class="guide-section collapsed" id="guide-stock">
+                <button type="button" class="guide-toggle" onclick="toggleGuide('stock')">
+                    <span>🧪 Magazzino e scorte</span><span class="pc-chevron">▾</span>
+                </button>
+                <div class="guide-body">
+                    <p>Ci sono <strong>due modi</strong> di tenere il conto, perché i prodotti sono di due tipi diversi.</p>
+                    <p><strong>1. Scorta per prodotto</strong> (campo 📦 in ogni scheda). Per snack, bibite e dolci: una lattina è una lattina. Metti quante ne hai, cala a ogni ordine, a zero il prodotto si esaurisce da solo.</p>
+                    <p><strong>2. Magazzino ingredienti</strong> (ultima sezione del listino, 🧪). Per i cocktail, che condividono le bottiglie: se il <strong>rum</strong> finisce, si esauriscono insieme Mojito, Piña Colada e tutti quelli che lo usano.</p>
+                    <p>Dentro ogni scheda cocktail trovi la riga <em>"Usa: ..."</em> che ti ricorda quali ingredienti servono.</p>
+                    <p><strong>Il valore -1 significa "non tracciare".</strong> Serve per non doverti censire tutto subito: puoi iniziare mettendo la quantità solo su rum e gin, e lasciare -1 sul resto.</p>
+                    <p><strong>⚠️ Avvisi:</strong> imposta la soglia (di base 2). Quando qualcosa scende sotto, in cima all'app ti compare il pannello <strong>Scorte in esaurimento</strong>: giallo se sta finendo, rosso se è finito.</p>
+                    <p class="guide-tip">💡 Quando riordini le bottiglie, riapri il magazzino e aggiorna i numeri: i prodotti tornano disponibili da soli.</p>
+                </div>
+            </div>
+
+            <div class="guide-section collapsed" id="guide-hours">
+                <button type="button" class="guide-toggle" onclick="toggleGuide('hours')">
+                    <span>🕐 Orari e apertura</span><span class="pc-chevron">▾</span>
+                </button>
+                <div class="guide-body">
+                    <p>Nel listino, la sezione <strong>Stato del servizio</strong> ha tre pulsanti:</p>
+                    <p><strong>🕐 Orari</strong> — l'app apre e chiude da sola secondo la tabella dei giorni. È la modalità normale.</p>
+                    <p><strong>🟢 Aperto</strong> — forza l'apertura anche fuori orario (apertura straordinaria).</p>
+                    <p><strong>🔴 Chiuso</strong> — chiude subito, qualunque sia l'ora (pausa, chiusura anticipata).</p>
+                    <p>Sotto i pulsanti c'è sempre scritto se <em>i clienti possono ordinare</em>, così non ci sono dubbi.</p>
+                    <p><strong>Tabella orari:</strong> una riga per giorno. La casella accanto al nome segna il giorno di riposo. Gli orari che scavalcano la mezzanotte (es. 10:00–01:00) funzionano correttamente.</p>
+                    <p><strong>A servizio chiuso</strong> il cliente vede una fascia rossa con l'ora di riapertura, il catalogo resta consultabile ma non ordinabile. Tu puoi comunque confermare i pagamenti.</p>
+                </div>
+            </div>
+
+            <div class="guide-section collapsed" id="guide-orders">
+                <button type="button" class="guide-toggle" onclick="toggleGuide('orders')">
+                    <span>📋 Ordini</span><span class="pc-chevron">▾</span>
+                </button>
+                <div class="guide-body">
+                    <p>Come admin vedi <strong>gli ordini di tutti</strong>, ognuno col nome del cliente. I clienti vedono solo i propri.</p>
+                    <p><strong>Rifiutare un ordine:</strong> tocca <strong>🚫 Rifiuta</strong> sotto l'ordine e scegli il motivo (ingrediente finito, servizio in chiusura, posizione non raggiungibile) oppure scrivilo tu.</p>
+                    <p>L'ordine sparisce subito dalla tua lista. Il cliente riceve l'avviso col motivo entro pochi secondi e l'ordine viene eliminato. <strong>Non finisce nel conto</strong>, quindi non paga nulla.</p>
+                    <p class="guide-warn">⚠️ Non puoi rifiutare un ordine già incluso in una richiesta di pagamento: a quel punto il conto è già stato chiesto.</p>
+                    <p>Serve la connessione per rifiutare: offline l'app te lo dice invece di fallire in silenzio.</p>
+                </div>
+            </div>
+
+            <div class="guide-section collapsed" id="guide-payments">
+                <button type="button" class="guide-toggle" onclick="toggleGuide('payments')">
+                    <span>💳 Pagamenti</span><span class="pc-chevron">▾</span>
+                </button>
+                <div class="guide-body">
+                    <p>Quando un cliente preme <strong>Paga e chiudi conto</strong>, non succede nulla di automatico: parte una <em>richiesta</em> che devi confermare tu.</p>
+                    <p>Ti arriva un messaggio WhatsApp e in cima all'app compare <strong>🔔 Richieste di pagamento</strong> col numero in rosso. Ogni richiesta mostra cliente, importo e numero di ordini.</p>
+                    <p>Quando hai incassato, tocca <strong>✓ Confermo ricezione</strong>: il conto di quel cliente si chiude.</p>
+                    <p class="guide-tip">💡 Se il cliente ordina <em>dopo</em> aver chiesto il conto, i nuovi ordini restano aperti: confermando chiudi solo quelli della richiesta, non gli altri.</p>
+                </div>
+            </div>
+
+            <div class="guide-section collapsed" id="guide-reviews">
+                <button type="button" class="guide-toggle" onclick="toggleGuide('reviews')">
+                    <span>⭐ Recensioni</span><span class="pc-chevron">▾</span>
+                </button>
+                <div class="guide-body">
+                    <p>Le recensioni sono pubbliche: chiunque apra <strong>💬 Leggi le recensioni</strong> vede media, distribuzione delle stelle ed elenco.</p>
+                    <p>Come admin, su ogni recensione hai il cestino <strong>🗑️</strong> per eliminare contenuti inappropriati. Gli altri non lo vedono.</p>
+                    <p>Le recensioni non passano da WhatsApp: restano nell'app.</p>
+                </div>
+            </div>
+
+            <div class="guide-section collapsed" id="guide-tech">
+                <button type="button" class="guide-toggle" onclick="toggleGuide('tech')">
+                    <span>🔧 Manutenzione</span><span class="pc-chevron">▾</span>
+                </button>
+                <div class="guide-body">
+                    <p><strong>Installare l'app:</strong> su Android, Chrome propone "Installa app"; su iPhone, Safari → Condividi → "Aggiungi a Home". Si apre a schermo intero come un'app vera.</p>
+                    <p><strong>Senza connessione:</strong> compare una fascia scura. Il catalogo funziona, gli ordini si creano lo stesso e partono da soli quando la rete torna (etichetta 📡 <em>da inviare</em>).</p>
+                    <p><strong>Aggiornare l'app:</strong> carichi il nuovo <code>index.html</code> su GitHub e basta. L'app se ne accorge da sola e mostra ai clienti la barra <em>"Nuova versione disponibile"</em>. Non devi cambiare numeri di versione a mano.</p>
+                    <p><strong>Dove finiscono i dati:</strong> su Firebase. Ordini, listino, magazzino, orari e recensioni sono condivisi tra tutti i dispositivi. Ogni cliente vede solo i propri ordini, riconosciuto dal nome che ha inserito.</p>
+                    <p class="guide-tip">💡 Se cambi qualcosa nel listino, gli altri dispositivi si aggiornano entro un minuto, senza ricaricare la pagina.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="danny" class="danny" style="display:none;">
+        <!-- Guida admin: sopra Danny, visibile solo a Daniel -->
+        <button id="helpBtn" class="help-btn" onclick="openGuide()" style="display:none;" aria-label="Guida" title="Guida">❓</button>
         <div id="dannyBubble" class="danny-bubble" style="display:none;">
             <button class="danny-close" onclick="dismissDanny()" aria-label="Chiudi">✕</button>
             <div id="dannyText" class="danny-text"></div>
@@ -1688,6 +1983,15 @@
                 <div class="pending-banner-amount" id="pendingAmount"></div>
                 <div class="pending-banner-text" data-i18n="pendingText">Daniel deve confermare di aver ricevuto il pagamento.</div>
             </div>
+        </div>
+
+        <!-- Avviso scorte in esaurimento (solo admin) -->
+        <div id="lowStockPanel" class="orders-section" style="display:none; margin-bottom:20px;">
+            <h2 style="margin-bottom:12px;">
+                ⚠️ <span data-i18n="lowStockTitle">Scorte in esaurimento</span>
+                <span class="badge" id="lowStockCount">0</span>
+            </h2>
+            <div id="lowStockList"></div>
         </div>
 
         <!-- Sezione admin: richieste di pagamento da confermare -->
@@ -2181,6 +2485,53 @@
         // un prodotto per nome, senza sapere a quale categoria appartiene.
         const allProducts = cocktails.concat(snacks, softdrinks, desserts);
 
+        // =============================================
+        // MAGAZZINO INGREDIENTI (solo cocktail)
+        // I cocktail sono composizioni: se finisce il rum cadono
+        // Mojito, Piña Colada e Caipirinha insieme. Snack, bibite e
+        // dolci invece "sono" l'ingrediente, quindi usano un contatore
+        // per prodotto (vedi stock più sotto).
+        // =============================================
+        const ingredients = [
+            { id: 'rum',        name: 'Rum',            icon: '🥃' },
+            { id: 'gin',        name: 'Gin',            icon: '🍸' },
+            { id: 'tequila',    name: 'Tequila',        icon: '🌵' },
+            { id: 'cachaca',    name: 'Cachaça',        icon: '🇧🇷' },
+            { id: 'vino_rosso', name: 'Vino rosso',     icon: '🍷' },
+            { id: 'campari',    name: 'Campari',        icon: '🔴' },
+            { id: 'aperol',     name: 'Aperol',         icon: '🟠' },
+            { id: 'vermouth',   name: 'Vermouth rosso', icon: '🍾' },
+            { id: 'prosecco',   name: 'Prosecco',       icon: '🥂' },
+            { id: 'triple_sec', name: 'Triple sec',     icon: '🍊' },
+            { id: 'sambuco',    name: 'Sciroppo sambuco', icon: '🌼' },
+            { id: 'cocco',      name: 'Crema di cocco', icon: '🥥' },
+            { id: 'tonica',     name: 'Acqua tonica',   icon: '💧' },
+            { id: 'soda',       name: 'Soda',           icon: '🫧' },
+            { id: 'lime',       name: 'Lime',           icon: '🟢' },
+            { id: 'limone',     name: 'Limone',         icon: '🍋' },
+            { id: 'ananas',     name: 'Succo ananas',   icon: '🍍' },
+            { id: 'menta',      name: 'Menta',          icon: '🌿' },
+            { id: 'zucchero',   name: 'Zucchero',       icon: '🧂' }
+        ];
+
+        // Quali ingredienti servono per ogni cocktail
+        const recipes = {
+            'Mojito':        ['rum', 'menta', 'lime', 'zucchero', 'soda'],
+            'Margarita':     ['tequila', 'triple_sec', 'lime'],
+            'Negroni':       ['gin', 'campari', 'vermouth'],
+            'Aperol Spritz': ['aperol', 'prosecco', 'soda'],
+            'Gin Tonic':     ['gin', 'tonica', 'lime'],
+            'Gin Lemon':     ['gin', 'limone', 'soda'],
+            'Hugo Spritz':   ['prosecco', 'sambuco', 'menta', 'soda'],
+            'Piña Colada':   ['rum', 'cocco', 'ananas'],
+            'Caipirinha':    ['cachaca', 'lime', 'zucchero'],
+            'Sangria':       ['vino_rosso', 'triple_sec', 'limone', 'zucchero']
+        };
+
+        function ingredientById(id) {
+            return ingredients.find(i => i.id === id);
+        }
+
         function findProduct(name) {
             return allProducts.find(p => p.name === baseNameOf(name));
         }
@@ -2288,6 +2639,14 @@
 
                 soldOutLabel: "ESAURITO",
 
+                tabIngredients: "Magazzino ingredienti",
+                stockLabel: "Scorta",
+                stockUnlimited: "-1 = illimitato",
+                stockUnlimitedHelp: "Imposta la quantità disponibile. Lascia -1 per non gestire la scorta di quell’ingrediente.",
+                lowStockThreshold: "Avvisa sotto",
+                lowStockTitle: "Scorte in esaurimento",
+                stockZero: "ESAURITO",
+                usesIngredients: "Usa",
                 rejectOrder: "Rifiuta",
                 rejectTitle: "🚫 Rifiuta ordine",
                 rejectSubtitle: "Scegli il motivo: il cliente lo vedrà nell’avviso.",
@@ -2450,6 +2809,14 @@
 
                 soldOutLabel: "SOLD OUT",
 
+                tabIngredients: "Ingredient stock",
+                stockLabel: "Stock",
+                stockUnlimited: "-1 = unlimited",
+                stockUnlimitedHelp: "Set the available quantity. Leave -1 to not track that ingredient.",
+                lowStockThreshold: "Warn below",
+                lowStockTitle: "Running low",
+                stockZero: "OUT",
+                usesIngredients: "Uses",
                 rejectOrder: "Reject",
                 rejectTitle: "🚫 Reject order",
                 rejectSubtitle: "Pick a reason: the customer will see it in the notice.",
@@ -2612,6 +2979,14 @@
 
                 soldOutLabel: "AGOTADO",
 
+                tabIngredients: "Almacén de ingredientes",
+                stockLabel: "Existencias",
+                stockUnlimited: "-1 = ilimitado",
+                stockUnlimitedHelp: "Indica la cantidad disponible. Deja -1 para no controlar ese ingrediente.",
+                lowStockThreshold: "Avisar por debajo de",
+                lowStockTitle: "Existencias bajas",
+                stockZero: "AGOTADO",
+                usesIngredients: "Usa",
                 rejectOrder: "Rechazar",
                 rejectTitle: "🚫 Rechazar pedido",
                 rejectSubtitle: "Elige el motivo: el cliente lo verá en el aviso.",
@@ -2774,6 +3149,14 @@
 
                 soldOutLabel: "AUSVERKAUFT",
 
+                tabIngredients: "Zutatenlager",
+                stockLabel: "Bestand",
+                stockUnlimited: "-1 = unbegrenzt",
+                stockUnlimitedHelp: "Verfügbare Menge eintragen. -1 lassen, um die Zutat nicht zu verfolgen.",
+                lowStockThreshold: "Warnen unter",
+                lowStockTitle: "Bestand geht zur Neige",
+                stockZero: "LEER",
+                usesIngredients: "Verwendet",
                 rejectOrder: "Ablehnen",
                 rejectTitle: "🚫 Bestellung ablehnen",
                 rejectSubtitle: "Grund wählen: der Kunde sieht ihn im Hinweis.",
@@ -2936,6 +3319,14 @@
 
                 soldOutLabel: "ÉPUISÉ",
 
+                tabIngredients: "Stock ingrédients",
+                stockLabel: "Stock",
+                stockUnlimited: "-1 = illimité",
+                stockUnlimitedHelp: "Indiquez la quantité disponible. Laissez -1 pour ne pas suivre cet ingrédient.",
+                lowStockThreshold: "Alerter en dessous de",
+                lowStockTitle: "Stock faible",
+                stockZero: "ÉPUISÉ",
+                usesIngredients: "Utilise",
                 rejectOrder: "Refuser",
                 rejectTitle: "🚫 Refuser la commande",
                 rejectSubtitle: "Choisissez le motif : le client le verra dans l’avis.",
@@ -3098,6 +3489,14 @@
 
                 soldOutLabel: "ЗАКІНЧИВСЯ",
 
+                tabIngredients: "Склад інгредієнтів",
+                stockLabel: "Запас",
+                stockUnlimited: "-1 = необмежено",
+                stockUnlimitedHelp: "Вкажіть доступну кількість. Залиште -1, щоб не відстежувати цей інгредієнт.",
+                lowStockThreshold: "Попереджати нижче",
+                lowStockTitle: "Запаси закінчуються",
+                stockZero: "НЕМАЄ",
+                usesIngredients: "Використовує",
                 rejectOrder: "Відхилити",
                 rejectTitle: "🚫 Відхилити замовлення",
                 rejectSubtitle: "Оберіть причину: клієнт побачить її у сповіщенні.",
@@ -3259,6 +3658,14 @@
                 specialOffer: "PROMOÇÃO",
                 soldOutLabel: "ESGOTADO",
 
+                tabIngredients: "Stock de ingredientes",
+                stockLabel: "Stock",
+                stockUnlimited: "-1 = ilimitado",
+                stockUnlimitedHelp: "Indique a quantidade disponível. Deixe -1 para não controlar esse ingrediente.",
+                lowStockThreshold: "Avisar abaixo de",
+                lowStockTitle: "Stock a acabar",
+                stockZero: "ESGOTADO",
+                usesIngredients: "Usa",
                 rejectOrder: "Recusar",
                 rejectTitle: "🚫 Recusar pedido",
                 rejectSubtitle: "Escolha o motivo: o cliente vê-lo-á no aviso.",
@@ -4041,6 +4448,7 @@
                     prices: [0.50, 1.00, 2.00].slice(0, c.variants.length),
                     special: false,
                     soldOut: false,        // Se attivo, il prodotto non è ordinabile
+                    stock: -1,             // -1 = illimitato, altrimenti pezzi rimasti
                     premium: false,        // Se attivo, appare una card "Nome Premium" nel catalogo
                     premiumSurcharge: 2.00 // Maggiorazione applicata alla versione premium
                 };
@@ -4051,6 +4459,7 @@
                     prices: [2.00, 3.00, 4.00].slice(0, s.variants.length),
                     special: false,
                     soldOut: false,
+                    stock: -1,
                     premium: false,
                     premiumSurcharge: 0
                 };
@@ -4061,6 +4470,7 @@
                     prices: [1.50, 2.00, 2.50].slice(0, d.variants.length),
                     special: false,
                     soldOut: false,
+                    stock: -1,
                     premium: false,
                     premiumSurcharge: 0
                 };
@@ -4071,6 +4481,7 @@
                     prices: [3.00, 4.00, 5.00].slice(0, d.variants.length),
                     special: false,
                     soldOut: false,
+                    stock: -1,
                     premium: false,
                     premiumSurcharge: 0
                 };
@@ -4081,6 +4492,15 @@
                 // Stato del servizio.
                 // manualOverride: null = seguono gli orari, true = forzato aperto,
                 // false = forzato chiuso (chiusura anticipata, giorno di riposo...)
+                // Magazzino ingredienti: quantità per bottiglia/confezione.
+                // -1 significa "sempre disponibile", per non obbligare
+                // Daniel a censire tutto subito.
+                ingredientStock: (() => {
+                    const s = {};
+                    ingredients.forEach(i => { s[i.id] = -1; });
+                    return s;
+                })(),
+                lowStockThreshold: 2,
                 service: {
                     manualOverride: null,
                     hours: {
@@ -4143,11 +4563,102 @@
             return !!(pricing.items[cocktailName] && pricing.items[cocktailName].special);
         }
 
-        // Prodotto esaurito. Vale anche per la versione Premium:
-        // è lo stesso prodotto base, quindi se manca, manca per entrambe.
+        // =============================================
+        // DISPONIBILITÀ
+        // Un prodotto è esaurito se: segnato a mano da Daniel,
+        // oppure la sua scorta è a zero, oppure (per i cocktail)
+        // manca almeno uno degli ingredienti della ricetta.
+        // =============================================
+        function getStock(name) {
+            const item = pricing.items[baseNameOf(name)];
+            const s = item ? item.stock : -1;
+            return (typeof s === 'number') ? s : -1;
+        }
+
+        function getIngredientStock(id) {
+            const s = pricing.ingredientStock ? pricing.ingredientStock[id] : -1;
+            return (typeof s === 'number') ? s : -1;
+        }
+
+        // Ingredienti mancanti per un dato cocktail
+        function missingIngredients(name) {
+            const recipe = recipes[baseNameOf(name)];
+            if (!recipe) return [];
+            return recipe.filter(id => getIngredientStock(id) === 0);
+        }
+
         function isSoldOut(name) {
             const base = baseNameOf(name);
-            return !!(pricing.items[base] && pricing.items[base].soldOut);
+            const item = pricing.items[base];
+
+            // 1) Segnato manualmente da Daniel
+            if (item && item.soldOut) return true;
+
+            // 2) Scorta del prodotto esaurita
+            if (getStock(base) === 0) return true;
+
+            // 3) Manca un ingrediente della ricetta
+            if (missingIngredients(base).length > 0) return true;
+
+            return false;
+        }
+
+        // Ingredienti sotto la soglia di riordino
+        function lowStockIngredients() {
+            const threshold = pricing.lowStockThreshold ?? 2;
+            return ingredients.filter(i => {
+                const q = getIngredientStock(i.id);
+                return q >= 0 && q <= threshold;
+            });
+        }
+
+        // Prodotti con poche unità rimaste
+        function lowStockProducts() {
+            const threshold = pricing.lowStockThreshold ?? 2;
+            return allProducts.filter(p => {
+                const q = getStock(p.name);
+                return q >= 0 && q <= threshold;
+            });
+        }
+
+        // Scala il magazzino dopo un ordine confermato
+        async function decrementStock(productName) {
+            const base = baseNameOf(productName);
+            const item = pricing.items[base];
+            let changed = false;
+
+            // Contatore del prodotto
+            if (item && typeof item.stock === 'number' && item.stock > 0) {
+                item.stock -= 1;
+                changed = true;
+            }
+
+            // Ingredienti della ricetta
+            const recipe = recipes[base];
+            if (recipe && pricing.ingredientStock) {
+                recipe.forEach(id => {
+                    const q = pricing.ingredientStock[id];
+                    if (typeof q === 'number' && q > 0) {
+                        pricing.ingredientStock[id] = q - 1;
+                        changed = true;
+                    }
+                });
+            }
+
+            if (!changed) return;
+
+            localStorage.setItem('cocktailPricing', JSON.stringify(pricing));
+            renderCocktails();
+            renderLowStockPanel();
+
+            // Propaga il nuovo magazzino agli altri dispositivi
+            if (cloudReady() && isOnline()) {
+                try {
+                    await firestoreDb.collection('settings').doc('pricing').set(pricing);
+                } catch (error) {
+                    console.log('Magazzino non sincronizzato:', error);
+                }
+            }
         }
 
         // =============================================
@@ -4212,6 +4723,7 @@
                                     prices: data.items[name].prices || merged.items[name].prices,
                                     special: !!data.items[name].special,
                                     soldOut: !!data.items[name].soldOut,
+                                    stock: (typeof data.items[name].stock === 'number') ? data.items[name].stock : -1,
                                     premium: !!data.items[name].premium,
                                     premiumSurcharge: (typeof data.items[name].premiumSurcharge === 'number')
                                         ? data.items[name].premiumSurcharge
@@ -4221,6 +4733,8 @@
                         });
                     }
                     if (data.timeSurcharge) merged.timeSurcharge = data.timeSurcharge;
+                    if (data.ingredientStock) merged.ingredientStock = data.ingredientStock;
+                    if (typeof data.lowStockThreshold === 'number') merged.lowStockThreshold = data.lowStockThreshold;
                     if (data.service) {
                         merged.service = {
                             manualOverride: (data.service.manualOverride === undefined) ? null : data.service.manualOverride,
@@ -4238,6 +4752,7 @@
                         renderCocktails();
                         updatePriceDisplay();
                         updateServiceBanner();
+                        renderLowStockPanel();
                     }
                 }
             } catch (error) {
@@ -4507,6 +5022,8 @@
             if (priceBtn) priceBtn.style.display = isAdmin() ? 'inline-block' : 'none';
             const avatar = document.getElementById('adminAvatar');
             if (avatar) avatar.style.display = isAdmin() ? 'inline-block' : 'none';
+            const helpBtn = document.getElementById('helpBtn');
+            if (helpBtn) helpBtn.style.display = isAdmin() ? 'flex' : 'none';
         }
 
         // =============================================
@@ -4781,6 +5298,51 @@
         }
 
         // L'admin visualizza le richieste in attesa
+        // =============================================
+        // GUIDA ADMIN
+        // Solo in italiano: è pensata per Daniel e la famiglia.
+        // =============================================
+        function openGuide() {
+            if (!isAdmin()) return;
+            document.getElementById('guideModal').classList.add('active');
+        }
+
+        function closeGuide() {
+            document.getElementById('guideModal').classList.remove('active');
+        }
+
+        function toggleGuide(id) {
+            const s = document.getElementById('guide-' + id);
+            if (s) s.classList.toggle('collapsed');
+        }
+
+        // Pannello avvisi: cosa sta finendo (solo admin)
+        function renderLowStockPanel() {
+            const panel = document.getElementById('lowStockPanel');
+            if (!panel) return;
+
+            if (!isAdmin()) { panel.style.display = 'none'; return; }
+
+            const lowIng = lowStockIngredients();
+            const lowProd = lowStockProducts();
+            const total = lowIng.length + lowProd.length;
+
+            if (total === 0) { panel.style.display = 'none'; return; }
+
+            document.getElementById('lowStockCount').textContent = total;
+            const line = (icon, name, qty) => `
+                <div class="low-stock-row${qty === 0 ? ' low-stock-out' : ''}">
+                    <span>${icon} ${name}</span>
+                    <span class="low-stock-qty">${qty === 0 ? t('stockZero') : qty}</span>
+                </div>`;
+
+            document.getElementById('lowStockList').innerHTML =
+                lowIng.map(i => line(i.icon, i.name, getIngredientStock(i.id))).join('') +
+                lowProd.map(p => line(p.icon, p.name, getStock(p.name))).join('');
+
+            panel.style.display = 'block';
+        }
+
         function renderPendingPayments() {
             const section = document.getElementById('pendingPaymentsSection');
             const list = document.getElementById('pendingPaymentsList');
@@ -4926,6 +5488,14 @@
                                        onchange="document.getElementById('card-${safeId}').classList.toggle('price-card-soldout', this.checked)">
                                 <span>🚫 ${t('soldOutEnable')}</span>
                             </label>
+                            <div class="price-row stock-row">
+                                <span class="price-variant">📦 ${t('stockLabel')}</span>
+                                <input type="number" step="1" min="-1"
+                                       data-stock="${c.name}"
+                                       value="${item.stock ?? -1}">
+                                <span class="stock-hint">${t('stockUnlimited')}</span>
+                            </div>
+                            ${recipes[c.name] ? `<div class="recipe-note">🧪 ${t('usesIngredients')}: ${recipes[c.name].map(id => ingredientById(id)?.name || id).join(', ')}</div>` : ''}
                             ${rows}
                             ${premiumBlock}
                         </div>
@@ -4946,11 +5516,46 @@
                     </div>
                 </div>`;
 
+            // Magazzino ingredienti: una riga per bottiglia/confezione
+            const buildIngredientsSection = () => {
+                const stock = pricing.ingredientStock || {};
+                const rows = ingredients.map(i => {
+                    const q = (typeof stock[i.id] === 'number') ? stock[i.id] : -1;
+                    const out = q === 0;
+                    return `
+                        <div class="ingredient-row${out ? ' ingredient-out' : ''}">
+                            <span class="ing-name">${i.icon} ${i.name}</span>
+                            <input type="number" step="1" min="-1"
+                                   data-ingredient="${i.id}" value="${q}">
+                            ${out ? `<span class="ing-flag">🚫</span>` : ''}
+                        </div>`;
+                }).join('');
+
+                return `
+                    <div class="price-section collapsed" id="section-ingredients">
+                        <button type="button" class="price-section-toggle" onclick="togglePriceSection('ingredients')">
+                            <span>🧪 ${t('tabIngredients')}</span>
+                            <span class="ps-count">${ingredients.length}</span>
+                            <span class="pc-chevron">▾</span>
+                        </button>
+                        <div class="price-section-body" id="sectionBody-ingredients">
+                            <p class="ing-help">${t('stockUnlimitedHelp')}</p>
+                            <div class="price-row" style="margin-bottom:12px;">
+                                <span class="price-variant">⚠️ ${t('lowStockThreshold')}</span>
+                                <input type="number" step="1" min="0" id="lowStockThreshold"
+                                       value="${pricing.lowStockThreshold ?? 2}">
+                            </div>
+                            ${rows}
+                        </div>
+                    </div>`;
+            };
+
             form.innerHTML =
                 buildSection('tabCocktails', '🍹', cocktails, true) +
                 buildSection('tabSnacks', '🍿', snacks, false) +
                 buildSection('tabSoftdrinks', '🥤', softdrinks, false) +
-                buildSection('tabDesserts', '🍰', desserts, false);
+                buildSection('tabDesserts', '🍰', desserts, false) +
+                buildIngredientsSection();
 
             const ts = pricing.timeSurcharge || {};
             document.getElementById('surchargeNow').value = (ts['Subito'] ?? 1).toFixed(2);
@@ -5000,6 +5605,30 @@
                 const name = chk.getAttribute('data-soldout');
                 if (updated.items[name]) updated.items[name].soldOut = chk.checked;
             });
+
+            // Scorte per prodotto
+            document.querySelectorAll('#priceListForm input[data-stock]').forEach(input => {
+                const name = input.getAttribute('data-stock');
+                const val = parseInt(input.value, 10);
+                if (updated.items[name]) {
+                    updated.items[name].stock = isNaN(val) ? -1 : val;
+                }
+            });
+
+            // Magazzino ingredienti
+            const ingStock = {};
+            document.querySelectorAll('#priceListForm input[data-ingredient]').forEach(input => {
+                const id = input.getAttribute('data-ingredient');
+                const val = parseInt(input.value, 10);
+                ingStock[id] = isNaN(val) ? -1 : val;
+            });
+            if (Object.keys(ingStock).length) updated.ingredientStock = ingStock;
+
+            const thrEl = document.getElementById('lowStockThreshold');
+            if (thrEl) {
+                const thr = parseInt(thrEl.value, 10);
+                updated.lowStockThreshold = isNaN(thr) ? 2 : thr;
+            }
 
             // Versione premium attiva/disattiva
             document.querySelectorAll('#priceListForm input[data-premium]').forEach(chk => {
@@ -5051,6 +5680,7 @@
             renderCocktails();
             updatePriceDisplay();
             updateServiceBanner();
+            renderLowStockPanel();
 
             const successMsg = document.getElementById('successMessage');
             successMsg.textContent = ok ? t('priceListSaved') : t('priceListSavedLocal');
@@ -5386,6 +6016,7 @@
             ordersPage = 1; // Torna alla prima pagina per mostrare il nuovo ordine
             saveOrders();
             await saveOrderToCloud(order);
+            await decrementStock(selectedCocktail); // Scala scorte e ingredienti
 
             // Show success message
             const successMsg = document.getElementById('successMessage');
@@ -6456,6 +7087,7 @@
         checkRegistration(); // Mostra il popup nome oppure carica gli ordini dell'utente dal cloud
         startPaymentPolling();
         startPricingPolling(); // Tiene il listino allineato con quello dell'admin
+        renderLowStockPanel(); // Avvisi scorte per l'admin
         syncPendingOrders(); // Invia gli ordini rimasti in coda da sessioni offline
         initDanny();         // Attiva il barista virtuale
 
@@ -6468,7 +7100,8 @@
             reviewModal: closeReviewModal,
             reviewsModal: closeReviewsPage,
             priceListModal: closePriceList,
-            rejectModal: closeRejectModal
+            rejectModal: closeRejectModal,
+            guideModal: closeGuide
         };
 
         Object.keys(MODAL_CLOSERS).forEach(id => {
