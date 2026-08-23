@@ -2154,6 +2154,54 @@
             background: #fff;
         }
 
+        /* =============================================
+           CHECKLIST PREPARAZIONE/PULIZIA EVENTI
+           ============================================= */
+        .party-confirmed-card {
+            background: #fff;
+            border-left: 4px solid var(--lagoon);
+            border-radius: var(--radius-sm);
+            padding: 12px 14px;
+            margin-bottom: 12px;
+        }
+
+        .checklist-toggle {
+            display: block;
+            width: 100%;
+            text-align: left;
+            background: rgba(46, 196, 182, 0.10);
+            border: 1px solid rgba(46, 196, 182, 0.35);
+            border-radius: 6px;
+            padding: 8px 10px;
+            margin-top: 8px;
+            font-family: var(--font-body);
+            font-size: 0.78em;
+            font-weight: 600;
+            color: var(--dusk);
+            cursor: pointer;
+        }
+
+        .checklist-items {
+            padding: 8px 4px 2px;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 4px;
+            font-size: 0.8em;
+            color: var(--dusk);
+            cursor: pointer;
+        }
+
+        .checklist-item input { width: auto; margin: 0; }
+
+        .checklist-item-done span {
+            text-decoration: line-through;
+            color: var(--dusk-soft);
+        }
+
         .pagination {
             display: flex;
             justify-content: center;
@@ -2380,6 +2428,10 @@
                     <p><strong>Diversamente da tutto il resto: qui non si ordina per il ritiro immediato.</strong> Chi prenota sceglie una data futura e la richiesta resta <em>in attesa</em> finché tu non la confermi o rifiuti. Non è un "conferma sempre": stai davvero verificando la tua disponibilità per quella data.</p>
                     <p>Le richieste in attesa compaiono nel pannello <strong>🎉 Richieste feste</strong>. Per ognuna hai due pulsanti: <strong>✓ Accetta</strong> (la data è confermata) o <strong>🚫 Rifiuta</strong> (ti chiede un motivo breve, es. "data non disponibile", che il cliente vede).</p>
                     <p>Gli eventi confermati restano visibili sotto, in <strong>Prossimi eventi confermati</strong>, ordinati per data — così non perdi il filo di cosa hai in calendario.</p>
+                    <p><strong>💰 Il pagamento:</strong> quando tocchi <strong>✓ Accetta</strong>, l'app crea automaticamente un ordine per l'intero importo del pacchetto nello storico del cliente — esattamente come se avesse ordinato un cocktail. Lo salda con lo stesso <strong>"Paga e chiudi conto"</strong> di sempre: contanti (con la tua conferma) oppure carta prepagata, con lo sconto fedeltà del 10% se ha saldo disponibile.</p>
+                    <p><strong>👀 Visibilità:</strong> gli eventi confermati compaiono in un pannello <strong>"Prossimi eventi in programma"</strong> visibile a tutta la famiglia, non solo a chi ha prenotato — così tutti sanno cosa è in calendario.</p>
+                    <p><strong>🚫 Annullare un evento già confermato:</strong> per un imprevisto (maltempo, problema personale...) tocca <strong>Annulla evento</strong> sotto la scheda dell'evento. Ti viene chiesto un motivo breve: il cliente lo vede, e l'eventuale ordine di pagamento già creato viene rimosso automaticamente — non resta a dover pagare qualcosa che non si farà.</p>
+                    <p><strong>📋 Checklist preparazione e pulizia:</strong> ogni evento confermato ha due checklist proprie, con spunta. <em>Prepara evento</em> copre scorte, bancone, tavoli, decorazioni, bagni. <em>Pulizia e ripristino</em> copre pavimenti, bagni, bancone, spazzatura, bicchieri, disallestimento. I progressi restano salvati anche se chiudi l'app.</p>
                     <p><strong>Nel listino</strong> (sezione 🎉 Feste) puoi cambiare il prezzo di ogni fascia per ogni pacchetto, e metterne uno in pausa con ⏸️ se è fuori stagione (es. Xmas Party a luglio).</p>
                     <p class="guide-warn">⚠️ L'app non controlla automaticamente se una data è già impegnata: la verifica di disponibilità è manuale, sei tu a saperlo.</p>
                 </div>
@@ -2488,6 +2540,12 @@
         <div id="myChoresPanel" class="orders-section" style="display:none; margin-bottom:20px;">
             <h2 style="margin-bottom:12px;">🧹 <span data-i18n="myChoresTitle">I miei lavoretti assegnati</span></h2>
             <div id="myChoresList"></div>
+        </div>
+
+        <!-- Prossimi eventi: visibile a tutta la famiglia, non solo a chi prenota -->
+        <div id="publicPartyPanel" class="orders-section" style="display:none; margin-bottom:20px;">
+            <h2 style="margin-bottom:12px;">🎉 <span data-i18n="publicPartyTitle">Prossimi eventi in programma</span></h2>
+            <div id="publicPartyList"></div>
         </div>
 
         <!-- Richieste feste da confermare (solo admin) -->
@@ -3471,6 +3529,16 @@
 
                 soldOutLabel: "ESAURITO",
 
+                publicPartyTitle: "Prossimi eventi in programma",
+                hostedBy: "Organizzato da",
+                prepChecklistBtn: "📋 Prepara evento",
+                cleanupChecklistBtn: "🧹 Pulizia e ripristino",
+                cancelParty: "Annulla evento",
+                confirmCancelParty: "Annullare {name}? Il cliente verrà avvisato e l'eventuale conto rimosso.",
+                partyCancelReasonPrompt: "Motivo dell'annullamento (es: imprevisto, maltempo):",
+                partyCancelReasonDefault: "Imprevisto",
+                partyCancelledAlert: "🚫 Il tuo evento {name} è stato annullato: {reason}",
+                partyCancelledLabel: "Annullato",
                 tabParty: "Feste",
                 bookParty: "Prenota",
                 guestsLabel: "persone",
@@ -3500,7 +3568,7 @@
                 confirmAcceptParty: "Confermi la disponibilità per {name}?",
                 partyRejectReasonPrompt: "Motivo del rifiuto (es: data non disponibile):",
                 partyRejectReasonDefault: "Data non disponibile",
-                partyConfirmedAlert: "✅ La tua richiesta per {name} il {date} è stata confermata!",
+                partyConfirmedAlert: "✅ La tua richiesta per {name} il {date} è stata confermata! Trovi il conto nel tuo storico ordini.",
                 partyRejectedAlert: "❌ La tua richiesta per {name} è stata rifiutata: {reason}",
                 partyConfirmedLabel: "Confermata",
                 partyRejectedLabel: "Rifiutata",
@@ -3733,6 +3801,16 @@
 
                 soldOutLabel: "SOLD OUT",
 
+                publicPartyTitle: "Upcoming events",
+                hostedBy: "Hosted by",
+                prepChecklistBtn: "📋 Prepare event",
+                cleanupChecklistBtn: "🧹 Cleanup & reset",
+                cancelParty: "Cancel event",
+                confirmCancelParty: "Cancel {name}? The customer will be notified and any bill removed.",
+                partyCancelReasonPrompt: "Reason for cancellation (e.g: unforeseen issue, weather):",
+                partyCancelReasonDefault: "Unforeseen issue",
+                partyCancelledAlert: "🚫 Your event {name} has been cancelled: {reason}",
+                partyCancelledLabel: "Cancelled",
                 tabParty: "Parties",
                 bookParty: "Book",
                 guestsLabel: "guests",
@@ -3762,7 +3840,7 @@
                 confirmAcceptParty: "Confirm availability for {name}?",
                 partyRejectReasonPrompt: "Reason for rejection (e.g: date unavailable):",
                 partyRejectReasonDefault: "Date unavailable",
-                partyConfirmedAlert: "✅ Your request for {name} on {date} has been confirmed!",
+                partyConfirmedAlert: "✅ Your request for {name} on {date} has been confirmed! The bill is now in your order history.",
                 partyRejectedAlert: "❌ Your request for {name} was rejected: {reason}",
                 partyConfirmedLabel: "Confirmed",
                 partyRejectedLabel: "Rejected",
@@ -3995,6 +4073,16 @@
 
                 soldOutLabel: "AGOTADO",
 
+                publicPartyTitle: "Próximos eventos",
+                hostedBy: "Organizado por",
+                prepChecklistBtn: "📋 Preparar evento",
+                cleanupChecklistBtn: "🧹 Limpieza y reposición",
+                cancelParty: "Cancelar evento",
+                confirmCancelParty: "¿Cancelar {name}? Se avisará al cliente y se eliminará la cuenta si existe.",
+                partyCancelReasonPrompt: "Motivo de la cancelación (ej: imprevisto, mal tiempo):",
+                partyCancelReasonDefault: "Imprevisto",
+                partyCancelledAlert: "🚫 Tu evento {name} ha sido cancelado: {reason}",
+                partyCancelledLabel: "Cancelado",
                 tabParty: "Fiestas",
                 bookParty: "Reservar",
                 guestsLabel: "personas",
@@ -4024,7 +4112,7 @@
                 confirmAcceptParty: "¿Confirmas la disponibilidad para {name}?",
                 partyRejectReasonPrompt: "Motivo del rechazo (ej: fecha no disponible):",
                 partyRejectReasonDefault: "Fecha no disponible",
-                partyConfirmedAlert: "✅ ¡Tu solicitud para {name} el {date} ha sido confirmada!",
+                partyConfirmedAlert: "✅ ¡Tu solicitud para {name} el {date} ha sido confirmada! La cuenta ya está en tu historial de pedidos.",
                 partyRejectedAlert: "❌ Tu solicitud para {name} fue rechazada: {reason}",
                 partyConfirmedLabel: "Confirmada",
                 partyRejectedLabel: "Rechazada",
@@ -4257,6 +4345,16 @@
 
                 soldOutLabel: "AUSVERKAUFT",
 
+                publicPartyTitle: "Anstehende Veranstaltungen",
+                hostedBy: "Organisiert von",
+                prepChecklistBtn: "📋 Veranstaltung vorbereiten",
+                cleanupChecklistBtn: "🧹 Reinigung & Rückbau",
+                cancelParty: "Veranstaltung absagen",
+                confirmCancelParty: "{name} absagen? Der Kunde wird benachrichtigt, eine eventuelle Rechnung entfernt.",
+                partyCancelReasonPrompt: "Grund für die Absage (z.B.: unvorhergesehenes Ereignis, Wetter):",
+                partyCancelReasonDefault: "Unvorhergesehenes Ereignis",
+                partyCancelledAlert: "🚫 Deine Veranstaltung {name} wurde abgesagt: {reason}",
+                partyCancelledLabel: "Abgesagt",
                 tabParty: "Partys",
                 bookParty: "Buchen",
                 guestsLabel: "Gäste",
@@ -4286,7 +4384,7 @@
                 confirmAcceptParty: "Verfügbarkeit für {name} bestätigen?",
                 partyRejectReasonPrompt: "Grund für die Ablehnung (z.B.: Termin nicht verfügbar):",
                 partyRejectReasonDefault: "Termin nicht verfügbar",
-                partyConfirmedAlert: "✅ Deine Anfrage für {name} am {date} wurde bestätigt!",
+                partyConfirmedAlert: "✅ Deine Anfrage für {name} am {date} wurde bestätigt! Die Rechnung findest du jetzt in deiner Bestellhistorie.",
                 partyRejectedAlert: "❌ Deine Anfrage für {name} wurde abgelehnt: {reason}",
                 partyConfirmedLabel: "Bestätigt",
                 partyRejectedLabel: "Abgelehnt",
@@ -4519,6 +4617,16 @@
 
                 soldOutLabel: "ÉPUISÉ",
 
+                publicPartyTitle: "Événements à venir",
+                hostedBy: "Organisé par",
+                prepChecklistBtn: "📋 Préparer l’événement",
+                cleanupChecklistBtn: "🧹 Nettoyage et remise en état",
+                cancelParty: "Annuler l'événement",
+                confirmCancelParty: "Annuler {name} ? Le client sera averti et la note éventuelle supprimée.",
+                partyCancelReasonPrompt: "Motif de l'annulation (ex : imprévu, météo) :",
+                partyCancelReasonDefault: "Imprévu",
+                partyCancelledAlert: "🚫 Votre événement {name} a été annulé : {reason}",
+                partyCancelledLabel: "Annulé",
                 tabParty: "Fêtes",
                 bookParty: "Réserver",
                 guestsLabel: "personnes",
@@ -4548,7 +4656,7 @@
                 confirmAcceptParty: "Confirmer la disponibilité pour {name} ?",
                 partyRejectReasonPrompt: "Motif du refus (ex : date indisponible) :",
                 partyRejectReasonDefault: "Date indisponible",
-                partyConfirmedAlert: "✅ Votre demande pour {name} le {date} a été confirmée !",
+                partyConfirmedAlert: "✅ Votre demande pour {name} le {date} a été confirmée ! La note se trouve maintenant dans votre historique de commandes.",
                 partyRejectedAlert: "❌ Votre demande pour {name} a été refusée : {reason}",
                 partyConfirmedLabel: "Confirmée",
                 partyRejectedLabel: "Refusée",
@@ -4781,6 +4889,16 @@
 
                 soldOutLabel: "ЗАКІНЧИВСЯ",
 
+                publicPartyTitle: "Найближчі події",
+                hostedBy: "Організовано",
+                prepChecklistBtn: "📋 Підготовка події",
+                cleanupChecklistBtn: "🧹 Прибирання та відновлення",
+                cancelParty: "Скасувати подію",
+                confirmCancelParty: "Скасувати {name}? Клієнта повідомлять, а рахунок буде видалено.",
+                partyCancelReasonPrompt: "Причина скасування (напр.: непередбачувана обставина, погода):",
+                partyCancelReasonDefault: "Непередбачувана обставина",
+                partyCancelledAlert: "🚫 Вашу подію {name} скасовано: {reason}",
+                partyCancelledLabel: "Скасовано",
                 tabParty: "Свята",
                 bookParty: "Забронювати",
                 guestsLabel: "осіб",
@@ -4810,7 +4928,7 @@
                 confirmAcceptParty: "Підтвердити наявність для {name}?",
                 partyRejectReasonPrompt: "Причина відмови (напр.: дата недоступна):",
                 partyRejectReasonDefault: "Дата недоступна",
-                partyConfirmedAlert: "✅ Ваш запит для {name} на {date} підтверджено!",
+                partyConfirmedAlert: "✅ Ваш запит для {name} на {date} підтверджено! Рахунок тепер у вашій історії замовлень.",
                 partyRejectedAlert: "❌ Ваш запит для {name} відхилено: {reason}",
                 partyConfirmedLabel: "Підтверджено",
                 partyRejectedLabel: "Відхилено",
@@ -5042,6 +5160,16 @@
                 specialOffer: "PROMOÇÃO",
                 soldOutLabel: "ESGOTADO",
 
+                publicPartyTitle: "Próximos eventos",
+                hostedBy: "Organizado por",
+                prepChecklistBtn: "📋 Preparar evento",
+                cleanupChecklistBtn: "🧹 Limpeza e reposição",
+                cancelParty: "Cancelar evento",
+                confirmCancelParty: "Cancelar {name}? O cliente será avisado e a conta eventual removida.",
+                partyCancelReasonPrompt: "Motivo do cancelamento (ex.: imprevisto, mau tempo):",
+                partyCancelReasonDefault: "Imprevisto",
+                partyCancelledAlert: "🚫 O seu evento {name} foi cancelado: {reason}",
+                partyCancelledLabel: "Cancelado",
                 tabParty: "Festas",
                 bookParty: "Reservar",
                 guestsLabel: "pessoas",
@@ -5071,7 +5199,7 @@
                 confirmAcceptParty: "Confirmar disponibilidade para {name}?",
                 partyRejectReasonPrompt: "Motivo da recusa (ex.: data indisponível):",
                 partyRejectReasonDefault: "Data indisponível",
-                partyConfirmedAlert: "✅ O seu pedido para {name} em {date} foi confirmado!",
+                partyConfirmedAlert: "✅ O seu pedido para {name} em {date} foi confirmado! A conta já está no seu histórico de pedidos.",
                 partyRejectedAlert: "❌ O seu pedido para {name} foi recusado: {reason}",
                 partyConfirmedLabel: "Confirmada",
                 partyRejectedLabel: "Recusada",
@@ -8257,10 +8385,37 @@
 
             booking.status = 'confirmed';
             renderPartyPanels();
+
+            // Il pagamento del pacchetto segue lo stesso percorso di un
+            // ordine normale: creiamo un ordine per l'intero importo, che
+            // il cliente troverà nel suo storico e salderà con "Paga e
+            // chiudi conto" (contanti, oppure carta con lo sconto fedeltà).
+            // L'id dell'ordine resta collegato alla prenotazione: se Daniel
+            // dovesse annullare più avanti, sappiamo cosa rimuovere.
+            const order = {
+                id: Date.now() + Math.floor(Math.random() * 1000),
+                userId: booking.userId,
+                customerName: booking.requestedBy,
+                cocktail: `${booking.icon} ${booking.partyName}`,
+                variant: `${booking.guests} ${t('guestsLabel')}`,
+                location: 'Evento',
+                time: new Date(booking.eventDate).toLocaleDateString('it-IT'),
+                orderTime: new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }),
+                orderDate: new Date().toLocaleDateString('it-IT'),
+                notes: booking.note || '',
+                price: booking.price
+            };
+            booking.orderId = order.id;
+
             if (cloudReady()) {
-                try { await firestoreDb.collection('partyBookings').doc(String(id)).update({ status: 'confirmed' }); }
-                catch (error) { console.log('Errore conferma festa:', error); }
+                try {
+                    await firestoreDb.collection('orders').doc(String(order.id)).set(order);
+                    await firestoreDb.collection('partyBookings').doc(String(id)).update({ status: 'confirmed', orderId: order.id });
+                } catch (error) { console.log('Errore conferma festa:', error); }
             }
+
+            // Se è Daniel stesso a guardare lo storico, lo vede aggiornato subito
+            await loadOrdersFromCloud();
         }
 
         // L'admin rifiuta: chiede un motivo breve (data non disponibile, ecc.)
@@ -8297,6 +8452,9 @@
                 } else if (b.status === 'rejected' && !seen.includes(b.id)) {
                     alert(t('partyRejectedAlert').replace('{name}', b.partyName).replace('{reason}', b.rejectReason || ''));
                     seen.push(b.id);
+                } else if (b.status === 'cancelled' && !seen.includes('cancel-' + b.id)) {
+                    alert(t('partyCancelledAlert').replace('{name}', b.partyName).replace('{reason}', b.cancelReason || ''));
+                    seen.push('cancel-' + b.id);
                 }
             }
             localStorage.setItem('seenPartyResolutions', JSON.stringify(seen));
@@ -8305,6 +8463,148 @@
         function renderPartyPanels() {
             renderAdminPartyPanel();
             renderMyPartyPanel();
+            renderPublicPartyPanel();
+        }
+
+        // =============================================
+        // CHECKLIST PREPARAZIONE E PULIZIA
+        // Una copia per evento (non condivisa tra feste diverse), così
+        // Daniel segna i progressi specifici di quella data.
+        // =============================================
+        function buildDefaultPrepChecklist() {
+            return [
+                'Controllare scorte ingredienti e ghiaccio',
+                'Allestire il bancone bar',
+                'Preparare tavoli e sedie per gli invitati',
+                'Montare le decorazioni a tema',
+                'Preparare bicchieri e attrezzature',
+                'Verificare che i bagni siano puliti e riforniti',
+                'Controllare che i cestini della spazzatura siano vuoti',
+                'Testare impianto audio/luci, se previsto'
+            ].map((label, i) => ({ id: i, label, done: false }));
+        }
+
+        function buildDefaultCleanupChecklist() {
+            return [
+                'Lavare i pavimenti',
+                'Pulire i bagni',
+                'Pulire e riordinare il bancone bar',
+                'Svuotare e sostituire i sacchi della spazzatura',
+                'Lavare bicchieri e stoviglie rimaste',
+                'Rimuovere decorazioni e disallestire',
+                'Riporre tavoli e sedie',
+                'Arieggiare il locale',
+                'Aggiornare il magazzino con le scorte residue'
+            ].map((label, i) => ({ id: i, label, done: false }));
+        }
+
+        // Quali checklist sono aperte in questo momento (si perde al
+        // ricaricamento, non serve persisterlo: è solo stato di vista).
+        const expandedChecklists = new Set();
+
+        function toggleChecklistView(bookingId, type) {
+            const key = bookingId + '-' + type;
+            if (expandedChecklists.has(key)) expandedChecklists.delete(key);
+            else expandedChecklists.add(key);
+            renderAdminPartyPanel();
+        }
+
+        async function toggleChecklistItem(bookingId, type, itemId) {
+            const booking = partyBookings_data.find(b => b.id === bookingId);
+            if (!booking) return;
+            const list = type === 'prep' ? booking.prepChecklist : booking.cleanupChecklist;
+            const item = list && list.find(i => i.id === itemId);
+            if (!item) return;
+            item.done = !item.done;
+            renderAdminPartyPanel();
+
+            if (cloudReady()) {
+                const field = type === 'prep' ? 'prepChecklist' : 'cleanupChecklist';
+                try { await firestoreDb.collection('partyBookings').doc(String(bookingId)).update({ [field]: list }); }
+                catch (error) { console.log('Errore aggiornamento checklist:', error); }
+            }
+        }
+
+        function renderChecklistBlock(booking, type) {
+            const list = type === 'prep' ? booking.prepChecklist : booking.cleanupChecklist;
+            const done = list.filter(i => i.done).length;
+            const label = type === 'prep' ? t('prepChecklistBtn') : t('cleanupChecklistBtn');
+            const expanded = expandedChecklists.has(booking.id + '-' + type);
+
+            const items = expanded ? `
+                <div class="checklist-items">
+                    ${list.map(item => `
+                        <label class="checklist-item${item.done ? ' checklist-item-done' : ''}">
+                            <input type="checkbox" ${item.done ? 'checked' : ''}
+                                   onchange="toggleChecklistItem(${booking.id}, '${type}', ${item.id})">
+                            <span>${item.label}</span>
+                        </label>
+                    `).join('')}
+                </div>` : '';
+
+            return `
+                <button type="button" class="checklist-toggle" onclick="toggleChecklistView(${booking.id}, '${type}')">
+                    ${label} (${done}/${list.length})
+                </button>
+                ${items}`;
+        }
+
+        // L'admin annulla un evento già confermato per un imprevisto.
+        // Rimuove anche l'ordine di pagamento già creato: il cliente non
+        // deve restare a dover pagare qualcosa che non si farà più.
+        async function cancelPartyBooking(id) {
+            const booking = partyBookings_data.find(b => b.id === id);
+            if (!booking) return;
+
+            const reason = prompt(t('partyCancelReasonPrompt'));
+            if (reason === null) return; // annullata l'azione stessa
+
+            if (!confirm(t('confirmCancelParty').replace('{name}', booking.partyName))) return;
+
+            booking.status = 'cancelled';
+            booking.cancelReason = reason.trim() || t('partyCancelReasonDefault');
+            renderPartyPanels();
+
+            orders = orders.filter(o => o.id !== booking.orderId);
+            saveOrders();
+            renderOrders();
+
+            if (cloudReady()) {
+                try {
+                    await firestoreDb.collection('partyBookings').doc(String(id)).update({
+                        status: 'cancelled',
+                        cancelReason: booking.cancelReason
+                    });
+                    if (booking.orderId) {
+                        await firestoreDb.collection('orders').doc(String(booking.orderId)).delete();
+                    }
+                } catch (error) { console.log('Errore annullamento festa:', error); }
+            }
+        }
+
+        // Pannello pubblico: visibile a chiunque (non solo a chi ha
+        // prenotato o all'admin), un calendario condiviso di cosa è in
+        // programma per tutta la famiglia.
+        function renderPublicPartyPanel() {
+            const panel = document.getElementById('publicPartyPanel');
+            if (!panel) return;
+            if (!customerName) { panel.style.display = 'none'; return; }
+
+            const upcoming = partyBookings_data
+                .filter(b => b.status === 'confirmed')
+                .sort((a, b) => new Date(a.eventDate) - new Date(b.eventDate));
+
+            if (upcoming.length === 0) { panel.style.display = 'none'; return; }
+            panel.style.display = 'block';
+
+            document.getElementById('publicPartyList').innerHTML = upcoming.map(b => `
+                <div class="chore-row">
+                    <div class="chore-row-info">
+                        <strong>${b.icon} ${t('party_' + b.partyId)}</strong><br>
+                        <small>📅 ${new Date(b.eventDate).toLocaleDateString('it-IT')} · 👥 ${b.guests} ${t('guestsLabel')} · ${t('hostedBy')} ${b.requestedBy}</small>
+                    </div>
+                </div>
+            `).join('');
         }
 
         function renderAdminPartyPanel() {
@@ -8337,10 +8637,25 @@
 
             const upcomingBox = document.getElementById('partyUpcomingBox');
             if (confirmed.length > 0) {
+                // Ogni evento confermato: dati essenziali, le due checklist
+                // e il pulsante per annullarlo in caso di imprevisti.
+                confirmed.forEach(b => {
+                    if (!b.prepChecklist) b.prepChecklist = buildDefaultPrepChecklist();
+                    if (!b.cleanupChecklist) b.cleanupChecklist = buildDefaultCleanupChecklist();
+                });
+
                 upcomingBox.style.display = 'block';
-                document.getElementById('partyUpcomingList').innerHTML = confirmed.map(b =>
-                    `<div class="chore-payout-item">📅 ${new Date(b.eventDate).toLocaleDateString('it-IT')} — ${b.icon} ${b.partyName} (${b.guests} ${t('guestsLabel')}) <em>${b.requestedBy}</em></div>`
-                ).join('');
+                document.getElementById('partyUpcomingList').innerHTML = confirmed.map(b => `
+                    <div class="party-confirmed-card">
+                        <div class="chore-payout-item">
+                            📅 ${new Date(b.eventDate).toLocaleDateString('it-IT')} — ${b.icon} ${b.partyName}
+                            (${b.guests} ${t('guestsLabel')}) <em>${b.requestedBy}</em>
+                        </div>
+                        ${renderChecklistBlock(b, 'prep')}
+                        ${renderChecklistBlock(b, 'cleanup')}
+                        <button class="reject-btn" style="margin-top:8px; width:100%;" onclick="cancelPartyBooking(${b.id})">🚫 ${t('cancelParty')}</button>
+                    </div>
+                `).join('');
             } else {
                 upcomingBox.style.display = 'none';
             }
@@ -8358,6 +8673,7 @@
             document.getElementById('myPartyList').innerHTML = mine.map(b => {
                 const statusLabel = b.status === 'confirmed' ? '✅ ' + t('partyConfirmedLabel')
                     : b.status === 'rejected' ? '❌ ' + t('partyRejectedLabel')
+                    : b.status === 'cancelled' ? '🚫 ' + t('partyCancelledLabel')
                     : '⏳ ' + t('partyPendingLabel');
                 const statusClass = b.status === 'confirmed' ? 'chore-status-done' : '';
                 return `
