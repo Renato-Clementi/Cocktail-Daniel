@@ -8444,6 +8444,7 @@
             if (!customerName || isAdmin()) return;
             const mine = partyBookings_data.filter(b => b.userId === getUserId(customerName));
             const seen = JSON.parse(localStorage.getItem('seenPartyResolutions') || '[]');
+            const toRemove = []; // rifiutate/annullate: una volta viste, non servono più
 
             for (const b of mine) {
                 if (b.status === 'confirmed' && !seen.includes(b.id)) {
@@ -8452,12 +8453,28 @@
                 } else if (b.status === 'rejected' && !seen.includes(b.id)) {
                     alert(t('partyRejectedAlert').replace('{name}', b.partyName).replace('{reason}', b.rejectReason || ''));
                     seen.push(b.id);
+                    toRemove.push(b.id);
                 } else if (b.status === 'cancelled' && !seen.includes('cancel-' + b.id)) {
                     alert(t('partyCancelledAlert').replace('{name}', b.partyName).replace('{reason}', b.cancelReason || ''));
                     seen.push('cancel-' + b.id);
+                    toRemove.push(b.id);
                 }
             }
             localStorage.setItem('seenPartyResolutions', JSON.stringify(seen));
+
+            // Una richiesta rifiutata o un evento annullato, una volta letto
+            // l'avviso, non ha più motivo di restare: si comporta come un
+            // ordine rifiutato, che sparisce dopo la notifica.
+            if (toRemove.length) {
+                partyBookings_data = partyBookings_data.filter(b => !toRemove.includes(b.id));
+                renderPartyPanels();
+                if (cloudReady()) {
+                    for (const id of toRemove) {
+                        try { await firestoreDb.collection('partyBookings').doc(String(id)).delete(); }
+                        catch (error) { console.log('Errore rimozione prenotazione risolta:', error); }
+                    }
+                }
+            }
         }
 
         function renderPartyPanels() {
