@@ -1948,6 +1948,83 @@
             padding: 3px 0;
         }
 
+        /* =============================================
+           CARTA PREPAGATA E RICARICHE
+           ============================================= */
+        .wallet-panel {
+            background: linear-gradient(135deg, #D4AF37 0%, var(--palm) 100%);
+            border-radius: var(--radius);
+            padding: 16px 18px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 22px rgba(184, 134, 11, 0.4);
+        }
+
+        .wallet-panel-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .wallet-label {
+            font-size: 0.78em;
+            color: rgba(255,255,255,0.85);
+            letter-spacing: 0.4px;
+            margin-bottom: 3px;
+        }
+
+        .wallet-balance {
+            font-family: var(--font-mono);
+            font-size: 1.7em;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .wallet-pending-note {
+            font-size: 0.72em;
+            color: rgba(255,255,255,0.85);
+            margin-top: 4px;
+        }
+
+        .wallet-topup-btn {
+            flex-shrink: 0;
+            background: rgba(255,255,255,0.92);
+            color: var(--palm);
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 11px 16px;
+            font-family: var(--font-body);
+            font-size: 0.85em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .wallet-topup-btn:active { transform: scale(0.94); }
+
+        .topup-quick-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .topup-quick-btn {
+            flex: 1;
+            padding: 12px 4px;
+            border: 2px solid var(--sand-deep);
+            border-radius: var(--radius-sm);
+            background: #fff;
+            color: var(--dusk);
+            font-family: var(--font-mono);
+            font-size: 0.95em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .topup-quick-btn:hover { border-color: var(--sand-gold); background: rgba(245,166,35,0.08); }
+        .topup-quick-btn:active { transform: scale(0.95); }
+
         .pagination {
             display: flex;
             justify-content: center;
@@ -2122,6 +2199,9 @@
                     <p>Ti arriva un messaggio WhatsApp e in cima all'app compare <strong>🔔 Richieste di pagamento</strong> col numero in rosso. Ogni richiesta mostra cliente, importo e numero di ordini.</p>
                     <p>Quando hai incassato, tocca <strong>✓ Confermo ricezione</strong>: il conto di quel cliente si chiude.</p>
                     <p class="guide-tip">💡 Se il cliente ordina <em>dopo</em> aver chiesto il conto, i nuovi ordini restano aperti: confermando chiudi solo quelli della richiesta, non gli altri.</p>
+                    <p><strong>💳 Carta prepagata e sconto fedeltà:</strong> il cliente può chiederti una ricarica dall'app (stesso meccanismo del conto: ti arriva un WhatsApp, tu confermi quando hai i contanti in mano nella sezione <strong>🔋 Richieste di ricarica</strong>). Il credito resta sulla sua carta.</p>
+                    <p>Quando ha un saldo, al momento di pagare il cliente vede la scelta tra <strong>contanti</strong> e <strong>carta</strong>. Pagando con la carta ottiene il <strong>10% di sconto</strong> — è l'incentivo a ricaricare in anticipo. Se il saldo non copre tutto il conto, copre quello che può (partendo dagli ordini più vecchi) e il resto segue il normale flusso in contanti con la tua conferma.</p>
+                    <p class="guide-tip">💡 Il pagamento con la carta <strong>non richiede la tua conferma</strong>: i contanti li avevi già ricevuti al momento della ricarica, quindi l'ordine si chiude subito. Ricevi comunque un WhatsApp informativo.</p>
                 </div>
             </div>
 
@@ -2250,6 +2330,15 @@
             <div id="pendingPaymentsList"></div>
         </div>
 
+        <!-- Richieste di ricarica carta (solo admin) -->
+        <div id="pendingTopupsSection" class="orders-section" style="display:none; margin-bottom:20px;">
+            <h2 style="margin-bottom:15px;">
+                🔋 <span data-i18n="topupRequestsTitle">Richieste di ricarica</span>
+                <span class="badge" id="pendingTopupsCount">0</span>
+            </h2>
+            <div id="pendingTopupsList"></div>
+        </div>
+
         <!-- Schede categoria -->
         <div class="category-tabs">
             <button class="category-tab" id="tabCocktails" onclick="setCategory('cocktails')">
@@ -2271,6 +2360,18 @@
 
         <!-- Catalogo prodotti -->
         <div class="cocktail-grid" id="cocktailGrid"></div>
+
+        <!-- La mia carta prepagata (clienti) -->
+        <div id="myWalletPanel" class="wallet-panel" style="display:none;">
+            <div class="wallet-panel-row">
+                <div>
+                    <div class="wallet-label" data-i18n="walletTitle">💳 La mia carta</div>
+                    <div class="wallet-balance" id="walletBalanceAmount">0,00€</div>
+                    <div id="walletPendingNote" class="wallet-pending-note" style="display:none;"></div>
+                </div>
+                <button class="wallet-topup-btn" onclick="openTopupModal()" data-i18n="topupBtn">+ Ricarica</button>
+            </div>
+        </div>
 
         <!-- Orders Section -->
         <div class="orders-section">
@@ -2300,6 +2401,48 @@
     </div>
 
     <!-- Reviews Page Modal (pubblica) -->
+    <!-- Modale ricarica carta -->
+    <div class="modal" id="topupModal">
+        <div class="modal-content" style="max-width:400px; text-align:center;">
+            <button class="modal-close" onclick="closeTopupModal()" aria-label="Chiudi">✕</button>
+            <h2 data-i18n="topupModalTitle">🔋 Ricarica la carta</h2>
+            <p style="color:var(--dusk-soft); font-size:0.85em; margin-bottom:16px;" data-i18n="topupModalSubtitle">Dai i contanti a Daniel: appena confermato, il credito è sulla tua carta.</p>
+
+            <div class="topup-quick-row">
+                <button type="button" class="topup-quick-btn" onclick="setTopupAmount(10)">10€</button>
+                <button type="button" class="topup-quick-btn" onclick="setTopupAmount(20)">20€</button>
+                <button type="button" class="topup-quick-btn" onclick="setTopupAmount(50)">50€</button>
+            </div>
+
+            <div class="form-group" style="text-align:left;">
+                <label data-i18n="topupAmountLabel">Importo:</label>
+                <input type="number" step="0.5" min="1" id="topupAmount" data-i18n-placeholder="topupCustomPlaceholder" placeholder="Altro importo">
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="closeTopupModal()" data-i18n="cancel">Annulla</button>
+                <button class="btn btn-primary" onclick="confirmTopupRequest()" data-i18n="topupConfirmBtn">Richiedi ricarica</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale scelta pagamento: carta (sconto) o contanti -->
+    <div class="modal" id="walletChoiceModal">
+        <div class="modal-content" style="max-width:400px; text-align:center;">
+            <button class="modal-close" onclick="closeWalletChoiceModal()" aria-label="Chiudi">✕</button>
+            <h2 data-i18n="choosePaymentTitle">Come vuoi pagare?</h2>
+            <div style="background:rgba(46,196,182,0.12); border:2px solid var(--lagoon); border-radius:10px; padding:14px; margin-bottom:16px;">
+                <div style="font-size:0.82em; color:var(--dusk-soft); margin-bottom:4px;" data-i18n="walletCurrentBalance">Saldo sulla carta:</div>
+                <div id="walletChoiceBalance" style="font-family:var(--font-mono); font-size:1.5em; font-weight:700; color:var(--coral-deep);"></div>
+                <div id="walletChoiceCardInfo" style="font-size:0.82em; color:var(--dusk); margin-top:8px;"></div>
+            </div>
+            <div class="btn-group" style="flex-direction:column; gap:10px;">
+                <button id="walletChoiceCardBtn" class="btn btn-primary" style="width:100%;" onclick="payWithCard()" data-i18n="payWithCardBtn">💳 Usa il saldo (-10%)</button>
+                <button class="btn btn-secondary" style="width:100%;" onclick="closeWalletChoiceModal(); proceedCashPayment();" data-i18n="payCashBtn">💶 Paga in contanti</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modale assegnazione lavoretto -->
     <div class="modal" id="choreModal">
         <div class="modal-content" style="max-width:400px; text-align:center;">
@@ -2979,6 +3122,28 @@
 
                 soldOutLabel: "ESAURITO",
 
+                walletTitle: "💳 La mia carta",
+                topupBtn: "+ Ricarica",
+                topupPendingNote: "⏳ Richiesta di {amount} in attesa di conferma",
+                topupModalTitle: "🔋 Ricarica la carta",
+                topupModalSubtitle: "Dai i contanti a Daniel: appena confermato, il credito è sulla tua carta.",
+                topupAmountLabel: "Importo:",
+                topupCustomPlaceholder: "Altro importo",
+                topupConfirmBtn: "Richiedi ricarica",
+                topupInvalidAmount: "Inserisci un importo valido.",
+                topupRequestedMsg: "🔋 Richiesta di ricarica inviata!",
+                topupConfirmedAlert: "✅ Ricarica di {amount} confermata! È già sulla tua carta.",
+                topupRequestsTitle: "Richieste di ricarica",
+                confirmTopupPrompt: "Confermi di aver ricevuto da",
+                topupConfirmedMsg: "✅ Ricarica confermata per {name}",
+                choosePaymentTitle: "Come vuoi pagare?",
+                walletCurrentBalance: "Saldo sulla carta:",
+                payWithCardBtn: "💳 Usa il saldo (-10%)",
+                payCashBtn: "💶 Paga in contanti",
+                cardCoversNothing: "Il saldo non basta per coprire nemmeno un ordine intero.",
+                cardCoversAll: "Copri tutto il conto con {amount}, risparmiando {saved}!",
+                cardCoversPartial: "Copri {count} ordini risparmiando {saved}. Resterebbero {remaining} da pagare in contanti.",
+                cardPaidFullMsg: "✅ Pagato con la carta! Saldo residuo: {balance}",
                 tabChores: "Lavoretti",
                 assignChore: "Assegna",
                 choresPausedButton: "In pausa",
@@ -3181,6 +3346,28 @@
 
                 soldOutLabel: "SOLD OUT",
 
+                walletTitle: "💳 My card",
+                topupBtn: "+ Top up",
+                topupPendingNote: "⏳ {amount} top-up awaiting confirmation",
+                topupModalTitle: "🔋 Top up your card",
+                topupModalSubtitle: "Give the cash to Daniel: as soon as he confirms, it's on your card.",
+                topupAmountLabel: "Amount:",
+                topupCustomPlaceholder: "Other amount",
+                topupConfirmBtn: "Request top-up",
+                topupInvalidAmount: "Please enter a valid amount.",
+                topupRequestedMsg: "🔋 Top-up request sent!",
+                topupConfirmedAlert: "✅ Top-up of {amount} confirmed! It’s already on your card.",
+                topupRequestsTitle: "Top-up requests",
+                confirmTopupPrompt: "Confirm you received from",
+                topupConfirmedMsg: "✅ Top-up confirmed for {name}",
+                choosePaymentTitle: "How do you want to pay?",
+                walletCurrentBalance: "Card balance:",
+                payWithCardBtn: "💳 Use balance (-10%)",
+                payCashBtn: "💶 Pay cash",
+                cardCoversNothing: "Your balance isn't enough to cover even one full order.",
+                cardCoversAll: "You cover the whole bill with {amount}, saving {saved}!",
+                cardCoversPartial: "You cover {count} orders saving {saved}. {remaining} would remain to pay in cash.",
+                cardPaidFullMsg: "✅ Paid with the card! Remaining balance: {balance}",
                 tabChores: "Chores",
                 assignChore: "Assign",
                 choresPausedButton: "Paused",
@@ -3383,6 +3570,28 @@
 
                 soldOutLabel: "AGOTADO",
 
+                walletTitle: "💳 Mi tarjeta",
+                topupBtn: "+ Recargar",
+                topupPendingNote: "⏳ Recarga de {amount} pendiente de confirmación",
+                topupModalTitle: "🔋 Recarga tu tarjeta",
+                topupModalSubtitle: "Dale el efectivo a Daniel: en cuanto lo confirme, el saldo estará en tu tarjeta.",
+                topupAmountLabel: "Importe:",
+                topupCustomPlaceholder: "Otro importe",
+                topupConfirmBtn: "Solicitar recarga",
+                topupInvalidAmount: "Introduce un importe válido.",
+                topupRequestedMsg: "🔋 ¡Solicitud de recarga enviada!",
+                topupConfirmedAlert: "✅ ¡Recarga de {amount} confirmada! Ya está en tu tarjeta.",
+                topupRequestsTitle: "Solicitudes de recarga",
+                confirmTopupPrompt: "¿Confirmas haber recibido de",
+                topupConfirmedMsg: "✅ Recarga confirmada para {name}",
+                choosePaymentTitle: "¿Cómo quieres pagar?",
+                walletCurrentBalance: "Saldo en la tarjeta:",
+                payWithCardBtn: "💳 Usar saldo (-10%)",
+                payCashBtn: "💶 Pagar en efectivo",
+                cardCoversNothing: "El saldo no alcanza para cubrir ni un pedido completo.",
+                cardCoversAll: "Cubres toda la cuenta con {amount}, ¡ahorrando {saved}!",
+                cardCoversPartial: "Cubres {count} pedidos ahorrando {saved}. Quedarían {remaining} por pagar en efectivo.",
+                cardPaidFullMsg: "✅ ¡Pagado con la tarjeta! Saldo restante: {balance}",
                 tabChores: "Tareas",
                 assignChore: "Asignar",
                 choresPausedButton: "En pausa",
@@ -3585,6 +3794,28 @@
 
                 soldOutLabel: "AUSVERKAUFT",
 
+                walletTitle: "💳 Meine Karte",
+                topupBtn: "+ Aufladen",
+                topupPendingNote: "⏳ Aufladung von {amount} wartet auf Bestätigung",
+                topupModalTitle: "🔋 Karte aufladen",
+                topupModalSubtitle: "Gib Daniel das Bargeld: sobald er bestätigt, ist das Guthaben auf deiner Karte.",
+                topupAmountLabel: "Betrag:",
+                topupCustomPlaceholder: "Anderer Betrag",
+                topupConfirmBtn: "Aufladung anfordern",
+                topupInvalidAmount: "Bitte einen gültigen Betrag eingeben.",
+                topupRequestedMsg: "🔋 Aufladeanfrage gesendet!",
+                topupConfirmedAlert: "✅ Aufladung von {amount} bestätigt! Sie ist schon auf deiner Karte.",
+                topupRequestsTitle: "Aufladeanfragen",
+                confirmTopupPrompt: "Bestätigst du den Erhalt von",
+                topupConfirmedMsg: "✅ Aufladung bestätigt für {name}",
+                choosePaymentTitle: "Wie möchtest du zahlen?",
+                walletCurrentBalance: "Guthaben auf der Karte:",
+                payWithCardBtn: "💳 Guthaben nutzen (-10%)",
+                payCashBtn: "💶 Bar bezahlen",
+                cardCoversNothing: "Das Guthaben reicht nicht für eine einzige komplette Bestellung.",
+                cardCoversAll: "Du deckst die ganze Rechnung mit {amount} und sparst {saved}!",
+                cardCoversPartial: "Du deckst {count} Bestellungen und sparst {saved}. {remaining} blieben bar zu zahlen.",
+                cardPaidFullMsg: "✅ Mit Karte bezahlt! Restguthaben: {balance}",
                 tabChores: "Aufgaben",
                 assignChore: "Zuweisen",
                 choresPausedButton: "Pausiert",
@@ -3787,6 +4018,28 @@
 
                 soldOutLabel: "ÉPUISÉ",
 
+                walletTitle: "💳 Ma carte",
+                topupBtn: "+ Recharger",
+                topupPendingNote: "⏳ Recharge de {amount} en attente de confirmation",
+                topupModalTitle: "🔋 Rechargez votre carte",
+                topupModalSubtitle: "Donnez le liquide à Daniel : dès sa confirmation, le crédit est sur votre carte.",
+                topupAmountLabel: "Montant :",
+                topupCustomPlaceholder: "Autre montant",
+                topupConfirmBtn: "Demander une recharge",
+                topupInvalidAmount: "Veuillez entrer un montant valide.",
+                topupRequestedMsg: "🔋 Demande de recharge envoyée !",
+                topupConfirmedAlert: "✅ Recharge de {amount} confirmée ! Elle est déjà sur votre carte.",
+                topupRequestsTitle: "Demandes de recharge",
+                confirmTopupPrompt: "Confirmez-vous avoir reçu de",
+                topupConfirmedMsg: "✅ Recharge confirmée pour {name}",
+                choosePaymentTitle: "Comment voulez-vous payer ?",
+                walletCurrentBalance: "Solde de la carte :",
+                payWithCardBtn: "💳 Utiliser le solde (-10%)",
+                payCashBtn: "💶 Payer en espèces",
+                cardCoversNothing: "Le solde ne suffit pas pour couvrir ne serait-ce qu’une commande entière.",
+                cardCoversAll: "Vous couvrez toute la note avec {amount}, en économisant {saved} !",
+                cardCoversPartial: "Vous couvrez {count} commandes en économisant {saved}. Il resterait {remaining} à payer en espèces.",
+                cardPaidFullMsg: "✅ Payé avec la carte ! Solde restant : {balance}",
                 tabChores: "Corvées",
                 assignChore: "Assigner",
                 choresPausedButton: "En pause",
@@ -3989,6 +4242,28 @@
 
                 soldOutLabel: "ЗАКІНЧИВСЯ",
 
+                walletTitle: "💳 Моя картка",
+                topupBtn: "+ Поповнити",
+                topupPendingNote: "⏳ Поповнення на {amount} очікує підтвердження",
+                topupModalTitle: "🔋 Поповнити картку",
+                topupModalSubtitle: "Віддайте готівку Денні: щойно він підтвердить, кошти будуть на картці.",
+                topupAmountLabel: "Сума:",
+                topupCustomPlaceholder: "Інша сума",
+                topupConfirmBtn: "Запросити поповнення",
+                topupInvalidAmount: "Введіть коректну суму.",
+                topupRequestedMsg: "🔋 Запит на поповнення надіслано!",
+                topupConfirmedAlert: "✅ Поповнення на {amount} підтверджено! Кошти вже на картці.",
+                topupRequestsTitle: "Запити на поповнення",
+                confirmTopupPrompt: "Підтверджуєте отримання від",
+                topupConfirmedMsg: "✅ Поповнення підтверджено для {name}",
+                choosePaymentTitle: "Як бажаєте оплатити?",
+                walletCurrentBalance: "Баланс картки:",
+                payWithCardBtn: "💳 Використати баланс (-10%)",
+                payCashBtn: "💶 Готівкою",
+                cardCoversNothing: "Балансу не вистачає навіть на одне повне замовлення.",
+                cardCoversAll: "Ви покриваєте весь рахунок за {amount}, заощадивши {saved}!",
+                cardCoversPartial: "Ви покриваєте {count} замовлень, заощадивши {saved}. {remaining} залишиться сплатити готівкою.",
+                cardPaidFullMsg: "✅ Оплачено карткою! Залишок балансу: {balance}",
                 tabChores: "Справи",
                 assignChore: "Доручити",
                 choresPausedButton: "Призупинено",
@@ -4190,6 +4465,28 @@
                 specialOffer: "PROMOÇÃO",
                 soldOutLabel: "ESGOTADO",
 
+                walletTitle: "💳 O meu cartão",
+                topupBtn: "+ Carregar",
+                topupPendingNote: "⏳ Carregamento de {amount} a aguardar confirmação",
+                topupModalTitle: "🔋 Carregar o cartão",
+                topupModalSubtitle: "Dê o dinheiro ao Daniel: assim que confirmar, o saldo fica no seu cartão.",
+                topupAmountLabel: "Valor:",
+                topupCustomPlaceholder: "Outro valor",
+                topupConfirmBtn: "Pedir carregamento",
+                topupInvalidAmount: "Introduza um valor válido.",
+                topupRequestedMsg: "🔋 Pedido de carregamento enviado!",
+                topupConfirmedAlert: "✅ Carregamento de {amount} confirmado! Já está no seu cartão.",
+                topupRequestsTitle: "Pedidos de carregamento",
+                confirmTopupPrompt: "Confirma que recebeu de",
+                topupConfirmedMsg: "✅ Carregamento confirmado para {name}",
+                choosePaymentTitle: "Como quer pagar?",
+                walletCurrentBalance: "Saldo no cartão:",
+                payWithCardBtn: "💳 Usar saldo (-10%)",
+                payCashBtn: "💶 Pagar em dinheiro",
+                cardCoversNothing: "O saldo não chega para cobrir nem um pedido inteiro.",
+                cardCoversAll: "Cobre a conta toda com {amount}, poupando {saved}!",
+                cardCoversPartial: "Cobre {count} pedidos poupando {saved}. Ficariam {remaining} por pagar em dinheiro.",
+                cardPaidFullMsg: "✅ Pago com o cartão! Saldo restante: {balance}",
                 tabChores: "Tarefas",
                 assignChore: "Atribuir",
                 choresPausedButton: "Em pausa",
@@ -5599,6 +5896,7 @@
             if (avatar) avatar.style.display = isAdmin() ? 'inline-block' : 'none';
             const helpBtn = document.getElementById('helpBtn');
             if (helpBtn) helpBtn.style.display = isAdmin() ? 'flex' : 'none';
+            renderWalletPanel();
         }
 
         // =============================================
@@ -5728,6 +6026,318 @@
 
         // Il cliente richiede la chiusura del conto: crea una richiesta in attesa
         // che solo l'admin (Daniel) potrà confermare.
+        // =============================================
+        // CARTA PREPAGATA E SCONTO FEDELTÀ
+        // Il cliente carica credito (Daniel conferma di aver ricevuto i
+        // contanti, come per i pagamenti); pagando poi con quel credito
+        // ottiene il 10% di sconto — è l'incentivo a ricaricare prima
+        // invece di pagare volta per volta.
+        // =============================================
+        const CARD_DISCOUNT = 0.10; // 10%
+        let walletBalance = 0;
+        let myPendingTopup = null; // { id, amount } — richiesta di ricarica in attesa
+
+        try {
+            const cached = localStorage.getItem('walletBalance');
+            if (cached !== null) walletBalance = parseFloat(cached) || 0;
+            const cachedTopup = localStorage.getItem('myPendingTopup');
+            if (cachedTopup) myPendingTopup = JSON.parse(cachedTopup);
+        } catch (e) { /* usa i valori di default */ }
+
+        function walletDocId() {
+            return getUserId(customerName);
+        }
+
+        async function loadWalletFromCloud() {
+            if (!cloudReady() || !customerName) return;
+            try {
+                const doc = await firestoreDb.collection('wallets').doc(walletDocId()).get();
+                walletBalance = doc.exists ? (doc.data().balance || 0) : 0;
+                localStorage.setItem('walletBalance', String(walletBalance));
+                renderWalletPanel();
+            } catch (error) {
+                console.log('Saldo carta non disponibile:', error);
+            }
+        }
+
+        async function writeWalletBalance(newBalance) {
+            walletBalance = Math.max(0, Math.round(newBalance * 100) / 100);
+            localStorage.setItem('walletBalance', String(walletBalance));
+            renderWalletPanel();
+            if (!cloudReady()) return;
+            try {
+                await firestoreDb.collection('wallets').doc(walletDocId()).set({
+                    userId: walletDocId(),
+                    customerName: customerName,
+                    balance: walletBalance
+                }, { merge: true });
+            } catch (error) {
+                console.log('Saldo non sincronizzato:', error);
+            }
+        }
+
+        // Mostra il pannello "La mia carta" solo ai clienti (non a Daniel)
+        function renderWalletPanel() {
+            const panel = document.getElementById('myWalletPanel');
+            if (!panel) return;
+            if (isAdmin() || !customerName) { panel.style.display = 'none'; return; }
+
+            panel.style.display = 'block';
+            document.getElementById('walletBalanceAmount').textContent = formatPrice(walletBalance);
+
+            const pendingNote = document.getElementById('walletPendingNote');
+            if (myPendingTopup) {
+                pendingNote.style.display = 'block';
+                pendingNote.textContent = t('topupPendingNote').replace('{amount}', formatPrice(myPendingTopup.amount));
+            } else {
+                pendingNote.style.display = 'none';
+            }
+        }
+
+        // --- Richiesta di ricarica (il cliente la avvia, Daniel la conferma) ---
+        function openTopupModal() {
+            document.getElementById('topupAmount').value = '';
+            document.getElementById('topupModal').classList.add('active');
+        }
+
+        function closeTopupModal() {
+            document.getElementById('topupModal').classList.remove('active');
+        }
+
+        function setTopupAmount(value) {
+            document.getElementById('topupAmount').value = value;
+        }
+
+        async function confirmTopupRequest() {
+            const amount = parseFloat(document.getElementById('topupAmount').value);
+            if (!amount || amount <= 0) {
+                alert(t('topupInvalidAmount'));
+                return;
+            }
+
+            const request = {
+                id: Date.now(),
+                userId: walletDocId(),
+                customerName: customerName,
+                amount: amount,
+                requestedAt: Date.now(),
+                requestedDate: new Date().toLocaleDateString('it-IT'),
+                requestedTime: new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })
+            };
+
+            myPendingTopup = { id: request.id, amount: amount };
+            localStorage.setItem('myPendingTopup', JSON.stringify(myPendingTopup));
+            closeTopupModal();
+            renderWalletPanel();
+
+            if (cloudReady()) {
+                try {
+                    await firestoreDb.collection('topupRequests').doc(String(request.id)).set(request);
+                } catch (error) {
+                    console.log('Errore richiesta ricarica:', error);
+                }
+            }
+
+            let message = `🔋 *RICHIESTA RICARICA CARTA*\n\n`;
+            message += `👤 *Cliente:* ${customerName}\n`;
+            message += `💰 *Importo:* ${formatPrice(amount)}\n`;
+            message += `\n➡️ Conferma nell'app quando hai ricevuto i contanti.`;
+
+            const successMsg = document.getElementById('successMessage');
+            successMsg.textContent = t('topupRequestedMsg');
+            successMsg.classList.add('show');
+            setTimeout(() => successMsg.classList.remove('show'), 3000);
+
+            openWhatsApp(ADMIN_PHONE, encodeURIComponent(message));
+        }
+
+        // Il cliente scopre se Daniel ha confermato (la richiesta è sparita)
+        async function checkMyTopupStatus() {
+            if (!cloudReady() || !customerName || isAdmin() || !myPendingTopup) return;
+            try {
+                const doc = await firestoreDb.collection('topupRequests').doc(String(myPendingTopup.id)).get();
+                if (!doc.exists) {
+                    const confirmedAmount = myPendingTopup.amount;
+                    myPendingTopup = null;
+                    localStorage.removeItem('myPendingTopup');
+                    await loadWalletFromCloud();
+                    alert(t('topupConfirmedAlert').replace('{amount}', formatPrice(confirmedAmount)));
+                }
+            } catch (error) {
+                console.log('Errore verifica ricarica:', error);
+            }
+        }
+
+        // --- Vista admin: richieste di ricarica da confermare ---
+        let pendingTopups = [];
+
+        async function loadPendingTopups() {
+            if (!cloudReady() || !isAdmin()) return;
+            try {
+                const snapshot = await firestoreDb.collection('topupRequests').get();
+                pendingTopups = snapshot.docs.map(d => d.data()).sort((a, b) => b.requestedAt - a.requestedAt);
+                renderPendingTopups();
+            } catch (error) {
+                console.log('Errore caricamento ricariche:', error);
+            }
+        }
+
+        function renderPendingTopups() {
+            const section = document.getElementById('pendingTopupsSection');
+            if (!section) return;
+            if (!isAdmin() || pendingTopups.length === 0) { section.style.display = 'none'; return; }
+
+            section.style.display = 'block';
+            document.getElementById('pendingTopupsCount').textContent = pendingTopups.length;
+            document.getElementById('pendingTopupsList').innerHTML = pendingTopups.map(r => `
+                <div class="payment-request">
+                    <div class="payment-request-info">
+                        <strong>${r.customerName}</strong><br>
+                        <span class="payment-amount">${formatPrice(r.amount)}</span><br>
+                        <small style="color:#666;">${r.requestedDate} ${r.requestedTime}</small>
+                    </div>
+                    <button class="confirm-payment-btn" onclick="confirmTopupReceived('${r.userId}', ${r.id})">${t('confirmReceived')}</button>
+                </div>
+            `).join('');
+        }
+
+        async function confirmTopupReceived(userId, requestId) {
+            const req = pendingTopups.find(r => r.id === requestId);
+            if (!req) return;
+            if (!confirm(`${t('confirmTopupPrompt')} ${req.customerName}: ${formatPrice(req.amount)}?`)) return;
+
+            try {
+                const doc = await firestoreDb.collection('wallets').doc(userId).get();
+                const current = doc.exists ? (doc.data().balance || 0) : 0;
+                await firestoreDb.collection('wallets').doc(userId).set({
+                    userId: userId,
+                    customerName: req.customerName,
+                    balance: current + req.amount
+                });
+                await firestoreDb.collection('topupRequests').doc(String(requestId)).delete();
+
+                await loadPendingTopups();
+
+                const successMsg = document.getElementById('successMessage');
+                successMsg.textContent = t('topupConfirmedMsg').replace('{name}', req.customerName);
+                successMsg.classList.add('show');
+                setTimeout(() => successMsg.classList.remove('show'), 3000);
+            } catch (error) {
+                console.log('Errore conferma ricarica:', error);
+                alert('Errore durante la conferma. Riprova.');
+            }
+        }
+
+        // --- Pagamento con la carta (sconto fedeltà) ---
+        function openPaymentChoiceModal() {
+            const openOrders = orders.slice();
+            const preview = previewCardAllocation(openOrders, walletBalance);
+
+            document.getElementById('walletChoiceBalance').textContent = formatPrice(walletBalance);
+
+            const cardInfo = document.getElementById('walletChoiceCardInfo');
+            if (preview.covered.length === 0) {
+                cardInfo.textContent = t('cardCoversNothing');
+                document.getElementById('walletChoiceCardBtn').style.display = 'none';
+            } else if (preview.remaining.length === 0) {
+                cardInfo.textContent = t('cardCoversAll')
+                    .replace('{amount}', formatPrice(preview.coveredDiscountedTotal))
+                    .replace('{saved}', formatPrice(preview.savings));
+                document.getElementById('walletChoiceCardBtn').style.display = 'block';
+            } else {
+                cardInfo.textContent = t('cardCoversPartial')
+                    .replace('{count}', preview.covered.length)
+                    .replace('{saved}', formatPrice(preview.savings))
+                    .replace('{remaining}', formatPrice(preview.remainingCashTotal));
+                document.getElementById('walletChoiceCardBtn').style.display = 'block';
+            }
+
+            document.getElementById('walletChoiceModal').classList.add('active');
+        }
+
+        function closeWalletChoiceModal() {
+            document.getElementById('walletChoiceModal').classList.remove('active');
+        }
+
+        // Calcola quali ordini il saldo può coprire (dal più vecchio al più
+        // recente) e quanto si risparmierebbe. Funzione pura: non modifica
+        // nulla, serve per mostrare l'anteprima prima di confermare.
+        function previewCardAllocation(openOrders, balance) {
+            const sorted = openOrders.slice().sort((a, b) => a.id - b.id); // più vecchi prima
+            let remainingBalance = balance;
+            const covered = [];
+            const remaining = [];
+            let coveredDiscountedTotal = 0;
+            let coveredFullTotal = 0;
+
+            sorted.forEach(order => {
+                const price = parseFloat(String(order.price).replace(',', '.').replace('€', '')) || 0;
+                const discounted = Math.round(price * (1 - CARD_DISCOUNT) * 100) / 100;
+                if (remaining.length === 0 && remainingBalance >= discounted) {
+                    covered.push(order);
+                    coveredDiscountedTotal += discounted;
+                    coveredFullTotal += price;
+                    remainingBalance -= discounted;
+                } else {
+                    remaining.push(order);
+                }
+            });
+
+            const remainingCashTotal = remaining.reduce((sum, o) => {
+                const p = parseFloat(String(o.price).replace(',', '.').replace('€', '')) || 0;
+                return sum + p;
+            }, 0);
+
+            return {
+                covered, remaining,
+                coveredDiscountedTotal,
+                remainingCashTotal,
+                savings: Math.round((coveredFullTotal - coveredDiscountedTotal) * 100) / 100
+            };
+        }
+
+        async function payWithCard() {
+            const preview = previewCardAllocation(orders.slice(), walletBalance);
+            closeWalletChoiceModal();
+
+            if (preview.covered.length === 0) return;
+
+            // Addebita il saldo e chiude subito gli ordini coperti: è credito
+            // già incassato da Daniel in precedenza, non serve una nuova
+            // conferma per quella parte.
+            await writeWalletBalance(walletBalance - preview.coveredDiscountedTotal);
+
+            const coveredIds = preview.covered.map(o => o.id);
+            orders = orders.filter(o => !coveredIds.includes(o.id));
+            saveOrders();
+            renderOrders();
+
+            if (cloudReady()) {
+                for (const id of coveredIds) {
+                    try { await firestoreDb.collection('orders').doc(String(id)).delete(); }
+                    catch (error) { console.log('Errore chiusura ordine (carta):', error); }
+                }
+            }
+
+            // Nota di cortesia a Daniel: non richiede conferma, il credito c'era già
+            let message = `💳 *PAGAMENTO CON CARTA*\n\n`;
+            message += `👤 *Cliente:* ${customerName}\n`;
+            message += `✅ *${preview.covered.length} ordini chiusi con il saldo:* ${formatPrice(preview.coveredDiscountedTotal)}\n`;
+            message += `🎁 *Sconto fedeltà:* -${formatPrice(preview.savings)}\n`;
+            message += `💰 *Saldo residuo:* ${formatPrice(walletBalance)}`;
+            openWhatsApp(ADMIN_PHONE, encodeURIComponent(message));
+
+            const successMsg = document.getElementById('successMessage');
+            if (preview.remaining.length === 0) {
+                successMsg.textContent = t('cardPaidFullMsg').replace('{balance}', formatPrice(walletBalance));
+                successMsg.classList.add('show');
+                setTimeout(() => successMsg.classList.remove('show'), 4000);
+            } else {
+                // Il resto segue il normale flusso in contanti, con conferma di Daniel
+                await proceedCashPayment();
+            }
+        }
+
         async function payAndClose() {
             if (orders.length === 0) return;
 
@@ -5737,9 +6347,21 @@
                 return;
             }
 
-            // La richiesta copre TUTTI gli ordini attualmente presenti (inclusi quelli
-            // di un'eventuale richiesta precedente, che viene così aggiornata).
-            // Gli ordini creati DOPO questa richiesta resteranno aperti da pagare.
+            // Se c'è un saldo sulla carta, prima si sceglie come pagare.
+            // Senza saldo si va dritti al flusso in contanti di sempre.
+            if (walletBalance > 0) {
+                openPaymentChoiceModal();
+                return;
+            }
+
+            await proceedCashPayment();
+        }
+
+        // Flusso "in contanti": crea la richiesta che Daniel dovrà confermare
+        // di aver ricevuto. È lo stesso flusso di sempre, ora isolato in una
+        // funzione propria così il pagamento con la carta può richiamarlo
+        // per l'eventuale resto non coperto dal saldo.
+        async function proceedCashPayment() {
             const ordersToPay = orders.slice();
             if (ordersToPay.length === 0) return;
             const orderIdsToPay = ordersToPay.map(o => o.id);
@@ -8071,8 +8693,11 @@
                 if (!customerName) return;
                 if (isAdmin()) {
                     loadPendingPayments();
+                    loadPendingTopups();
                 } else {
                     checkMyPaymentStatus();
+                    checkMyTopupStatus();
+                    loadWalletFromCloud();
                 }
                 // Ricarica gli ordini: è così che il cliente scopre
                 // se Daniel ne ha rifiutato uno.
@@ -8129,7 +8754,9 @@
             priceListModal: closePriceList,
             rejectModal: closeRejectModal,
             guideModal: closeGuide,
-            choreModal: closeChoreModal
+            choreModal: closeChoreModal,
+            topupModal: closeTopupModal,
+            walletChoiceModal: closeWalletChoiceModal
         };
 
         Object.keys(MODAL_CLOSERS).forEach(id => {
