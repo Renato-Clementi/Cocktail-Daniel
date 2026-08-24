@@ -2579,6 +2579,41 @@
             </div>
         </div>
 
+        <!-- Menu e catalogo: sempre in cima, prima di ogni pannello
+             secondario (scorte, lavoretti, feste, libreria, pagamenti).
+             È la cosa che si sfoglia più spesso, non deve richiedere
+             di scorrere oltre le notifiche per arrivarci. -->
+        <div class="category-tabs-wrap" id="categoryTabsWrap">
+            <button class="tab-scroll-arrow tab-scroll-arrow-left" onclick="scrollTabs(-1)" aria-label="Scorri a sinistra">‹</button>
+            <div class="category-tabs" id="categoryTabs">
+            <button class="category-tab" id="tabCocktails" onclick="setCategory('cocktails')">
+                🍹 <span data-i18n="tabCocktails">Cocktail</span>
+            </button>
+            <button class="category-tab" id="tabSnacks" onclick="setCategory('snacks')">
+                🍿 <span data-i18n="tabSnacks">Snack</span>
+            </button>
+            <button class="category-tab" id="tabSoftdrinks" onclick="setCategory('softdrinks')">
+                🥤 <span data-i18n="tabSoftdrinks">Soft drink</span>
+            </button>
+            <button class="category-tab" id="tabDesserts" onclick="setCategory('desserts')">
+                🍰 <span data-i18n="tabDesserts">Dolci</span>
+            </button>
+            <button class="category-tab" id="tabChores" onclick="setCategory('chores')">
+                🧹 <span data-i18n="tabChores">Lavoretti</span>
+            </button>
+            <button class="category-tab" id="tabMerch" onclick="setCategory('merch')">
+                🛍️ <span data-i18n="tabMerch">Merchandising</span>
+            </button>
+            <button class="category-tab" id="tabParty" onclick="setCategory('party')">
+                🎉 <span data-i18n="tabParty">Feste</span>
+            </button>
+            </div>
+            <button class="tab-scroll-arrow tab-scroll-arrow-right" onclick="scrollTabs(1)" aria-label="Scorri a destra">›</button>
+        </div>
+
+        <!-- Catalogo prodotti -->
+        <div class="cocktail-grid" id="cocktailGrid"></div>
+
         <!-- Avviso scorte in esaurimento (solo admin) -->
         <div id="lowStockPanel" class="low-stock-panel collapsed" style="display:none;">
             <button type="button" class="low-stock-toggle" onclick="document.getElementById('lowStockPanel').classList.toggle('collapsed')">
@@ -2641,11 +2676,6 @@
 
         <!-- La mia libreria digitale: resta per sempre, anche dopo che
              l'ordine è stato pagato e rimosso dallo storico -->
-        <div id="myLibraryPanel" class="orders-section" style="display:none; margin-bottom:20px;">
-            <h2 style="margin-bottom:12px;">📚 <span data-i18n="myLibraryTitle">La mia libreria</span></h2>
-            <div id="myLibraryList"></div>
-        </div>
-
         <!-- Sezione admin: richieste di pagamento da confermare -->
         <div id="pendingPaymentsSection" class="orders-section" style="display:none; margin-bottom:20px;">
             <h2 style="margin-bottom:15px;">
@@ -2663,38 +2693,6 @@
             </h2>
             <div id="pendingTopupsList"></div>
         </div>
-
-        <!-- Schede categoria -->
-        <div class="category-tabs-wrap" id="categoryTabsWrap">
-            <button class="tab-scroll-arrow tab-scroll-arrow-left" onclick="scrollTabs(-1)" aria-label="Scorri a sinistra">‹</button>
-            <div class="category-tabs" id="categoryTabs">
-            <button class="category-tab" id="tabCocktails" onclick="setCategory('cocktails')">
-                🍹 <span data-i18n="tabCocktails">Cocktail</span>
-            </button>
-            <button class="category-tab" id="tabSnacks" onclick="setCategory('snacks')">
-                🍿 <span data-i18n="tabSnacks">Snack</span>
-            </button>
-            <button class="category-tab" id="tabSoftdrinks" onclick="setCategory('softdrinks')">
-                🥤 <span data-i18n="tabSoftdrinks">Soft drink</span>
-            </button>
-            <button class="category-tab" id="tabDesserts" onclick="setCategory('desserts')">
-                🍰 <span data-i18n="tabDesserts">Dolci</span>
-            </button>
-            <button class="category-tab" id="tabChores" onclick="setCategory('chores')">
-                🧹 <span data-i18n="tabChores">Lavoretti</span>
-            </button>
-            <button class="category-tab" id="tabMerch" onclick="setCategory('merch')">
-                🛍️ <span data-i18n="tabMerch">Merchandising</span>
-            </button>
-            <button class="category-tab" id="tabParty" onclick="setCategory('party')">
-                🎉 <span data-i18n="tabParty">Feste</span>
-            </button>
-            </div>
-            <button class="tab-scroll-arrow tab-scroll-arrow-right" onclick="scrollTabs(1)" aria-label="Scorri a destra">›</button>
-        </div>
-
-        <!-- Catalogo prodotti -->
-        <div class="cocktail-grid" id="cocktailGrid"></div>
 
         <!-- La mia carta prepagata (clienti) -->
         <div id="myWalletPanel" class="wallet-panel" style="display:none;">
@@ -2733,6 +2731,14 @@
         <div style="margin-top: 10px;">
             <button onclick="shareApp()" style="width: 100%; background: linear-gradient(135deg, var(--coral) 0%, var(--coral-deep) 100%); color: #fff; border: none; border-radius: var(--radius); padding: 16px 20px; font-family: var(--font-body); font-size: 15px; font-weight: 600; letter-spacing: 0.3px; cursor: pointer; box-shadow: 0 8px 22px rgba(224,73,44,0.4); transition: transform 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''" data-i18n="shareButton">📤 Invita un amico</button>
         </div>
+    </div>
+
+    <!-- La mia libreria digitale: dopo "Invita un amico", resta per
+         sempre anche dopo che l'ordine è stato pagato e rimosso dallo
+         storico -->
+    <div id="myLibraryPanel" class="orders-section" style="display:none; margin-bottom:20px;">
+        <h2 style="margin-bottom:12px;">📚 <span data-i18n="myLibraryTitle">La mia libreria</span></h2>
+        <div id="myLibraryList"></div>
     </div>
 
     <!-- Reviews Page Modal (pubblica) -->
