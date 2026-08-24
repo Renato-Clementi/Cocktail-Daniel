@@ -2412,9 +2412,11 @@
                 </button>
                 <div class="guide-body">
                     <p>Sesta scheda del catalogo: libro dei cocktail, cappellino, maglietta, bicchiere firmato, adesivi, borsa. Funziona come gli altri prodotti (schede, varianti, prezzo, scorta nel listino), con una differenza voluta.</p>
-                    <p><strong>Niente posizione né orario:</strong> il merchandising si ritira al banco, quindi il modale d'ordine non chiede "dove sei" o "quando" — solo la variante (taglia, colore) e un campo note, utile per il testo della dedica sul libro.</p>
+                    <p><strong>Niente posizione né orario:</strong> il merchandising si ritira al banco, quindi il modale d'ordine non chiede "dove sei" o "quando" — solo la variante (taglia, colore) e un campo note.</p>
+                    <p><strong>📖 Il libro è digitale:</strong> a differenza degli altri articoli, è un PDF (5€) consegnato subito dopo il pagamento — nessun ritiro fisico, e resta acquistabile anche a servizio chiuso, dato che non dipende dal bar. Quando il pagamento si chiude (carta o contanti confermati da te), il cliente trova il file nel suo pannello <strong>📚 La mia libreria</strong>, che resta visibile per sempre — a differenza dello storico ordini, non sparisce mai, così può riscaricarlo quando vuole.</p>
                     <p><strong>Prezzi:</strong> a differenza di cocktail e snack, qui le varianti costano tutte uguale di base (una taglia L non deve costare più di una S) — tranne gli adesivi, dove il set da 6 costa più del set da 3, perché lì la quantità lo giustifica. Puoi comunque cambiare ogni prezzo dal listino come sempre.</p>
-                    <p>Lo <strong>stock</strong> funziona come per snack e bibite: imposta quante copie/pezzi hai, cala a ogni ordine, a zero si esaurisce da solo.</p>
+                    <p>Lo <strong>stock</strong> funziona come per snack e bibite: imposta quante copie/pezzi hai, cala a ogni ordine, a zero si esaurisce da solo. Non si applica al libro, che essendo un file non finisce mai.</p>
+                    <p class="guide-warn">⚠️ Il PDF è ospitato come file pubblico sul sito: chi conosce l'indirizzo esatto del file potrebbe scaricarlo senza pagare. Per un progetto familiare va bene così; se un domani servisse una protezione più seria, se ne può parlare.</p>
                 </div>
             </div>
 
@@ -2635,6 +2637,13 @@
         <div id="myPartyPanel" class="orders-section" style="display:none; margin-bottom:20px;">
             <h2 style="margin-bottom:12px;">🎉 <span data-i18n="myPartyTitle">Le mie feste prenotate</span></h2>
             <div id="myPartyList"></div>
+        </div>
+
+        <!-- La mia libreria digitale: resta per sempre, anche dopo che
+             l'ordine è stato pagato e rimosso dallo storico -->
+        <div id="myLibraryPanel" class="orders-section" style="display:none; margin-bottom:20px;">
+            <h2 style="margin-bottom:12px;">📚 <span data-i18n="myLibraryTitle">La mia libreria</span></h2>
+            <div id="myLibraryList"></div>
         </div>
 
         <!-- Sezione admin: richieste di pagamento da confermare -->
@@ -3285,7 +3294,7 @@
         // consegna, non ha senso chiedere "dove sei" per una maglietta.
         // =============================================
         const merch = [
-            { name: "Libro dei Cocktail di Daniel", icon: "📖", description: "Le ricette originali, autografate", variants: ["Copia singola", "Con dedica"] },
+            { name: "Libro dei Cocktail di Daniel", icon: "📖", description: "Le 10 ricette originali, in PDF - invio immediato dopo il pagamento", variants: ["PDF"], digital: true, fileUrl: "il-libro-dei-cocktail-di-daniel.pdf" },
             { name: "Cappellino", icon: "🧢", description: "Ricamato, taglia unica", variants: ["Nero", "Corallo", "Turchese"] },
             { name: "Maglietta", icon: "👕", description: "100% cotone, stampa esclusiva", variants: ["S", "M", "L", "XL"] },
             { name: "Bicchiere Firmato", icon: "🥃", description: "Lo stesso dei nostri cocktail", variants: ["Mojito", "Margarita"] },
@@ -3296,6 +3305,85 @@
         function isMerch(name) {
             const base = baseNameOf(name);
             return merch.some(m => m.name === base);
+        }
+
+        // Un prodotto digitale (es. il libro in PDF) non ha scorte fisiche
+        // né bisogno di ritiro: appena il pagamento si chiude, il file va
+        // consegnato subito, non "dato in mano" da Daniel.
+        function getDigitalProduct(name) {
+            const base = baseNameOf(name);
+            return merch.find(m => m.name === base && m.digital) || null;
+        }
+
+        // =============================================
+        // LIBRERIA DIGITALE
+        // A differenza degli ordini normali (che spariscono una volta
+        // pagati), un acquisto digitale resta per sempre: è la prova che
+        // il cliente ha comprato quel PDF, con accesso permanente al file.
+        // Va creata nel momento esatto in cui un ordine si chiude pagato,
+        // sia che accada all'istante (carta) sia dopo la conferma di
+        // Daniel (contanti) — altrimenti il download sparirebbe insieme
+        // all'ordine prima che il cliente riesca a scaricarlo.
+        // =============================================
+        let myDigitalPurchases = [];
+
+        async function grantDigitalPurchases(paidOrders) {
+            const digitalOrders = paidOrders.filter(o => getDigitalProduct(o.cocktail));
+            if (digitalOrders.length === 0) return;
+
+            for (const order of digitalOrders) {
+                const product = getDigitalProduct(order.cocktail);
+                const purchase = {
+                    id: Date.now() + Math.floor(Math.random() * 1000),
+                    userId: order.userId,
+                    customerName: order.customerName,
+                    productName: product.name,
+                    icon: product.icon,
+                    fileUrl: product.fileUrl,
+                    purchasedAt: Date.now(),
+                    purchasedDate: new Date().toLocaleDateString('it-IT')
+                };
+                if (order.userId === getUserId(customerName)) {
+                    myDigitalPurchases.unshift(purchase);
+                }
+                if (cloudReady()) {
+                    try {
+                        await firestoreDb.collection('digitalPurchases').doc(String(purchase.id)).set(purchase);
+                    } catch (error) { console.log('Errore salvataggio acquisto digitale:', error); }
+                }
+            }
+            renderMyLibraryPanel();
+        }
+
+        async function loadMyLibraryFromCloud() {
+            if (!cloudReady() || !customerName) return;
+            try {
+                const snapshot = await firestoreDb.collection('digitalPurchases').get();
+                myDigitalPurchases = snapshot.docs
+                    .map(d => d.data())
+                    .filter(p => p.userId === getUserId(customerName))
+                    .sort((a, b) => b.purchasedAt - a.purchasedAt);
+                renderMyLibraryPanel();
+            } catch (error) {
+                console.log('Libreria digitale non disponibile:', error);
+            }
+        }
+
+        function renderMyLibraryPanel() {
+            const panel = document.getElementById('myLibraryPanel');
+            if (!panel) return;
+            if (!customerName || myDigitalPurchases.length === 0) { panel.style.display = 'none'; return; }
+
+            panel.style.display = 'block';
+            document.getElementById('myLibraryList').innerHTML = myDigitalPurchases.map(p => `
+                <div class="chore-row">
+                    <div class="chore-row-info">
+                        <strong>${p.icon} ${p.productName}</strong><br>
+                        <small>${t('purchasedOn')} ${p.purchasedDate}</small>
+                    </div>
+                    <a href="${p.fileUrl}" download class="chore-done-btn" style="text-decoration:none; display:inline-block;">📥 ${t('downloadPdf')}</a>
+                </div>
+            `).join('');
         }
 
         const allProducts = cocktails.concat(snacks, softdrinks, desserts, merch);
@@ -3606,6 +3694,9 @@
 
                 soldOutLabel: "ESAURITO",
 
+                myLibraryTitle: "La mia libreria",
+                purchasedOn: "Acquistato il",
+                downloadPdf: "Scarica il PDF",
                 rebookParty: "Proponi nuova data",
                 rebookPartyConfirm: "Invia nuova data",
                 partyRebookNotice: "🔄 Stai riproponendo questa festa con una nuova data. Daniel dovrà confermarla di nuovo.",
@@ -3619,7 +3710,7 @@
                 userGuideTitle: "📖 Guida all'app",
                 userGuideSubtitle: "Tutto quello che puoi fare da qui. Tocca una sezione per aprirla.",
                 userGuideOrderTitle: "🍹 Come ordinare",
-                userGuideOrderBody: "<p>Scegli una categoria dalle schede in alto (Cocktail, Snack, Soft drink, Dolci, Merchandising...) e tocca il prodotto che vuoi.</p><p>Scegli la variante, la posizione (dove sei, in casa, in giardino) e l'orario preferito, poi tocca <strong>Conferma Ordine</strong>. Il prezzo mostrato è già quello finale.</p><p>A volte compare qualche prodotto consigliato in abbinamento: puoi aggiungerlo con un tocco o ignorarlo, resta comunque opzionale.</p>",
+                userGuideOrderBody: "<p>Scegli una categoria dalle schede in alto (Cocktail, Snack, Soft drink, Dolci, Merchandising...) e tocca il prodotto che vuoi.</p><p>Scegli la variante, la posizione (dove sei, in casa, in giardino) e l'orario preferito, poi tocca <strong>Conferma Ordine</strong>. Il prezzo mostrato è già quello finale.</p><p>A volte compare qualche prodotto consigliato in abbinamento: puoi aggiungerlo con un tocco o ignorarlo, resta comunque opzionale.</p><p><strong>Il libro dei cocktail in PDF</strong> è diverso dagli altri: appena il pagamento si chiude te lo ritrovi in <strong>📚 La mia libreria</strong>, un pannello che resta per sempre — puoi riscaricarlo quando vuoi.</p>",
                 userGuidePayTitle: "💳 Come si paga",
                 userGuidePayBody: "<p>I tuoi ordini restano nello <strong>storico</strong> finché non chiudi il conto. Quando hai finito, tocca <strong>Paga e chiudi conto</strong>.</p><p>Se hai un saldo sulla carta prepagata, puoi scegliere di pagare con quello e ottenere il <strong>10% di sconto</strong>. Altrimenti si paga in contanti: la richiesta parte e il conto si chiude quando Daniel conferma di aver ricevuto i soldi.</p><p>Per ricaricare la carta tocca <strong>+ Ricarica</strong> nel riquadro dorato, scegli l'importo e consegna i contanti a Daniel: il saldo comparirà appena lui conferma.</p>",
                 userGuideChoresTitle: "🧹 Lavoretti per Daniel",
@@ -3906,6 +3997,9 @@
 
                 soldOutLabel: "SOLD OUT",
 
+                myLibraryTitle: "My library",
+                purchasedOn: "Purchased on",
+                downloadPdf: "Download PDF",
                 rebookParty: "Propose new date",
                 rebookPartyConfirm: "Send new date",
                 partyRebookNotice: "🔄 You're re-proposing this party with a new date. Daniel will need to confirm it again.",
@@ -3919,7 +4013,7 @@
                 userGuideTitle: "📖 App guide",
                 userGuideSubtitle: "Everything you can do here. Tap a section to open it.",
                 userGuideOrderTitle: "🍹 How to order",
-                userGuideOrderBody: "<p>Pick a category from the tabs at the top (Cocktails, Snacks, Soft drinks, Desserts, Merchandise...) and tap the product you want.</p><p>Choose the variant, the location (where you are, at home, in the garden) and the preferred time, then tap <strong>Confirm Order</strong>. The price shown is already the final one.</p><p>Sometimes a matching product is suggested: you can add it with a tap or ignore it, it's always optional.</p>",
+                userGuideOrderBody: "<p>Pick a category from the tabs at the top (Cocktails, Snacks, Soft drinks, Desserts, Merchandise...) and tap the product you want.</p><p>Choose the variant, the location (where you are, at home, in the garden) and the preferred time, then tap <strong>Confirm Order</strong>. The price shown is already the final one.</p><p>Sometimes a matching product is suggested: you can add it with a tap or ignore it, it's always optional.</p><p>The <strong>PDF cocktail book</strong> works differently: as soon as payment closes, it appears in <strong>📚 My library</strong>, a panel that stays forever — you can download it again anytime.</p>",
                 userGuidePayTitle: "💳 How to pay",
                 userGuidePayBody: "<p>Your orders stay in your <strong>history</strong> until you close the bill. When you're done, tap <strong>Pay and close bill</strong>.</p><p>If you have a balance on your prepaid card, you can choose to pay with it and get <strong>10% off</strong>. Otherwise you pay cash: the request is sent, and the bill closes once Daniel confirms he received the money.</p><p>To top up the card, tap <strong>+ Top up</strong> in the golden box, choose the amount and hand the cash to Daniel: the balance will appear as soon as he confirms.</p>",
                 userGuideChoresTitle: "🧹 Chores for Daniel",
@@ -4206,6 +4300,9 @@
 
                 soldOutLabel: "AGOTADO",
 
+                myLibraryTitle: "Mi biblioteca",
+                purchasedOn: "Comprado el",
+                downloadPdf: "Descargar PDF",
                 rebookParty: "Proponer nueva fecha",
                 rebookPartyConfirm: "Enviar nueva fecha",
                 partyRebookNotice: "🔄 Estás reproponiendo esta fiesta con una nueva fecha. Daniel deberá confirmarla de nuevo.",
@@ -4219,7 +4316,7 @@
                 userGuideTitle: "📖 Guía de la app",
                 userGuideSubtitle: "Todo lo que puedes hacer aquí. Toca una sección para abrirla.",
                 userGuideOrderTitle: "🍹 Cómo pedir",
-                userGuideOrderBody: "<p>Elige una categoría en las pestañas de arriba (Cócteles, Aperitivos, Refrescos, Postres, Merchandising...) y toca el producto que quieras.</p><p>Elige la variante, la ubicación (donde estás, en casa, en el jardín) y la hora preferida, luego toca <strong>Confirmar Pedido</strong>. El precio mostrado ya es el final.</p><p>A veces aparece algún producto recomendado a juego: puedes añadirlo con un toque o ignorarlo, siempre es opcional.</p>",
+                userGuideOrderBody: "<p>Elige una categoría en las pestañas de arriba (Cócteles, Aperitivos, Refrescos, Postres, Merchandising...) y toca el producto que quieras.</p><p>Elige la variante, la ubicación (donde estás, en casa, en el jardín) y la hora preferida, luego toca <strong>Confirmar Pedido</strong>. El precio mostrado ya es el final.</p><p>A veces aparece algún producto recomendado a juego: puedes añadirlo con un toque o ignorarlo, siempre es opcional.</p><p>El <strong>libro de cócteles en PDF</strong> funciona distinto: en cuanto se cierra el pago, aparece en <strong>📚 Mi biblioteca</strong>, un panel que queda para siempre — puedes volver a descargarlo cuando quieras.</p>",
                 userGuidePayTitle: "💳 Cómo se paga",
                 userGuidePayBody: "<p>Tus pedidos quedan en tu <strong>historial</strong> hasta que cierres la cuenta. Cuando termines, toca <strong>Pagar y cerrar cuenta</strong>.</p><p>Si tienes saldo en la tarjeta prepago, puedes elegir pagar con ella y obtener un <strong>10% de descuento</strong>. Si no, se paga en efectivo: la solicitud se envía y la cuenta se cierra cuando Daniel confirma que ha recibido el dinero.</p><p>Para recargar la tarjeta, toca <strong>+ Recargar</strong> en el recuadro dorado, elige el importe y entrega el efectivo a Daniel: el saldo aparecerá en cuanto confirme.</p>",
                 userGuideChoresTitle: "🧹 Tareas para Daniel",
@@ -4506,6 +4603,9 @@
 
                 soldOutLabel: "AUSVERKAUFT",
 
+                myLibraryTitle: "Meine Bibliothek",
+                purchasedOn: "Gekauft am",
+                downloadPdf: "PDF herunterladen",
                 rebookParty: "Neuen Termin vorschlagen",
                 rebookPartyConfirm: "Neuen Termin senden",
                 partyRebookNotice: "🔄 Du schlägst für diese Party einen neuen Termin vor. Daniel muss ihn erneut bestätigen.",
@@ -4519,7 +4619,7 @@
                 userGuideTitle: "📖 App-Anleitung",
                 userGuideSubtitle: "Alles, was du hier tun kannst. Tippe auf einen Abschnitt, um ihn zu öffnen.",
                 userGuideOrderTitle: "🍹 So bestellst du",
-                userGuideOrderBody: "<p>Wähle oben eine Kategorie (Cocktails, Snacks, Softdrinks, Desserts, Merchandise...) und tippe auf das gewünschte Produkt.</p><p>Wähle die Variante, den Ort (wo du bist, zu Hause, im Garten) und die gewünschte Zeit, dann tippe auf <strong>Bestellung bestätigen</strong>. Der angezeigte Preis ist bereits der Endpreis.</p><p>Manchmal wird ein passendes Produkt vorgeschlagen: du kannst es mit einem Tipp hinzufügen oder ignorieren, es ist immer optional.</p>",
+                userGuideOrderBody: "<p>Wähle oben eine Kategorie (Cocktails, Snacks, Softdrinks, Desserts, Merchandise...) und tippe auf das gewünschte Produkt.</p><p>Wähle die Variante, den Ort (wo du bist, zu Hause, im Garten) und die gewünschte Zeit, dann tippe auf <strong>Bestellung bestätigen</strong>. Der angezeigte Preis ist bereits der Endpreis.</p><p>Manchmal wird ein passendes Produkt vorgeschlagen: du kannst es mit einem Tipp hinzufügen oder ignorieren, es ist immer optional.</p><p>Das <strong>Cocktailbuch als PDF</strong> funktioniert anders: sobald die Zahlung abgeschlossen ist, erscheint es in <strong>📚 Meine Bibliothek</strong>, einem Panel, das für immer bleibt — du kannst es jederzeit erneut herunterladen.</p>",
                 userGuidePayTitle: "💳 So bezahlst du",
                 userGuidePayBody: "<p>Deine Bestellungen bleiben in deinem <strong>Verlauf</strong>, bis du die Rechnung schließt. Wenn du fertig bist, tippe auf <strong>Bezahlen und Rechnung schließen</strong>.</p><p>Hast du Guthaben auf der Prepaid-Karte, kannst du damit bezahlen und erhältst <strong>10% Rabatt</strong>. Sonst zahlst du bar: die Anfrage wird gesendet, und die Rechnung schließt, sobald Daniel den Geldeingang bestätigt.</p><p>Zum Aufladen tippe auf <strong>+ Aufladen</strong> im goldenen Kasten, wähle den Betrag und gib Daniel das Bargeld: das Guthaben erscheint, sobald er bestätigt.</p>",
                 userGuideChoresTitle: "🧹 Aufgaben für Daniel",
@@ -4806,6 +4906,9 @@
 
                 soldOutLabel: "ÉPUISÉ",
 
+                myLibraryTitle: "Ma bibliothèque",
+                purchasedOn: "Acheté le",
+                downloadPdf: "Télécharger le PDF",
                 rebookParty: "Proposer une nouvelle date",
                 rebookPartyConfirm: "Envoyer la nouvelle date",
                 partyRebookNotice: "🔄 Vous proposez une nouvelle date pour cette fête. Daniel devra la confirmer à nouveau.",
@@ -4819,7 +4922,7 @@
                 userGuideTitle: "📖 Guide de l'app",
                 userGuideSubtitle: "Tout ce que vous pouvez faire ici. Touchez une section pour l’ouvrir.",
                 userGuideOrderTitle: "🍹 Comment commander",
-                userGuideOrderBody: "<p>Choisissez une catégorie dans les onglets en haut (Cocktails, Snacks, Boissons, Desserts, Produits dérivés...) et touchez le produit voulu.</p><p>Choisissez la variante, l'emplacement (où vous êtes, à la maison, au jardin) et l'heure préférée, puis touchez <strong>Confirmer la Commande</strong>. Le prix affiché est déjà le prix final.</p><p>Parfois un produit complémentaire est suggéré : vous pouvez l'ajouter d'un geste ou l'ignorer, c'est toujours facultatif.</p>",
+                userGuideOrderBody: "<p>Choisissez une catégorie dans les onglets en haut (Cocktails, Snacks, Boissons, Desserts, Produits dérivés...) et touchez le produit voulu.</p><p>Choisissez la variante, l'emplacement (où vous êtes, à la maison, au jardin) et l'heure préférée, puis touchez <strong>Confirmer la Commande</strong>. Le prix affiché est déjà le prix final.</p><p>Parfois un produit complémentaire est suggéré : vous pouvez l'ajouter d'un geste ou l'ignorer, c'est toujours facultatif.</p><p>Le <strong>livre de cocktails en PDF</strong> fonctionne différemment : dès que le paiement est clôturé, il apparaît dans <strong>📚 Ma bibliothèque</strong>, un panneau qui reste pour toujours — vous pouvez le retélécharger à tout moment.</p>",
                 userGuidePayTitle: "💳 Comment payer",
                 userGuidePayBody: "<p>Vos commandes restent dans votre <strong>historique</strong> jusqu'à ce que vous clôturiez l'addition. Une fois terminé, touchez <strong>Payer et clôturer l'addition</strong>.</p><p>Si vous avez un solde sur la carte prépayée, vous pouvez payer avec et obtenir <strong>10% de réduction</strong>. Sinon, vous payez en espèces : la demande est envoyée, et l'addition se clôture quand Daniel confirme avoir reçu l'argent.</p><p>Pour recharger la carte, touchez <strong>+ Recharger</strong> dans l'encadré doré, choisissez le montant et remettez l'argent à Daniel : le solde apparaîtra dès sa confirmation.</p>",
                 userGuideChoresTitle: "🧹 Corvées pour Daniel",
@@ -5106,6 +5209,9 @@
 
                 soldOutLabel: "ЗАКІНЧИВСЯ",
 
+                myLibraryTitle: "Моя бібліотека",
+                purchasedOn: "Придбано",
+                downloadPdf: "Завантажити PDF",
                 rebookParty: "Запропонувати нову дату",
                 rebookPartyConfirm: "Надіслати нову дату",
                 partyRebookNotice: "🔄 Ви пропонуєте нову дату для цього свята. Денні потрібно підтвердити її знову.",
@@ -5119,7 +5225,7 @@
                 userGuideTitle: "📖 Гід по застосунку",
                 userGuideSubtitle: "Усе, що можна тут робити. Торкніться розділу, щоб відкрити.",
                 userGuideOrderTitle: "🍹 Як замовити",
-                userGuideOrderBody: "<p>Оберіть категорію на вкладках вгорі (Коктейлі, Закуски, Напої, Десерти, Мерч...) і торкніться потрібного товару.</p><p>Оберіть варіант, місце (де ви, вдома, у саду) та бажаний час, потім торкніться <strong>Підтвердити замовлення</strong>. Показана ціна вже остаточна.</p><p>Іноді пропонується супутній товар: можна додати одним дотиком або проігнорувати — це завжди необов'язково.</p>",
+                userGuideOrderBody: "<p>Оберіть категорію на вкладках вгорі (Коктейлі, Закуски, Напої, Десерти, Мерч...) і торкніться потрібного товару.</p><p>Оберіть варіант, місце (де ви, вдома, у саду) та бажаний час, потім торкніться <strong>Підтвердити замовлення</strong>. Показана ціна вже остаточна.</p><p>Іноді пропонується супутній товар: можна додати одним дотиком або проігнорувати — це завжди необов'язково.</p><p><strong>Книга коктейлів у PDF</strong> працює інакше: щойно оплату закрито, вона з'являється в <strong>📚 Моя бібліотека</strong> — панелі, яка залишається назавжди, тож можна завантажити знову будь-коли.</p>",
                 userGuidePayTitle: "💳 Як оплатити",
                 userGuidePayBody: "<p>Ваші замовлення залишаються в <strong>історії</strong>, доки ви не закриєте рахунок. Коли готові, торкніться <strong>Оплатити і закрити рахунок</strong>.</p><p>Якщо на картці є баланс, можна оплатити ним і отримати <strong>знижку 10%</strong>. Інакше оплата готівкою: запит надсилається, і рахунок закривається, коли Денні підтвердить отримання грошей.</p><p>Щоб поповнити картку, торкніться <strong>+ Поповнити</strong> у золотистому блоці, оберіть суму й передайте готівку Денні: баланс з'явиться одразу після підтвердження.</p>",
                 userGuideChoresTitle: "🧹 Справи для Денні",
@@ -5405,6 +5511,9 @@
                 specialOffer: "PROMOÇÃO",
                 soldOutLabel: "ESGOTADO",
 
+                myLibraryTitle: "A minha biblioteca",
+                purchasedOn: "Comprado em",
+                downloadPdf: "Descarregar PDF",
                 rebookParty: "Propor nova data",
                 rebookPartyConfirm: "Enviar nova data",
                 partyRebookNotice: "🔄 Está a propor uma nova data para esta festa. O Daniel terá de a confirmar novamente.",
@@ -5418,7 +5527,7 @@
                 userGuideTitle: "📖 Guia da aplicação",
                 userGuideSubtitle: "Tudo o que pode fazer aqui. Toque numa secção para a abrir.",
                 userGuideOrderTitle: "🍹 Como encomendar",
-                userGuideOrderBody: "<p>Escolha uma categoria nos separadores no topo (Cocktails, Snacks, Bebidas, Sobremesas, Merchandising...) e toque no produto que quer.</p><p>Escolha a variante, a localização (onde está, em casa, no jardim) e o horário preferido, depois toque em <strong>Confirmar Pedido</strong>. O preço mostrado já é o final.</p><p>Por vezes surge um produto sugerido a condizer: pode adicioná-lo com um toque ou ignorar, é sempre opcional.</p>",
+                userGuideOrderBody: "<p>Escolha uma categoria nos separadores no topo (Cocktails, Snacks, Bebidas, Sobremesas, Merchandising...) e toque no produto que quer.</p><p>Escolha a variante, a localização (onde está, em casa, no jardim) e o horário preferido, depois toque em <strong>Confirmar Pedido</strong>. O preço mostrado já é o final.</p><p>Por vezes surge um produto sugerido a condizer: pode adicioná-lo com um toque ou ignorar, é sempre opcional.</p><p>O <strong>livro de cocktails em PDF</strong> funciona de forma diferente: assim que o pagamento é fechado, aparece na <strong>📚 A minha biblioteca</strong>, um painel que fica para sempre — pode voltar a descarregá-lo quando quiser.</p>",
                 userGuidePayTitle: "💳 Como se paga",
                 userGuidePayBody: "<p>Os seus pedidos ficam no <strong>histórico</strong> até fechar a conta. Quando terminar, toque em <strong>Pagar e fechar conta</strong>.</p><p>Se tiver saldo no cartão pré-pago, pode optar por pagar com ele e obter <strong>10% de desconto</strong>. Caso contrário paga-se em dinheiro: o pedido é enviado e a conta fecha quando o Daniel confirmar que recebeu o dinheiro.</p><p>Para carregar o cartão, toque em <strong>+ Carregar</strong> na caixa dourada, escolha o valor e entregue o dinheiro ao Daniel: o saldo aparece assim que ele confirmar.</p>",
                 userGuideChoresTitle: "🧹 Tarefas para o Daniel",
@@ -5676,7 +5785,8 @@
                     "100% cotone, stampa esclusiva": "100% cotton, exclusive print",
                     "Lo stesso dei nostri cocktail": "The same one used for our cocktails",
                     "Il logo di Cocktail Daniel": "The Cocktail Daniel logo",
-                    "Tela resistente, fatta con amore": "Sturdy canvas, made with love"
+                    "Tela resistente, fatta con amore": "Sturdy canvas, made with love",
+                    "Le 10 ricette originali, in PDF - invio immediato dopo il pagamento": "The 10 original recipes, in PDF - delivered instantly after payment"
                 },
                 variants: {
                     "Classico": "Classic",
@@ -5802,7 +5912,8 @@
                     "100% cotone, stampa esclusiva": "100% algodón, estampado exclusivo",
                     "Lo stesso dei nostri cocktail": "El mismo que usamos para nuestros cócteles",
                     "Il logo di Cocktail Daniel": "El logo de Cocktail Daniel",
-                    "Tela resistente, fatta con amore": "Lona resistente, hecha con cariño"
+                    "Tela resistente, fatta con amore": "Lona resistente, hecha con cariño",
+                    "Le 10 ricette originali, in PDF - invio immediato dopo il pagamento": "Las 10 recetas originales, en PDF - entrega inmediata tras el pago"
                 },
                 variants: {
                     "Classico": "Clásico",
@@ -5928,7 +6039,8 @@
                     "100% cotone, stampa esclusiva": "100% Baumwolle, exklusiver Print",
                     "Lo stesso dei nostri cocktail": "Das gleiche Glas wie bei unseren Cocktails",
                     "Il logo di Cocktail Daniel": "Das Cocktail-Daniel-Logo",
-                    "Tela resistente, fatta con amore": "Robustes Segeltuch, mit Liebe gemacht"
+                    "Tela resistente, fatta con amore": "Robustes Segeltuch, mit Liebe gemacht",
+                    "Le 10 ricette originali, in PDF - invio immediato dopo il pagamento": "Die 10 Originalrezepte, als PDF - sofortige Lieferung nach der Zahlung"
                 },
                 variants: {
                     "Classico": "Klassisch",
@@ -6054,7 +6166,8 @@
                     "100% cotone, stampa esclusiva": "100% coton, impression exclusive",
                     "Lo stesso dei nostri cocktail": "Le même que celui de nos cocktails",
                     "Il logo di Cocktail Daniel": "Le logo de Cocktail Daniel",
-                    "Tela resistente, fatta con amore": "Toile résistante, faite avec amour"
+                    "Tela resistente, fatta con amore": "Toile résistante, faite avec amour",
+                    "Le 10 ricette originali, in PDF - invio immediato dopo il pagamento": "Les 10 recettes originales, en PDF - livraison immédiate après paiement"
                 },
                 variants: {
                     "Classico": "Classique",
@@ -6180,7 +6293,8 @@
                     "100% cotone, stampa esclusiva": "100% бавовна, ексклюзивний принт",
                     "Lo stesso dei nostri cocktail": "Той самий, що й для наших коктейлів",
                     "Il logo di Cocktail Daniel": "Логотип Cocktail Daniel",
-                    "Tela resistente, fatta con amore": "Міцна тканина, зроблено з любов'ю"
+                    "Tela resistente, fatta con amore": "Міцна тканина, зроблено з любов'ю",
+                    "Le 10 ricette originali, in PDF - invio immediato dopo il pagamento": "10 оригінальних рецептів у форматі PDF - миттєва доставка після оплати"
                 },
                 variants: {
                     "Classico": "Класичний",
@@ -6306,7 +6420,8 @@
                     "100% cotone, stampa esclusiva": "100% algodão, estampa exclusiva",
                     "Lo stesso dei nostri cocktail": "O mesmo que usamos nos nossos cocktails",
                     "Il logo di Cocktail Daniel": "O logótipo do Cocktail Daniel",
-                    "Tela resistente, fatta con amore": "Lona resistente, feita com carinho"
+                    "Tela resistente, fatta con amore": "Lona resistente, feita com carinho",
+                    "Le 10 ricette originali, in PDF - invio immediato dopo il pagamento": "As 10 receitas originais, em PDF - entrega imediata após o pagamento"
                 },
                 variants: {
                     "Classico": "Clássico",
@@ -6446,7 +6561,7 @@
             // Eccezione naturale: gli adesivi, dove il set più grande costa
             // di più — lì sì che la quantità giustifica un prezzo diverso.
             const merchDefaults = {
-                'Libro dei Cocktail di Daniel': [12.00, 12.00],
+                'Libro dei Cocktail di Daniel': [5.00],
                 'Cappellino': [15.00, 15.00, 15.00],
                 'Maglietta': [18.00, 18.00, 18.00, 18.00],
                 'Bicchiere Firmato': [8.00, 8.00],
@@ -7437,6 +7552,7 @@
             await writeWalletBalance(walletBalance - preview.coveredDiscountedTotal);
 
             const coveredIds = preview.covered.map(o => o.id);
+            await grantDigitalPurchases(preview.covered); // prima di rimuoverli dalla lista
             orders = orders.filter(o => !coveredIds.includes(o.id));
             saveOrders();
             renderOrders();
@@ -7749,11 +7865,18 @@
             if (!confirm(`Confermi di aver ricevuto ${payment.totalFormatted} da ${payment.customerName}?`)) return;
 
             try {
+                const idsToDelete = payment.orderIds || [];
+
+                // Prima di cancellarli, controlla se tra questi ordini c'è
+                // un prodotto digitale (es. il libro in PDF): il contante
+                // è appena stato confermato, quindi va consegnato subito.
+                const paidOrders = orders.filter(o => idsToDelete.includes(o.id));
+                await grantDigitalPurchases(paidOrders);
+
                 const batch = firestoreDb.batch();
 
                 // Cancella SOLO gli ordini inclusi nella richiesta di pagamento.
                 // Eventuali ordini aggiunti dopo la richiesta restano aperti da pagare.
-                const idsToDelete = payment.orderIds || [];
                 idsToDelete.forEach(orderId => {
                     batch.delete(firestoreDb.collection('orders').doc(String(orderId)));
                 });
@@ -8287,7 +8410,9 @@
 
             grid.innerHTML = getCatalogItems().map(item => {
                 const baseName = item.name;
-                const closed = !isServiceOpen();
+                // I prodotti digitali (es. il libro in PDF) restano acquistabili
+                // anche a servizio chiuso: non dipendono dal bar fisico.
+                const closed = !isServiceOpen() && !getDigitalProduct(baseName);
                 const soldOut = isSoldOut(baseName) || closed;
                 // Su un prodotto esaurito l'offerta non ha senso: non si può ordinare
                 const special = !soldOut && !item.premium && isSpecial(baseName);
@@ -9169,8 +9294,10 @@
             const cocktail = findProduct(cocktailName);
             if (!cocktail) return;
 
-            // Protezione: a servizio chiuso non si ordina
-            if (!isServiceOpen()) {
+            // Protezione: a servizio chiuso non si ordina. Eccezione: un
+            // prodotto digitale (es. il libro in PDF) non dipende dagli
+            // orari del bar fisico, si può acquistare sempre.
+            if (!isServiceOpen() && !getDigitalProduct(cocktailName)) {
                 const next = nextOpeningText();
                 alert(next ? t('serviceClosedUntil').replace('{time}', next) : t('serviceClosed'));
                 return;
@@ -9453,7 +9580,8 @@
             const notes = document.getElementById('orderNotes').value.trim();
 
             // Il servizio potrebbe aver chiuso mentre il modale era aperto
-            if (!isServiceOpen()) {
+            // (i prodotti digitali fanno eccezione, come sopra)
+            if (!isServiceOpen() && !getDigitalProduct(selectedCocktail)) {
                 const next = nextOpeningText();
                 alert(next ? t('serviceClosedUntil').replace('{time}', next) : t('serviceClosed'));
                 closeModal();
@@ -10625,6 +10753,7 @@
                 loadPartyBookingsFromCloud().then(() => {
                     if (!isAdmin()) checkMyPartyBookingsStatus();
                 });
+                if (!isAdmin()) loadMyLibraryFromCloud();
             };
             poll();
             setInterval(poll, 15000); // ogni 15 secondi
@@ -10663,6 +10792,7 @@
         startPricingPolling(); // Tiene il listino allineato con quello dell'admin
         loadChoresFromCloud(); // Carica i lavoretti assegnati
         loadPartyBookingsFromCloud(); // Carica le prenotazioni feste
+        loadMyLibraryFromCloud(); // Carica gli acquisti digitali (es. il libro PDF)
         renderLowStockPanel(); // Avvisi scorte per l'admin
         syncPendingOrders(); // Invia gli ordini rimasti in coda da sessioni offline
         initDanny();         // Attiva il barista virtuale
