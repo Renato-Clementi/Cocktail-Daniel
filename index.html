@@ -2456,6 +2456,23 @@
         </div>
     </div>
 
+    <!-- Timer Pomodoro: 25 min lavoro / 5 min pausa, utile per lo studio
+         come per i turni al chiosco. Stato solo locale, non salvato. -->
+    <div class="modal" id="pomodoroModal">
+        <div class="modal-content" style="max-width:360px; text-align:center;">
+            <button class="modal-close" onclick="closePomodoro()" aria-label="Chiudi">✕</button>
+            <h2 style="margin-bottom:6px;">⏱️ Timer Pomodoro</h2>
+            <p id="pomodoroPhaseLabel" style="font-size:0.95em; font-weight:700; color:var(--coral-deep); margin-bottom:6px;">Pronto per iniziare</p>
+            <div id="pomodoroDisplay" style="font-family:var(--font-mono); font-size:3em; font-weight:700; color:var(--dusk); margin:14px 0;">25:00</div>
+            <p id="pomodoroCycleLabel" style="font-size:0.78em; color:var(--dusk-soft); margin-bottom:18px;">Ciclo 1 di 4</p>
+            <div class="btn-group" style="margin-bottom:10px;">
+                <button class="btn btn-primary" id="pomodoroStartBtn" onclick="togglePomodoro()">▶️ Avvia</button>
+                <button class="btn btn-secondary" onclick="resetPomodoro()">↺ Azzera</button>
+            </div>
+            <p style="font-size:0.75em; color:var(--dusk-soft);">25 minuti di lavoro, 5 di pausa. Pausa lunga (15') ogni 4 cicli.</p>
+        </div>
+    </div>
+
     <!-- Guida per i clienti (tutte le lingue, come il resto dell'app) -->
     <div class="modal" id="userGuideModal">
         <div class="modal-content">
@@ -2526,6 +2543,8 @@
     <div id="danny" class="danny" style="display:none;">
         <!-- Un solo pulsante ❓ per tutti: guida admin per Daniel, guida d'uso per i clienti -->
         <button id="helpBtn" class="help-btn" onclick="openHelp()" style="display:none;" aria-label="Guida" title="Guida">❓</button>
+        <!-- Timer Pomodoro: utile sia per lo studio sia per i turni al chiosco -->
+        <button id="pomodoroBtn" class="help-btn pomodoro-btn" onclick="openPomodoro()" style="display:none;" aria-label="Timer Pomodoro" title="Timer Pomodoro">⏱️</button>
         <div id="dannyBubble" class="danny-bubble" style="display:none;">
             <button class="danny-close" onclick="dismissDanny()" aria-label="Chiudi">✕</button>
             <div id="dannyText" class="danny-text"></div>
@@ -2615,6 +2634,14 @@
         <div class="cocktail-grid" id="cocktailGrid"></div>
 
         <!-- Avviso scorte in esaurimento (solo admin) -->
+        <!-- Controllo rapido Modalità studio: l'unica azione concessa al
+             supervisore (Renato). Tutto il resto dei pannelli è sola vista. -->
+        <div id="superStudyControlPanel" class="orders-section" style="display:none; margin-bottom:20px; border-left:4px solid var(--lagoon);">
+            <h2 style="margin-bottom:10px;">🎓 Controllo Modalità Studio</h2>
+            <p id="superStudyStatusText" style="font-size:0.88em; color:var(--dusk-soft); margin-bottom:12px;"></p>
+            <button id="superStudyToggleBtn" class="btn btn-primary" style="width:100%;" onclick="toggleStudyModeDirect()"></button>
+        </div>
+
         <div id="lowStockPanel" class="low-stock-panel collapsed" style="display:none;">
             <button type="button" class="low-stock-toggle" onclick="document.getElementById('lowStockPanel').classList.toggle('collapsed')">
                 <span>⚠️ <span data-i18n="lowStockTitle">Scorte in esaurimento</span></span>
@@ -2638,7 +2665,7 @@
                     <strong id="chorePayoutTotal">0,00€</strong>
                 </div>
                 <div id="chorePayoutList"></div>
-                <button class="btn btn-primary" style="width:100%; margin-top:10px;" onclick="settleChorePayouts()" data-i18n="settleChoresBtn">Ho pagato tutto</button>
+                <button class="btn btn-primary" id="settleChoresBtn" style="width:100%; margin-top:10px;" onclick="settleChorePayouts()" data-i18n="settleChoresBtn">Ho pagato tutto</button>
             </div>
         </div>
 
@@ -2652,6 +2679,15 @@
         <div id="publicPartyPanel" class="orders-section" style="display:none; margin-bottom:20px;">
             <h2 style="margin-bottom:12px;">🎉 <span data-i18n="publicPartyTitle">Prossimi eventi in programma</span></h2>
             <div id="publicPartyList"></div>
+        </div>
+
+        <!-- Checklist studio di Daniel: visibile a tutta la famiglia (per
+             sapere a che punto è), ma solo Daniel può spuntarla — non ha
+             senso che qualcun altro segni "fatto" al suo posto. -->
+        <div id="studyChecklistPanel" class="orders-section" style="display:none; margin-bottom:20px;">
+            <h2 style="margin-bottom:6px;">🎓 <span>Checklist studio di oggi</span></h2>
+            <p class="ing-help" id="studyChecklistDate" style="margin-bottom:12px;"></p>
+            <div id="studyChecklistList"></div>
         </div>
 
         <!-- Richieste feste da confermare (solo admin) -->
@@ -2916,6 +2952,7 @@
                     <button type="button" id="svcAuto" class="svc-btn" onclick="setServiceOverride(null)" data-i18n="svcAuto">🕐 Orari</button>
                     <button type="button" id="svcOpen" class="svc-btn" onclick="setServiceOverride(true)" data-i18n="svcOpen">🟢 Aperto</button>
                     <button type="button" id="svcClosed" class="svc-btn" onclick="setServiceOverride(false)" data-i18n="svcClosed">🔴 Chiuso</button>
+                    <button type="button" id="svcStudy" class="svc-btn" onclick="setServiceOverride(false, 'study')" data-i18n="svcStudy">🎓 Studio</button>
                 </div>
                 <div id="svcCurrentState" class="svc-state"></div>
 
@@ -3505,7 +3542,11 @@
             { id: 'erba',          name: "Tagliare l'erba",           icon: '🌿', category: 'Esterno' },
             { id: 'cameretta',     name: 'Riordinare la cameretta',   icon: '📦', category: 'Ordine' },
             { id: 'bucato',        name: 'Piegare il bucato',         icon: '👕', category: 'Ordine' },
-            { id: 'auto',          name: 'Lavare la macchina',        icon: '🚗', category: 'Altro' }
+            { id: 'auto',          name: 'Lavare la macchina',        icon: '🚗', category: 'Altro' },
+            { id: 'compiti',       name: 'Completare i compiti del giorno', icon: '🎓', category: 'Studio' },
+            { id: 'ripasso',       name: 'Ripassare per una verifica', icon: '📖', category: 'Studio' },
+            { id: 'lettura',       name: 'Leggere almeno 30 minuti',   icon: '📚', category: 'Studio' },
+            { id: 'progetto',      name: 'Consegnare un progetto scolastico', icon: '🗂️', category: 'Studio' }
         ];
 
         // Mance predefinite (l'admin può cambiarle dal listino)
@@ -3516,7 +3557,8 @@
                 cane: 2.00, lavare_cane: 3.00, mangiare_pet: 0.50,
                 piante: 1.00, erba: 4.00,
                 cameretta: 2.00, bucato: 1.50,
-                auto: 3.00
+                auto: 3.00,
+                compiti: 2.00, ripasso: 3.00, lettura: 1.50, progetto: 4.00
             };
             const items = {};
             chores.forEach(c => { items[c.id] = { tip: defaults[c.id] ?? 1.00, paused: false }; });
@@ -3701,6 +3743,10 @@
 
                 soldOutLabel: "ESAURITO",
 
+                supervisorViewOnly: "Solo vista",
+                svcStudy: "🎓 Studio",
+                svcStateStudy: "Chiuso per impegni scolastici",
+                serviceClosedStudy: "📚 Servizio in pausa: Daniel è impegnato con lo studio",
                 myLibraryTitle: "La mia libreria",
                 purchasedOn: "Acquistato il",
                 downloadPdf: "Scarica il PDF",
@@ -4004,6 +4050,10 @@
 
                 soldOutLabel: "SOLD OUT",
 
+                supervisorViewOnly: "View only",
+                svcStudy: "🎓 Study",
+                svcStateStudy: "Closed for school commitments",
+                serviceClosedStudy: "📚 Service paused: Daniel is busy studying",
                 myLibraryTitle: "My library",
                 purchasedOn: "Purchased on",
                 downloadPdf: "Download PDF",
@@ -4307,6 +4357,10 @@
 
                 soldOutLabel: "AGOTADO",
 
+                supervisorViewOnly: "Solo lectura",
+                svcStudy: "🎓 Estudio",
+                svcStateStudy: "Cerrado por compromisos escolares",
+                serviceClosedStudy: "📚 Servicio en pausa: Daniel está estudiando",
                 myLibraryTitle: "Mi biblioteca",
                 purchasedOn: "Comprado el",
                 downloadPdf: "Descargar PDF",
@@ -4610,6 +4664,10 @@
 
                 soldOutLabel: "AUSVERKAUFT",
 
+                supervisorViewOnly: "Nur Ansicht",
+                svcStudy: "🎓 Lernen",
+                svcStateStudy: "Wegen schulischer Verpflichtungen geschlossen",
+                serviceClosedStudy: "📚 Service pausiert: Daniel lernt gerade",
                 myLibraryTitle: "Meine Bibliothek",
                 purchasedOn: "Gekauft am",
                 downloadPdf: "PDF herunterladen",
@@ -4913,6 +4971,10 @@
 
                 soldOutLabel: "ÉPUISÉ",
 
+                supervisorViewOnly: "Lecture seule",
+                svcStudy: "🎓 Études",
+                svcStateStudy: "Fermé pour obligations scolaires",
+                serviceClosedStudy: "📚 Service en pause : Daniel est occupé à étudier",
                 myLibraryTitle: "Ma bibliothèque",
                 purchasedOn: "Acheté le",
                 downloadPdf: "Télécharger le PDF",
@@ -5216,6 +5278,10 @@
 
                 soldOutLabel: "ЗАКІНЧИВСЯ",
 
+                supervisorViewOnly: "Лише перегляд",
+                svcStudy: "🎓 Навчання",
+                svcStateStudy: "Зачинено через шкільні справи",
+                serviceClosedStudy: "📚 Сервіс на паузі: Денні навчається",
                 myLibraryTitle: "Моя бібліотека",
                 purchasedOn: "Придбано",
                 downloadPdf: "Завантажити PDF",
@@ -5518,6 +5584,10 @@
                 specialOffer: "PROMOÇÃO",
                 soldOutLabel: "ESGOTADO",
 
+                supervisorViewOnly: "Apenas vista",
+                svcStudy: "🎓 Estudo",
+                svcStateStudy: "Fechado por compromissos escolares",
+                serviceClosedStudy: "📚 Serviço em pausa: o Daniel está a estudar",
                 myLibraryTitle: "A minha biblioteca",
                 purchasedOn: "Comprado em",
                 downloadPdf: "Descarregar PDF",
@@ -6926,6 +6996,7 @@
                     if (data.service) {
                         merged.service = {
                             manualOverride: (data.service.manualOverride === undefined) ? null : data.service.manualOverride,
+                            closeReason: data.service.closeReason || null,
                             hours: data.service.hours || merged.service.hours
                         };
                     }
@@ -6941,6 +7012,7 @@
                         updatePriceDisplay();
                         updateServiceBanner();
                         renderLowStockPanel();
+                        renderSupervisorPanel();
                     }
                 }
             } catch (error) {
@@ -7034,6 +7106,11 @@
 
             if (isServiceOpen()) {
                 banner.style.display = 'none';
+            } else if (getServiceConfig().closeReason === 'study') {
+                // Chiusura per motivi scolastici: un messaggio diverso da
+                // quello generico, per non far pensare a un imprevisto.
+                document.getElementById('serviceBannerText').textContent = t('serviceClosedStudy');
+                banner.style.display = 'block';
             } else {
                 const next = nextOpeningText();
                 document.getElementById('serviceBannerText').textContent = next
@@ -7150,9 +7227,85 @@
         // Chi si registra con uno di questi nomi vede TUTTI gli ordini
         // =============================================
         const ADMIN_USER_IDS = ['daniel'];
+        const SUPERADMIN_USER_IDS = ['renato']; // supervisiona, ma non gestisce operativamente
 
         function isAdmin() {
             return ADMIN_USER_IDS.includes(getUserId(customerName));
+        }
+
+        function isSuperAdmin() {
+            return SUPERADMIN_USER_IDS.includes(getUserId(customerName));
+        }
+
+        // Vede tutto ciò che vede Daniel, ma non è detto che possa agire:
+        // usata per decidere COSA MOSTRARE, mai per decidere cosa si può
+        // FARE (i pulsanti operativi restano condizionati a isAdmin()).
+        function canSupervise() {
+            return isAdmin() || isSuperAdmin();
+        }
+
+        // =============================================
+        // CONTROLLO DIRETTO MODALITÀ STUDIO (solo superadmin)
+        // L'unica azione di scrittura concessa a Renato: mettere in pausa
+        // o riattivare il servizio per motivi scolastici, senza passare
+        // dal listino completo (che resta esclusivo di Daniel).
+        // =============================================
+        // Riferimento chiamato da showGreeting/polling: il pannello di
+        // supervisione oggi è il controllo Modalità studio. Tenerlo come
+        // funzione a parte lascia spazio ad altri controlli futuri.
+        function renderSupervisorPanel() {
+            renderSuperStudyControl();
+        }
+
+        function renderSuperStudyControl() {
+            const panel = document.getElementById('superStudyControlPanel');
+            if (!panel) return;
+            if (!isSuperAdmin()) { panel.style.display = 'none'; return; }
+
+            panel.style.display = 'block';
+            const cfg = getServiceConfig();
+            const inStudyMode = cfg.manualOverride === false && cfg.closeReason === 'study';
+
+            const statusText = document.getElementById('superStudyStatusText');
+            const toggleBtn = document.getElementById('superStudyToggleBtn');
+            if (inStudyMode) {
+                statusText.textContent = '📚 Il servizio è in pausa per motivi scolastici.';
+                toggleBtn.textContent = '🟢 Riattiva il servizio';
+            } else {
+                statusText.textContent = 'Il servizio segue gli orari/impostazioni normali di Daniel.';
+                toggleBtn.textContent = '🎓 Metti in pausa per studio';
+            }
+        }
+
+        async function toggleStudyModeDirect() {
+            if (!isSuperAdmin()) return;
+
+            const cfg = getServiceConfig();
+            const inStudyMode = cfg.manualOverride === false && cfg.closeReason === 'study';
+
+            const confirmMsg = inStudyMode
+                ? 'Riattivare il servizio del chiosco?'
+                : 'Mettere in pausa il servizio per motivi scolastici? I clienti vedranno un avviso dedicato.';
+            if (!confirm(confirmMsg)) return;
+
+            if (inStudyMode) {
+                pricing.service.manualOverride = null; // torna agli orari automatici
+                pricing.service.closeReason = null;
+            } else {
+                pricing.service.manualOverride = false;
+                pricing.service.closeReason = 'study';
+            }
+
+            renderSuperStudyControl();
+            updateServiceBanner();
+
+            if (cloudReady()) {
+                try {
+                    await firestoreDb.collection('settings').doc('pricing').set(pricing, { merge: true });
+                } catch (error) {
+                    console.log('Errore aggiornamento modalità studio:', error);
+                }
+            }
         }
 
         // Check if user is registered
@@ -7179,7 +7332,7 @@
             showGreeting();
             // Carica dal cloud gli ordini già associati a questo nome (da altri dispositivi)
             loadOrdersFromCloud();
-            if (isAdmin()) { loadPendingPayments(); } else { checkMyPaymentStatus(); }
+            if (canSupervise()) { loadPendingPayments(); } else { checkMyPaymentStatus(); }
         }
 
         // Change name (pencil button)
@@ -7201,15 +7354,19 @@
 
         // Show greeting bar
         function showGreeting() {
-            document.getElementById('greetingName').textContent = customerName + (isAdmin() ? ' (ADMIN)' : '');
+            const roleTag = isAdmin() ? ' (ADMIN)' : (isSuperAdmin() ? ' (SUPERVISORE)' : '');
+            document.getElementById('greetingName').textContent = customerName + roleTag;
             document.getElementById('userGreeting').style.display = 'block';
             const priceBtn = document.getElementById('priceListBtn');
-            if (priceBtn) priceBtn.style.display = isAdmin() ? 'inline-block' : 'none';
+            if (priceBtn) priceBtn.style.display = isAdmin() ? 'inline-block' : 'none'; // il listino resta solo di Daniel
             const avatar = document.getElementById('adminAvatar');
             if (avatar) avatar.style.display = isAdmin() ? 'inline-block' : 'none';
             const helpBtn = document.getElementById('helpBtn');
             if (helpBtn) helpBtn.style.display = 'flex'; // guida disponibile per tutti, admin e clienti
+            const pomodoroBtn = document.getElementById('pomodoroBtn');
+            if (pomodoroBtn) pomodoroBtn.style.display = 'flex';
             renderWalletPanel();
+            renderSupervisorPanel();
         }
 
         // =============================================
@@ -7256,7 +7413,7 @@
             if (!cloudReady() || !customerName) return;
             try {
                 let query = firestoreDb.collection('orders');
-                if (!isAdmin()) {
+                if (!canSupervise()) {
                     query = query.where('userId', '==', getUserId(customerName));
                 }
                 const snapshot = await query.get();
@@ -7485,7 +7642,7 @@
         let pendingTopups = [];
 
         async function loadPendingTopups() {
-            if (!cloudReady() || !isAdmin()) return;
+            if (!cloudReady() || !canSupervise()) return;
             try {
                 const snapshot = await firestoreDb.collection('topupRequests').get();
                 pendingTopups = snapshot.docs.map(d => d.data()).sort((a, b) => b.requestedAt - a.requestedAt);
@@ -7498,7 +7655,7 @@
         function renderPendingTopups() {
             const section = document.getElementById('pendingTopupsSection');
             if (!section) return;
-            if (!isAdmin() || pendingTopups.length === 0) { section.style.display = 'none'; return; }
+            if (!canSupervise() || pendingTopups.length === 0) { section.style.display = 'none'; return; }
 
             section.style.display = 'block';
             document.getElementById('pendingTopupsCount').textContent = pendingTopups.length;
@@ -7509,7 +7666,7 @@
                         <span class="payment-amount">${formatPrice(r.amount)}</span><br>
                         <small style="color:#666;">${r.requestedDate} ${r.requestedTime}</small>
                     </div>
-                    <button class="confirm-payment-btn" onclick="confirmTopupReceived('${r.userId}', ${r.id})">${t('confirmReceived')}</button>
+                    ${isAdmin() ? `<button class="confirm-payment-btn" onclick="confirmTopupReceived('${r.userId}', ${r.id})">${t('confirmReceived')}</button>` : `<span class="chore-status">👁️ ${t('supervisorViewOnly')}</span>`}
                 </div>
             `).join('');
         }
@@ -7796,7 +7953,7 @@
 
         // L'admin carica tutte le richieste in attesa
         async function loadPendingPayments() {
-            if (!cloudReady() || !isAdmin()) return;
+            if (!cloudReady() || !canSupervise()) return;
             try {
                 const snapshot = await firestoreDb.collection('payments').get();
                 pendingPayments = snapshot.docs
@@ -7816,13 +7973,132 @@
         // Un solo pulsante ❓, due guide diverse: Daniel vede quella
         // amministrativa (solo italiano), i clienti quella d'uso
         // (tradotta come il resto dell'app).
+        // =============================================
+        // TIMER POMODORO
+        // 25 min lavoro / 5 min pausa, pausa lunga (15') ogni 4 cicli.
+        // Stato solo locale: si azzera se si ricarica la pagina, ma non
+        // serve persisterlo, è un timer da tenere sott'occhio in sessione.
+        // =============================================
+        const POMODORO_WORK = 25 * 60;
+        const POMODORO_BREAK = 5 * 60;
+        const POMODORO_LONG_BREAK = 15 * 60;
+
+        let pomodoroSeconds = POMODORO_WORK;
+        let pomodoroPhase = 'work'; // 'work' | 'break' | 'longBreak'
+        let pomodoroCycle = 1;
+        let pomodoroRunning = false;
+        let pomodoroInterval = null;
+
+        function openPomodoro() {
+            document.getElementById('pomodoroModal').classList.add('active');
+            updatePomodoroDisplay();
+        }
+
+        function closePomodoro() {
+            document.getElementById('pomodoroModal').classList.remove('active');
+        }
+
+        function togglePomodoro() {
+            pomodoroRunning ? pausePomodoro() : startPomodoro();
+        }
+
+        function startPomodoro() {
+            pomodoroRunning = true;
+            document.getElementById('pomodoroStartBtn').textContent = '⏸️ Pausa';
+            pomodoroInterval = setInterval(() => {
+                pomodoroSeconds--;
+                if (pomodoroSeconds <= 0) {
+                    pomodoroBeep();
+                    advancePomodoroPhase();
+                } else {
+                    updatePomodoroDisplay();
+                }
+            }, 1000);
+        }
+
+        function pausePomodoro() {
+            pomodoroRunning = false;
+            clearInterval(pomodoroInterval);
+            document.getElementById('pomodoroStartBtn').textContent = '▶️ Riprendi';
+        }
+
+        function resetPomodoro() {
+            clearInterval(pomodoroInterval);
+            pomodoroRunning = false;
+            pomodoroPhase = 'work';
+            pomodoroCycle = 1;
+            pomodoroSeconds = POMODORO_WORK;
+            document.getElementById('pomodoroStartBtn').textContent = '▶️ Avvia';
+            updatePomodoroDisplay();
+        }
+
+        function advancePomodoroPhase() {
+            clearInterval(pomodoroInterval);
+            if (pomodoroPhase === 'work') {
+                if (pomodoroCycle % 4 === 0) {
+                    pomodoroPhase = 'longBreak';
+                    pomodoroSeconds = POMODORO_LONG_BREAK;
+                } else {
+                    pomodoroPhase = 'break';
+                    pomodoroSeconds = POMODORO_BREAK;
+                }
+            } else {
+                pomodoroPhase = 'work';
+                pomodoroSeconds = POMODORO_WORK;
+                if (pomodoroPhase === 'work' && (pomodoroCycle % 4 !== 0)) pomodoroCycle++;
+                else if (pomodoroPhase === 'work') pomodoroCycle = 1;
+            }
+            updatePomodoroDisplay();
+            // Riparte da sola nella fase successiva, così non serve
+            // ricliccare avvio ogni 25 minuti.
+            pomodoroInterval = setInterval(() => {
+                pomodoroSeconds--;
+                if (pomodoroSeconds <= 0) {
+                    pomodoroBeep();
+                    advancePomodoroPhase();
+                } else {
+                    updatePomodoroDisplay();
+                }
+            }, 1000);
+        }
+
+        function updatePomodoroDisplay() {
+            const m = String(Math.floor(pomodoroSeconds / 60)).padStart(2, '0');
+            const s = String(pomodoroSeconds % 60).padStart(2, '0');
+            const display = document.getElementById('pomodoroDisplay');
+            if (display) display.textContent = `${m}:${s}`;
+
+            const labels = { work: '🎯 Lavoro', break: '☕ Pausa breve', longBreak: '🌴 Pausa lunga' };
+            const phaseLabel = document.getElementById('pomodoroPhaseLabel');
+            if (phaseLabel) phaseLabel.textContent = labels[pomodoroPhase];
+
+            const cycleLabel = document.getElementById('pomodoroCycleLabel');
+            if (cycleLabel) cycleLabel.textContent = `Ciclo ${((pomodoroCycle - 1) % 4) + 1} di 4`;
+        }
+
+        // Un breve segnale acustico generato al volo: non serve un file
+        // audio esterno da caricare sul sito.
+        function pomodoroBeep() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.value = 880;
+                gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.4);
+            } catch (e) { /* niente audio, pazienza: il timer visivo basta */ }
+        }
+
         function openHelp() {
-            if (isAdmin()) openGuide();
+            if (canSupervise()) openGuide();
             else openUserGuide();
         }
 
         function openGuide() {
-            if (!isAdmin()) return;
+            if (!canSupervise()) return;
             document.getElementById('guideModal').classList.add('active');
         }
 
@@ -7873,7 +8149,7 @@
             const panel = document.getElementById('lowStockPanel');
             if (!panel) return;
 
-            if (!isAdmin()) { panel.style.display = 'none'; return; }
+            if (!canSupervise()) { panel.style.display = 'none'; return; }
 
             const lowIng = lowStockIngredients();
             const lowProd = lowStockProducts();
@@ -7906,7 +8182,7 @@
             const section = document.getElementById('pendingPaymentsSection');
             const list = document.getElementById('pendingPaymentsList');
 
-            if (!isAdmin() || pendingPayments.length === 0) {
+            if (!canSupervise() || pendingPayments.length === 0) {
                 section.style.display = 'none';
                 return;
             }
@@ -7921,7 +8197,7 @@
                         <small style="color:#666;"> · ${p.orderCount} ${p.orderCount === 1 ? t('orderSingular') : t('orderPlural')}</small><br>
                         <small style="color:#666;">${p.requestedDate} ${p.requestedTime}</small>
                     </div>
-                    <button class="confirm-payment-btn" onclick="confirmPaymentReceived('${p.userId}')">${t('confirmReceived')}</button>
+                    ${isAdmin() ? `<button class="confirm-payment-btn" onclick="confirmPaymentReceived('${p.userId}')">${t('confirmReceived')}</button>` : `<span class="chore-status">👁️ ${t('supervisorViewOnly')}</span>`}
                 </div>
             `).join('');
         }
@@ -8217,6 +8493,7 @@
 
             // Pannello servizio
             pendingServiceOverride = getServiceConfig().manualOverride ?? null;
+            pendingCloseReason = getServiceConfig().closeReason ?? null;
             renderServiceHours();
             refreshServiceButtons();
 
@@ -8361,6 +8638,7 @@
             }
             updated.service = {
                 manualOverride: (pendingServiceOverride === undefined) ? null : pendingServiceOverride,
+                closeReason: pendingCloseReason || null,
                 hours: hours
             };
 
@@ -8670,7 +8948,7 @@
         function renderAdminChoresPanel() {
             const panel = document.getElementById('adminChoresPanel');
             if (!panel) return;
-            if (!isAdmin()) { panel.style.display = 'none'; return; }
+            if (!canSupervise()) { panel.style.display = 'none'; return; }
 
             const todo = chores_data.filter(c => !c.done);
             const done = chores_data.filter(c => c.done);
@@ -8688,7 +8966,7 @@
                             <small>${t('requestedBy')} ${c.assignedBy} · ${c.date} ${c.time}</small>
                             ${c.note ? `<br><small>📝 ${c.note}</small>` : ''}
                         </div>
-                        <button class="chore-done-btn" onclick="markChoreDone(${c.id})">✓ ${t('choreDone')}</button>
+                        ${isAdmin() ? `<button class="chore-done-btn" onclick="markChoreDone(${c.id})">✓ ${t('choreDone')}</button>` : `<span class="chore-status">👁️ ${t('supervisorViewOnly')}</span>`}
                     </div>`).join('')
                 : `<p class="ing-help">${t('noChoresTodo')}</p>`;
 
@@ -8700,6 +8978,8 @@
                 document.getElementById('chorePayoutList').innerHTML = done.map(c =>
                     `<div class="chore-payout-item">${c.icon} ${c.name} — ${c.tip} <em>(${c.assignedBy})</em></div>`
                 ).join('');
+                const settleBtn = document.getElementById('settleChoresBtn');
+                if (settleBtn) settleBtn.style.display = isAdmin() ? 'block' : 'none'; // saldare è compito di Daniel
             } else {
                 payoutBox.style.display = 'none';
             }
@@ -9187,12 +9467,13 @@
             const done = list.filter(i => i.done).length;
             const label = type === 'prep' ? t('prepChecklistBtn') : t('cleanupChecklistBtn');
             const expanded = expandedChecklists.has(booking.id + '-' + type);
+            const editable = isAdmin(); // il supervisore vede i progressi, non li spunta al posto di Daniel
 
             const items = expanded ? `
                 <div class="checklist-items">
                     ${list.map(item => `
-                        <label class="checklist-item${item.done ? ' checklist-item-done' : ''}">
-                            <input type="checkbox" ${item.done ? 'checked' : ''}
+                        <label class="checklist-item${item.done ? ' checklist-item-done' : ''}" style="${editable ? '' : 'cursor:default;'}">
+                            <input type="checkbox" ${item.done ? 'checked' : ''} ${editable ? '' : 'disabled'}
                                    onchange="toggleChecklistItem(${booking.id}, '${type}', ${item.id})">
                             <span>${item.label}</span>
                         </label>
@@ -9266,10 +9547,82 @@
             `).join('');
         }
 
+        // =============================================
+        // CHECKLIST STUDIO GIORNALIERA
+        // Un'unica checklist condivisa (non per evento come le feste):
+        // si azzera da sola ogni giorno. Chiunque in famiglia la vede,
+        // ma solo Daniel può spuntarla — l'autovalutazione è il punto,
+        // non farla segnare a qualcun altro.
+        // =============================================
+        function buildDefaultStudyChecklist() {
+            return [
+                'Compiti scritti completati',
+                'Materiale per domani preparato',
+                'Ripasso di almeno 20 minuti fatto',
+                'Diario/agenda controllato'
+            ].map((label, i) => ({ id: i, label, done: false }));
+        }
+
+        let studyChecklist = { date: '', items: [] };
+
+        function todayKey() {
+            return new Date().toLocaleDateString('it-IT'); // gg/mm/aaaa
+        }
+
+        async function loadStudyChecklistFromCloud() {
+            if (!cloudReady()) return;
+            try {
+                const doc = await firestoreDb.collection('settings').doc('studyChecklist').get();
+                const data = doc.exists ? doc.data() : null;
+                if (data && data.date === todayKey()) {
+                    studyChecklist = data;
+                } else {
+                    // Giorno nuovo (o mai creata): riparte azzerata
+                    studyChecklist = { date: todayKey(), items: buildDefaultStudyChecklist() };
+                    await firestoreDb.collection('settings').doc('studyChecklist').set(studyChecklist);
+                }
+                renderStudyChecklistPanel();
+            } catch (error) {
+                console.log('Checklist studio non disponibile:', error);
+            }
+        }
+
+        async function toggleStudyChecklistItem(itemId) {
+            if (!isAdmin()) return; // solo Daniel spunta la propria checklist
+            const item = studyChecklist.items.find(i => i.id === itemId);
+            if (!item) return;
+            item.done = !item.done;
+            renderStudyChecklistPanel();
+            if (cloudReady()) {
+                try {
+                    await firestoreDb.collection('settings').doc('studyChecklist').set(studyChecklist);
+                } catch (error) { console.log('Errore aggiornamento checklist studio:', error); }
+            }
+        }
+
+        function renderStudyChecklistPanel() {
+            const panel = document.getElementById('studyChecklistPanel');
+            if (!panel || !customerName || !studyChecklist.items.length) {
+                if (panel) panel.style.display = 'none';
+                return;
+            }
+            panel.style.display = 'block';
+            document.getElementById('studyChecklistDate').textContent = studyChecklist.date;
+
+            const editable = isAdmin();
+            document.getElementById('studyChecklistList').innerHTML = studyChecklist.items.map(item => `
+                <label class="checklist-item${item.done ? ' checklist-item-done' : ''}" style="${editable ? '' : 'cursor:default;'}">
+                    <input type="checkbox" ${item.done ? 'checked' : ''} ${editable ? '' : 'disabled'}
+                           onchange="toggleStudyChecklistItem(${item.id})">
+                    <span>${item.label}</span>
+                </label>
+            `).join('');
+        }
+
         function renderAdminPartyPanel() {
             const panel = document.getElementById('adminPartyPanel');
             if (!panel) return;
-            if (!isAdmin()) { panel.style.display = 'none'; return; }
+            if (!canSupervise()) { panel.style.display = 'none'; return; }
 
             const pending = partyBookings_data.filter(b => b.status === 'pending');
             const confirmed = partyBookings_data.filter(b => b.status === 'confirmed')
@@ -9288,8 +9641,10 @@
                             ${b.note ? `<br><small>📝 ${b.note}</small>` : ''}
                         </div>
                         <div style="display:flex; flex-direction:column; gap:6px;">
+                            ${isAdmin() ? `
                             <button class="chore-done-btn" onclick="acceptPartyBooking(${b.id})">✓ ${t('accept')}</button>
-                            <button class="reject-btn" onclick="rejectPartyBooking(${b.id})">🚫 ${t('rejectOrder')}</button>
+                            <button class="reject-btn" onclick="rejectPartyBooking(${b.id})">🚫 ${t('rejectOrder')}</button>` : `
+                            <span class="chore-status">👁️ ${t('supervisorViewOnly')}</span>`}
                         </div>
                     </div>`).join('')
                 : `<p class="ing-help">${t('noPartyPending')}</p>`;
@@ -9312,7 +9667,7 @@
                         </div>
                         ${renderChecklistBlock(b, 'prep')}
                         ${renderChecklistBlock(b, 'cleanup')}
-                        <button class="reject-btn" style="margin-top:8px; width:100%;" onclick="cancelPartyBooking(${b.id})">🚫 ${t('cancelParty')}</button>
+                        ${isAdmin() ? `<button class="reject-btn" style="margin-top:8px; width:100%;" onclick="cancelPartyBooking(${b.id})">🚫 ${t('cancelParty')}</button>` : ''}
                     </div>
                 `).join('');
             } else {
@@ -10637,9 +10992,11 @@
         // PANNELLO SERVIZIO (admin)
         // =============================================
         let pendingServiceOverride; // valore scelto nel pannello, salvato col listino
+        let pendingCloseReason = null; // 'study' se la chiusura è per motivi scolastici
 
-        function setServiceOverride(value) {
+        function setServiceOverride(value, reason) {
             pendingServiceOverride = value;
+            pendingCloseReason = reason || null;
             refreshServiceButtons();
         }
 
@@ -10647,8 +11004,14 @@
             const map = { 'svcAuto': null, 'svcOpen': true, 'svcClosed': false };
             Object.keys(map).forEach(id => {
                 const el = document.getElementById(id);
-                if (el) el.classList.toggle('active', pendingServiceOverride === map[id]);
+                // "Chiuso" e "Studio" condividono lo stesso valore (false):
+                // si distinguono solo dal motivo, non dal pulsante Chiuso normale.
+                const matches = pendingServiceOverride === map[id]
+                    && !(id === 'svcClosed' && pendingCloseReason === 'study');
+                if (el) el.classList.toggle('active', matches);
             });
+            const studyBtn = document.getElementById('svcStudy');
+            if (studyBtn) studyBtn.classList.toggle('active', pendingServiceOverride === false && pendingCloseReason === 'study');
 
             // Anteprima di come apparirà ai clienti
             const stateEl = document.getElementById('svcCurrentState');
@@ -10657,7 +11020,8 @@
                 if (pendingServiceOverride === true) open = true;
                 else if (pendingServiceOverride === false) open = false;
                 else open = isOpenBySchedule();
-                stateEl.textContent = open ? t('svcStateOpen') : t('svcStateClosed');
+                stateEl.textContent = open ? t('svcStateOpen')
+                    : (pendingCloseReason === 'study' ? t('svcStateStudy') : t('svcStateClosed'));
                 stateEl.className = 'svc-state ' + (open ? 'svc-open' : 'svc-closed');
             }
         }
@@ -10807,7 +11171,7 @@
         function startPaymentPolling() {
             const poll = () => {
                 if (!customerName) return;
-                if (isAdmin()) {
+                if (canSupervise()) {
                     loadPendingPayments();
                     loadPendingTopups();
                 } else {
@@ -10823,6 +11187,7 @@
                     if (!isAdmin()) checkMyPartyBookingsStatus();
                 });
                 if (!isAdmin()) loadMyLibraryFromCloud();
+                loadStudyChecklistFromCloud();
             };
             poll();
             setInterval(poll, 15000); // ogni 15 secondi
@@ -10862,6 +11227,7 @@
         loadChoresFromCloud(); // Carica i lavoretti assegnati
         loadPartyBookingsFromCloud(); // Carica le prenotazioni feste
         loadMyLibraryFromCloud(); // Carica gli acquisti digitali (es. il libro PDF)
+        loadStudyChecklistFromCloud(); // Carica/azzera la checklist studio del giorno
         renderLowStockPanel(); // Avvisi scorte per l'admin
         syncPendingOrders(); // Invia gli ordini rimasti in coda da sessioni offline
         initDanny();         // Attiva il barista virtuale
@@ -10881,7 +11247,8 @@
             choreModal: closeChoreModal,
             topupModal: closeTopupModal,
             walletChoiceModal: closeWalletChoiceModal,
-            partyModal: closePartyModal
+            partyModal: closePartyModal,
+            pomodoroModal: closePomodoro
         };
 
         Object.keys(MODAL_CLOSERS).forEach(id => {
