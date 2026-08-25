@@ -2545,6 +2545,7 @@
                 <div class="guide-body">
                     <p><strong>📚 Checklist studio giornaliera:</strong> un pannello in cima all'app, visibile a tutta la famiglia, che si azzera da solo ogni giorno. Solo tu puoi spuntarne le voci — gli altri la vedono ma non possono farlo al posto tuo, è la tua autovalutazione.</p>
                     <p><strong>📷 Foto come prova:</strong> su ogni voce (sia della checklist studio sia di quelle preparazione/pulizia degli eventi) puoi allegare una foto col pulsante 📷 — utile per mostrare a Renato che una cosa è stata fatta davvero, non solo spuntata. Lui vede la miniatura e può ingrandirla, ma solo tu puoi aggiungerla o toglierla.</p>
+                    <p class="guide-warn">🔒 <strong>La foto è obbligatoria per spuntare:</strong> se provi a spuntare una voce senza aver prima allegato una foto, l'app te lo impedisce e te lo ricorda. Togliere una foto già allegata deseleziona automaticamente la voce — senza prova, la spunta non ha più senso.</p>
                     <p><strong>🧹 Lavoretti "Studio"</strong> nel catalogo lavoretti: "Completare i compiti", "Ripassare per una verifica", "Leggere 30 minuti", "Consegnare un progetto" — con mance più alte delle faccende di casa, per collegare lo studio a una ricompensa reale.</p>
                     <p class="guide-tip">💡 Nessuno di questi strumenti sostituisce un accordo chiaro in famiglia su quante ore dedicare al chiosco: sono aiuti pratici, non regole automatiche.</p>
                 </div>
@@ -2785,7 +2786,8 @@
              senso che qualcun altro segni "fatto" al suo posto. -->
         <div id="studyChecklistPanel" class="orders-section" style="display:none; margin-bottom:20px;">
             <h2 style="margin-bottom:6px;">🎓 <span>Checklist studio di oggi</span></h2>
-            <p class="ing-help" id="studyChecklistDate" style="margin-bottom:12px;"></p>
+            <p class="ing-help" id="studyChecklistDate" style="margin-bottom:4px;"></p>
+            <p class="ing-help" style="margin-bottom:12px; font-style:italic;">📷 Allega una foto per poter spuntare una voce.</p>
             <div id="studyChecklistList"></div>
         </div>
 
@@ -8126,7 +8128,7 @@
         // =============================================
         const GUIDE_VERSIONS = {
             start: 1, prices: 1, stock: 1, hours: 2, orders: 1, payments: 1,
-            reviews: 1, chores: 1, merch: 1, party: 2, supervisor: 2, study: 2, tech: 1
+            reviews: 1, chores: 1, merch: 1, party: 3, supervisor: 2, study: 3, tech: 1
         };
         const USER_GUIDE_VERSIONS = {
             order: 1, pay: 1, chores: 1, party: 1, reviews: 1, share: 1, offline: 1, danny: 1
@@ -9544,6 +9546,13 @@
             const list = type === 'prep' ? booking.prepChecklist : booking.cleanupChecklist;
             const item = list && list.find(i => i.id === itemId);
             if (!item) return;
+
+            if (!item.done && !item.photo) {
+                alert('📷 Allega prima una foto come prova: solo dopo potrai spuntare questa voce.');
+                renderAdminPartyPanel(); // ripristina la checkbox
+                return;
+            }
+
             item.done = !item.done;
             renderAdminPartyPanel();
 
@@ -9614,6 +9623,7 @@
             const item = list.find(i => i.id === itemId);
             if (!item) return;
             delete item.photo;
+            item.done = false; // senza foto non c'è più la prova
             renderAdminPartyPanel();
             if (cloudReady()) {
                 try {
@@ -9781,6 +9791,15 @@
             if (!isAdmin()) return; // solo Daniel spunta la propria checklist
             const item = studyChecklist.items.find(i => i.id === itemId);
             if (!item) return;
+
+            // Non si può spuntare senza una foto come prova. Scheckare
+            // resta sempre libero: togliere una prova già data va bene.
+            if (!item.done && !item.photo) {
+                alert('📷 Allega prima una foto come prova: solo dopo potrai spuntare questa voce.');
+                renderStudyChecklistPanel(); // ripristina la checkbox, il click nativo l'aveva già spuntata
+                return;
+            }
+
             item.done = !item.done;
             renderStudyChecklistPanel();
             if (cloudReady()) {
@@ -9837,6 +9856,8 @@
             const item = studyChecklist.items.find(i => i.id === itemId);
             if (!item) return;
             delete item.photo;
+            // Senza foto non c'è più la prova: la spunta perde senso
+            item.done = false;
             renderStudyChecklistPanel();
             if (cloudReady()) {
                 try { await firestoreDb.collection('settings').doc('studyChecklist').set(studyChecklist); }
