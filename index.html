@@ -2220,9 +2220,64 @@
             font-size: 0.8em;
             color: var(--dusk);
             cursor: pointer;
+            flex: 1;
+            min-width: 0;
         }
 
         .checklist-item input { width: auto; margin: 0; }
+
+        /* Riga che ospita la voce checklist + i controlli foto a fianco */
+        .checklist-item-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .checklist-photo-area {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .checklist-photo-btn {
+            border: none;
+            background: rgba(46, 196, 182, 0.15);
+            border-radius: 6px;
+            width: 30px;
+            height: 30px;
+            font-size: 0.95em;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .checklist-photo-btn:active { transform: scale(0.92); }
+
+        .checklist-photo-thumb {
+            width: 34px;
+            height: 34px;
+            border-radius: 6px;
+            object-fit: cover;
+            cursor: pointer;
+            border: 2px solid var(--lagoon);
+        }
+
+        .checklist-photo-remove {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: none;
+            background: #B03A2E;
+            color: #fff;
+            font-size: 0.6em;
+            line-height: 1;
+            cursor: pointer;
+            padding: 0;
+        }
 
         .checklist-item-done span {
             text-decoration: line-through;
@@ -2463,7 +2518,7 @@
                     <p><strong>🚫 Annullare un evento già confermato:</strong> per un imprevisto (maltempo, problema personale...) tocca <strong>Annulla evento</strong> sotto la scheda dell'evento. Ti viene chiesto un motivo breve: il cliente lo vede, e l'eventuale ordine di pagamento già creato viene rimosso automaticamente — non resta a dover pagare qualcosa che non si farà.</p>
                     <p>Il cliente può riaprire una festa annullata e proporre una nuova data: torna "in attesa" come una richiesta normale. Se nessuno la riprende, <strong>dopo 10 giorni viene eliminata da sola</strong> — non si accumulano richieste annullate dimenticate.</p>
                     <p><strong>✏️ Modifiche del cliente:</strong> finché una richiesta è "in attesa", il cliente può correggere fascia invitati, data, orario e note dal suo pannello. Ricevi un WhatsApp di aggiornamento: verifica di nuovo la disponibilità sui nuovi dati prima di accettare.</p>
-                    <p><strong>📋 Checklist preparazione e pulizia:</strong> ogni evento confermato ha due checklist proprie, con spunta. <em>Prepara evento</em> copre scorte, bancone, tavoli, decorazioni, bagni. <em>Pulizia e ripristino</em> copre pavimenti, bagni, bancone, spazzatura, bicchieri, disallestimento. I progressi restano salvati anche se chiudi l'app.</p>
+                    <p><strong>📋 Checklist preparazione e pulizia:</strong> ogni evento confermato ha due checklist proprie, con spunta e foto allegabile a ogni voce (📷). <em>Prepara evento</em> copre scorte, bancone, tavoli, decorazioni, bagni. <em>Pulizia e ripristino</em> copre pavimenti, bagni, bancone, spazzatura, bicchieri, disallestimento. I progressi (e le foto) restano salvati anche se chiudi l'app.</p>
                     <p><strong>Nel listino</strong> (sezione 🎉 Feste) puoi cambiare il prezzo di ogni fascia per ogni pacchetto, e metterne uno in pausa con ⏸️ se è fuori stagione (es. Xmas Party a luglio).</p>
                     <p class="guide-warn">⚠️ L'app non controlla automaticamente se una data è già impegnata: la verifica di disponibilità è manuale, sei tu a saperlo.</p>
                 </div>
@@ -2477,6 +2532,8 @@
                     <p>Quando Renato entra scrivendo il suo nome, ottiene un ruolo diverso dal tuo: <strong>supervisore</strong>, non admin. Vede l'etichetta "(SUPERVISORE)" invece di "(ADMIN)".</p>
                     <p>Vede <strong>tutti</strong> i pannelli che vedi tu — richieste feste, lavoretti da fare, pagamenti e ricariche in attesa, scorte in esaurimento, la tua checklist studio — ma <strong>senza un solo pulsante d'azione</strong>. Dove tu hai "Accetta", "Conferma", "Fatto", lui vede solo "👁️ Solo vista". Non ha nemmeno accesso al Listino.</p>
                     <p>L'unica eccezione: un pannello <strong>"🎓 Controllo Modalità Studio"</strong>, visibile solo a lui, con un pulsante per mettere in pausa o riattivare il servizio per motivi scolastici — la stessa 🎓 Modalità Studio che hai tu nel listino, ma azionabile da remoto senza passare dal tuo pannello.</p>
+                    <p class="guide-warn">🔒 <strong>Quando è Renato a mettere in pausa, il blocco è vero:</strong> i tuoi pulsanti Orari/Aperto/Chiuso/Studio nel listino restano disabilitati finché non riattiva lui — non puoi togliere la pausa dal tuo lato. E lui stesso può riattivare solo dopo che la tua checklist studio del giorno è completa al 100%: il pulsante di Renato resta disattivato finché non hai finito tutte le voci.</p>
+                    <p class="guide-tip">💡 Se sei tu a mettere in pausa lo studio dal tuo listino (senza che sia stato Renato), resta comunque tua: puoi riattivarla quando vuoi, senza vincoli.</p>
                     <p class="guide-tip">💡 L'idea è che Renato possa controllare che tutto proceda bene, senza gestire operativamente al posto tuo: l'attività resta tua.</p>
                 </div>
             </div>
@@ -2487,8 +2544,8 @@
                 </button>
                 <div class="guide-body">
                     <p><strong>📚 Checklist studio giornaliera:</strong> un pannello in cima all'app, visibile a tutta la famiglia, che si azzera da solo ogni giorno. Solo tu puoi spuntarne le voci — gli altri la vedono ma non possono farlo al posto tuo, è la tua autovalutazione.</p>
+                    <p><strong>📷 Foto come prova:</strong> su ogni voce (sia della checklist studio sia di quelle preparazione/pulizia degli eventi) puoi allegare una foto col pulsante 📷 — utile per mostrare a Renato che una cosa è stata fatta davvero, non solo spuntata. Lui vede la miniatura e può ingrandirla, ma solo tu puoi aggiungerla o toglierla.</p>
                     <p><strong>🧹 Lavoretti "Studio"</strong> nel catalogo lavoretti: "Completare i compiti", "Ripassare per una verifica", "Leggere 30 minuti", "Consegnare un progetto" — con mance più alte delle faccende di casa, per collegare lo studio a una ricompensa reale.</p>
-                    <p><strong>⏱️ Timer Pomodoro:</strong> il pulsante accanto alla guida. 25 minuti di lavoro, 5 di pausa, pausa lunga di 15 ogni 4 cicli, con un breve segnale acustico. Utile sia per studiare sia per i turni al chiosco.</p>
                     <p class="guide-tip">💡 Nessuno di questi strumenti sostituisce un accordo chiaro in famiglia su quante ore dedicare al chiosco: sono aiuti pratici, non regole automatiche.</p>
                 </div>
             </div>
@@ -2508,20 +2565,12 @@
         </div>
     </div>
 
-    <!-- Timer Pomodoro: 25 min lavoro / 5 min pausa, utile per lo studio
-         come per i turni al chiosco. Stato solo locale, non salvato. -->
-    <div class="modal" id="pomodoroModal">
-        <div class="modal-content" style="max-width:360px; text-align:center;">
-            <button class="modal-close" onclick="closePomodoro()" aria-label="Chiudi">✕</button>
-            <h2 style="margin-bottom:6px;">⏱️ Timer Pomodoro</h2>
-            <p id="pomodoroPhaseLabel" style="font-size:0.95em; font-weight:700; color:var(--coral-deep); margin-bottom:6px;">Pronto per iniziare</p>
-            <div id="pomodoroDisplay" style="font-family:var(--font-mono); font-size:3em; font-weight:700; color:var(--dusk); margin:14px 0;">25:00</div>
-            <p id="pomodoroCycleLabel" style="font-size:0.78em; color:var(--dusk-soft); margin-bottom:18px;">Ciclo 1 di 4</p>
-            <div class="btn-group" style="margin-bottom:10px;">
-                <button class="btn btn-primary" id="pomodoroStartBtn" onclick="togglePomodoro()">▶️ Avvia</button>
-                <button class="btn btn-secondary" onclick="resetPomodoro()">↺ Azzera</button>
-            </div>
-            <p style="font-size:0.75em; color:var(--dusk-soft);">25 minuti di lavoro, 5 di pausa. Pausa lunga (15') ogni 4 cicli.</p>
+    <!-- Lightbox foto: mostra a schermo intero una foto allegata a una
+         voce di checklist (studio o eventi) -->
+    <div class="modal" id="photoLightboxModal">
+        <div class="modal-content" style="max-width:480px; padding:12px; text-align:center;">
+            <button class="modal-close" onclick="closePhotoLightbox()" aria-label="Chiudi">✕</button>
+            <img id="photoLightboxImg" src="" alt="Foto allegata" style="width:100%; border-radius:10px; margin-top:20px;">
         </div>
     </div>
 
@@ -2595,8 +2644,6 @@
     <div id="danny" class="danny" style="display:none;">
         <!-- Un solo pulsante ❓ per tutti: guida admin per Daniel, guida d'uso per i clienti -->
         <button id="helpBtn" class="help-btn" onclick="openHelp()" style="display:none;" aria-label="Guida" title="Guida">❓</button>
-        <!-- Timer Pomodoro: utile sia per lo studio sia per i turni al chiosco -->
-        <button id="pomodoroBtn" class="help-btn pomodoro-btn" onclick="openPomodoro()" style="display:none;" aria-label="Timer Pomodoro" title="Timer Pomodoro">⏱️</button>
         <div id="dannyBubble" class="danny-bubble" style="display:none;">
             <button class="danny-close" onclick="dismissDanny()" aria-label="Chiudi">✕</button>
             <div id="dannyText" class="danny-text"></div>
@@ -3006,6 +3053,9 @@
                     <button type="button" id="svcClosed" class="svc-btn" onclick="setServiceOverride(false)" data-i18n="svcClosed">🔴 Chiuso</button>
                     <button type="button" id="svcStudy" class="svc-btn" onclick="setServiceOverride(false, 'study')" data-i18n="svcStudy">🎓 Studio</button>
                 </div>
+                <p id="svcLockNote" style="display:none; font-size:0.8em; color:var(--coral-deep); background:rgba(224,73,44,0.08); border-left:3px solid var(--coral-deep); border-radius:6px; padding:8px 10px; margin-top:8px;">
+                    🔒 Renato ha messo in pausa il servizio per motivi scolastici. Solo lui può riattivarlo, dopo che avrai completato la checklist di oggi.
+                </p>
                 <div id="svcCurrentState" class="svc-state"></div>
 
                 <div id="serviceHours" class="service-hours"></div>
@@ -3829,7 +3879,7 @@
                 userGuideOfflineTitle: "📡 Se manca la connessione",
                 userGuideOfflineBody: "<p>Puoi continuare a ordinare anche senza rete: l'ordine resta segnato <strong>da inviare</strong> e parte da solo appena la connessione torna.</p>",
                 userGuideDannyTitle: "🍹 Danny",
-                userGuideDannyBody: "<p>Il barista virtuale in basso a destra suggerisce cosa ordinare, abbinamenti e promemoria. Toccalo quando vuoi un consiglio, oppure ✕ per chiuderlo.</p><p>Accanto trovi anche <strong>⏱️ un timer Pomodoro</strong> (25 minuti di lavoro, 5 di pausa): utile per studiare o per organizzare un turno al chiosco.</p>",
+                userGuideDannyBody: "<p>Il barista virtuale in basso a destra suggerisce cosa ordinare, abbinamenti e promemoria. Toccalo quando vuoi un consiglio, oppure ✕ per chiuderlo.</p>",
                 publicPartyTitle: "Prossimi eventi in programma",
                 hostedBy: "Organizzato da",
                 prepChecklistBtn: "📋 Prepara evento",
@@ -4136,7 +4186,7 @@
                 userGuideOfflineTitle: "📡 If the connection drops",
                 userGuideOfflineBody: "<p>You can keep ordering even without a network: the order stays marked <strong>to send</strong> and goes through on its own as soon as the connection returns.</p>",
                 userGuideDannyTitle: "🍹 Danny",
-                userGuideDannyBody: "<p>The virtual bartender in the bottom right suggests what to order, pairings and reminders. Tap it for a suggestion, or ✕ to close it.</p><p>Next to it you'll also find a <strong>⏱️ Pomodoro timer</strong> (25 minutes of work, 5 of break): handy for studying or organizing a shift at the stand.</p>",
+                userGuideDannyBody: "<p>The virtual bartender in the bottom right suggests what to order, pairings and reminders. Tap it for a suggestion, or ✕ to close it.</p>",
                 publicPartyTitle: "Upcoming events",
                 hostedBy: "Hosted by",
                 prepChecklistBtn: "📋 Prepare event",
@@ -4443,7 +4493,7 @@
                 userGuideOfflineTitle: "📡 Si falla la conexión",
                 userGuideOfflineBody: "<p>Puedes seguir pidiendo incluso sin red: el pedido queda marcado <strong>por enviar</strong> y se envía solo en cuanto vuelva la conexión.</p>",
                 userGuideDannyTitle: "🍹 Danny",
-                userGuideDannyBody: "<p>El barman virtual abajo a la derecha sugiere qué pedir, combinaciones y recordatorios. Tócalo para un consejo, o ✕ para cerrarlo.</p><p>Al lado encontrarás también un <strong>⏱️ temporizador Pomodoro</strong> (25 minutos de trabajo, 5 de descanso): útil para estudiar o para organizar un turno en el chiringuito.</p>",
+                userGuideDannyBody: "<p>El barman virtual abajo a la derecha sugiere qué pedir, combinaciones y recordatorios. Tócalo para un consejo, o ✕ para cerrarlo.</p>",
                 publicPartyTitle: "Próximos eventos",
                 hostedBy: "Organizado por",
                 prepChecklistBtn: "📋 Preparar evento",
@@ -4750,7 +4800,7 @@
                 userGuideOfflineTitle: "📡 Bei fehlender Verbindung",
                 userGuideOfflineBody: "<p>Du kannst auch ohne Netz weiter bestellen: die Bestellung bleibt als <strong>zu senden</strong> markiert und wird automatisch gesendet, sobald die Verbindung zurück ist.</p>",
                 userGuideDannyTitle: "🍹 Danny",
-                userGuideDannyBody: "<p>Der virtuelle Barkeeper unten rechts schlägt vor, was du bestellen könntest, Kombinationen und Erinnerungen. Tippe ihn für einen Tipp an, oder ✕ zum Schließen.</p><p>Daneben findest du auch einen <strong>⏱️ Pomodoro-Timer</strong> (25 Minuten Arbeit, 5 Minuten Pause): praktisch zum Lernen oder um eine Schicht am Kiosk zu organisieren.</p>",
+                userGuideDannyBody: "<p>Der virtuelle Barkeeper unten rechts schlägt vor, was du bestellen könntest, Kombinationen und Erinnerungen. Tippe ihn für einen Tipp an, oder ✕ zum Schließen.</p>",
                 publicPartyTitle: "Anstehende Veranstaltungen",
                 hostedBy: "Organisiert von",
                 prepChecklistBtn: "📋 Veranstaltung vorbereiten",
@@ -5057,7 +5107,7 @@
                 userGuideOfflineTitle: "📡 En cas de coupure",
                 userGuideOfflineBody: "<p>Vous pouvez continuer à commander même sans réseau : la commande reste marquée <strong>à envoyer</strong> et part toute seule dès que la connexion revient.</p>",
                 userGuideDannyTitle: "🍹 Danny",
-                userGuideDannyBody: "<p>Le barman virtuel en bas à droite suggère quoi commander, des accords et des rappels. Touchez-le pour un conseil, ou ✕ pour le fermer.</p><p>À côté, vous trouverez aussi un <strong>⏱️ minuteur Pomodoro</strong> (25 minutes de travail, 5 de pause) : pratique pour étudier ou organiser un service au stand.</p>",
+                userGuideDannyBody: "<p>Le barman virtuel en bas à droite suggère quoi commander, des accords et des rappels. Touchez-le pour un conseil, ou ✕ pour le fermer.</p>",
                 publicPartyTitle: "Événements à venir",
                 hostedBy: "Organisé par",
                 prepChecklistBtn: "📋 Préparer l’événement",
@@ -5364,7 +5414,7 @@
                 userGuideOfflineTitle: "📡 Якщо немає з’єднання",
                 userGuideOfflineBody: "<p>Можна продовжувати замовляти навіть без мережі: замовлення залишається позначеним <strong>до надсилання</strong> і надсилається саме, щойно з'єднання відновиться.</p>",
                 userGuideDannyTitle: "🍹 Денні",
-                userGuideDannyBody: "<p>Віртуальний бармен внизу праворуч підказує, що замовити, поєднання та нагадування. Торкніться для поради або ✕, щоб закрити.</p><p>Поруч ви також знайдете <strong>⏱️ таймер Помодоро</strong> (25 хвилин роботи, 5 хвилин перерви): зручно для навчання або організації зміни на кіоску.</p>",
+                userGuideDannyBody: "<p>Віртуальний бармен внизу праворуч підказує, що замовити, поєднання та нагадування. Торкніться для поради або ✕, щоб закрити.</p>",
                 publicPartyTitle: "Найближчі події",
                 hostedBy: "Організовано",
                 prepChecklistBtn: "📋 Підготовка події",
@@ -5670,7 +5720,7 @@
                 userGuideOfflineTitle: "📡 Sem ligação",
                 userGuideOfflineBody: "<p>Pode continuar a encomendar mesmo sem rede: o pedido fica marcado <strong>por enviar</strong> e é enviado sozinho assim que a ligação voltar.</p>",
                 userGuideDannyTitle: "🍹 Danny",
-                userGuideDannyBody: "<p>O barman virtual em baixo à direita sugere o que encomendar, combinações e lembretes. Toque nele para um conselho, ou ✕ para fechar.</p><p>Ao lado encontra também um <strong>⏱️ temporizador Pomodoro</strong> (25 minutos de trabalho, 5 de pausa): útil para estudar ou organizar um turno na banca.</p>",
+                userGuideDannyBody: "<p>O barman virtual em baixo à direita sugere o que encomendar, combinações e lembretes. Toque nele para um conselho, ou ✕ para fechar.</p>",
                 publicPartyTitle: "Próximos eventos",
                 hostedBy: "Organizado por",
                 prepChecklistBtn: "📋 Preparar evento",
@@ -6789,6 +6839,8 @@
                 partyItems: buildDefaultPartyPricing(),
                 service: {
                     manualOverride: null,
+                    closeReason: null,
+                    lockedBy: null, // 'superadmin' se è stato Renato a mettere in pausa: solo lui può riattivare
                     hours: {
                         // 0 = domenica ... 6 = sabato
                         0: { open: '10:00', close: '24:00', closed: false },
@@ -7049,6 +7101,7 @@
                         merged.service = {
                             manualOverride: (data.service.manualOverride === undefined) ? null : data.service.manualOverride,
                             closeReason: data.service.closeReason || null,
+                            lockedBy: data.service.lockedBy || null,
                             hours: data.service.hours || merged.service.hours
                         };
                     }
@@ -7320,12 +7373,26 @@
 
             const statusText = document.getElementById('superStudyStatusText');
             const toggleBtn = document.getElementById('superStudyToggleBtn');
+
             if (inStudyMode) {
-                statusText.textContent = '📚 Il servizio è in pausa per motivi scolastici.';
+                const total = studyChecklist.items.length;
+                const done = studyChecklist.items.filter(i => i.done).length;
+                const checklistComplete = total > 0 && done === total;
+
+                statusText.innerHTML = `📚 Il servizio è in pausa per motivi scolastici.<br>` +
+                    `Checklist di Daniel: <strong>${done}/${total}</strong> completata` +
+                    (checklistComplete ? ' ✅' : '');
+
                 toggleBtn.textContent = '🟢 Riattiva il servizio';
+                toggleBtn.disabled = !checklistComplete;
+                toggleBtn.title = checklistComplete
+                    ? ''
+                    : 'Puoi riattivare solo dopo che Daniel ha completato tutta la checklist di oggi';
             } else {
                 statusText.textContent = 'Il servizio segue gli orari/impostazioni normali di Daniel.';
                 toggleBtn.textContent = '🎓 Metti in pausa per studio';
+                toggleBtn.disabled = false;
+                toggleBtn.title = '';
             }
         }
 
@@ -7335,17 +7402,26 @@
             const cfg = getServiceConfig();
             const inStudyMode = cfg.manualOverride === false && cfg.closeReason === 'study';
 
-            const confirmMsg = inStudyMode
-                ? 'Riattivare il servizio del chiosco?'
-                : 'Mettere in pausa il servizio per motivi scolastici? I clienti vedranno un avviso dedicato.';
-            if (!confirm(confirmMsg)) return;
-
             if (inStudyMode) {
+                // Si può riattivare solo dopo che la checklist di Daniel è
+                // completa: è la prova che i compiti sono stati fatti, non
+                // basta la sua parola.
+                const total = studyChecklist.items.length;
+                const done = studyChecklist.items.filter(i => i.done).length;
+                if (total === 0 || done < total) {
+                    alert('Daniel non ha ancora completato tutta la checklist di oggi. Riattiva il servizio solo dopo che l\'ha finita.');
+                    return;
+                }
+                if (!confirm('Checklist completata! Riattivare il servizio del chiosco?')) return;
+
                 pricing.service.manualOverride = null; // torna agli orari automatici
                 pricing.service.closeReason = null;
+                pricing.service.lockedBy = null;
             } else {
+                if (!confirm('Mettere in pausa il servizio per motivi scolastici? Solo tu potrai riattivarlo, e solo dopo che Daniel avrà completato la checklist di oggi.')) return;
                 pricing.service.manualOverride = false;
                 pricing.service.closeReason = 'study';
+                pricing.service.lockedBy = 'superadmin';
             }
 
             renderSuperStudyControl();
@@ -7415,8 +7491,6 @@
             if (avatar) avatar.style.display = isAdmin() ? 'inline-block' : 'none';
             const helpBtn = document.getElementById('helpBtn');
             if (helpBtn) helpBtn.style.display = 'flex'; // guida disponibile per tutti, admin e clienti
-            const pomodoroBtn = document.getElementById('pomodoroBtn');
-            if (pomodoroBtn) pomodoroBtn.style.display = 'flex';
             updateHelpButtonDot();
             renderWalletPanel();
             renderSupervisorPanel();
@@ -8026,125 +8100,6 @@
         // Un solo pulsante ❓, due guide diverse: Daniel vede quella
         // amministrativa (solo italiano), i clienti quella d'uso
         // (tradotta come il resto dell'app).
-        // =============================================
-        // TIMER POMODORO
-        // 25 min lavoro / 5 min pausa, pausa lunga (15') ogni 4 cicli.
-        // Stato solo locale: si azzera se si ricarica la pagina, ma non
-        // serve persisterlo, è un timer da tenere sott'occhio in sessione.
-        // =============================================
-        const POMODORO_WORK = 25 * 60;
-        const POMODORO_BREAK = 5 * 60;
-        const POMODORO_LONG_BREAK = 15 * 60;
-
-        let pomodoroSeconds = POMODORO_WORK;
-        let pomodoroPhase = 'work'; // 'work' | 'break' | 'longBreak'
-        let pomodoroCycle = 1;
-        let pomodoroRunning = false;
-        let pomodoroInterval = null;
-
-        function openPomodoro() {
-            document.getElementById('pomodoroModal').classList.add('active');
-            updatePomodoroDisplay();
-        }
-
-        function closePomodoro() {
-            document.getElementById('pomodoroModal').classList.remove('active');
-        }
-
-        function togglePomodoro() {
-            pomodoroRunning ? pausePomodoro() : startPomodoro();
-        }
-
-        function startPomodoro() {
-            pomodoroRunning = true;
-            document.getElementById('pomodoroStartBtn').textContent = '⏸️ Pausa';
-            pomodoroInterval = setInterval(() => {
-                pomodoroSeconds--;
-                if (pomodoroSeconds <= 0) {
-                    pomodoroBeep();
-                    advancePomodoroPhase();
-                } else {
-                    updatePomodoroDisplay();
-                }
-            }, 1000);
-        }
-
-        function pausePomodoro() {
-            pomodoroRunning = false;
-            clearInterval(pomodoroInterval);
-            document.getElementById('pomodoroStartBtn').textContent = '▶️ Riprendi';
-        }
-
-        function resetPomodoro() {
-            clearInterval(pomodoroInterval);
-            pomodoroRunning = false;
-            pomodoroPhase = 'work';
-            pomodoroCycle = 1;
-            pomodoroSeconds = POMODORO_WORK;
-            document.getElementById('pomodoroStartBtn').textContent = '▶️ Avvia';
-            updatePomodoroDisplay();
-        }
-
-        function advancePomodoroPhase() {
-            clearInterval(pomodoroInterval);
-            if (pomodoroPhase === 'work') {
-                if (pomodoroCycle % 4 === 0) {
-                    pomodoroPhase = 'longBreak';
-                    pomodoroSeconds = POMODORO_LONG_BREAK;
-                } else {
-                    pomodoroPhase = 'break';
-                    pomodoroSeconds = POMODORO_BREAK;
-                }
-            } else {
-                pomodoroPhase = 'work';
-                pomodoroSeconds = POMODORO_WORK;
-                if (pomodoroPhase === 'work' && (pomodoroCycle % 4 !== 0)) pomodoroCycle++;
-                else if (pomodoroPhase === 'work') pomodoroCycle = 1;
-            }
-            updatePomodoroDisplay();
-            // Riparte da sola nella fase successiva, così non serve
-            // ricliccare avvio ogni 25 minuti.
-            pomodoroInterval = setInterval(() => {
-                pomodoroSeconds--;
-                if (pomodoroSeconds <= 0) {
-                    pomodoroBeep();
-                    advancePomodoroPhase();
-                } else {
-                    updatePomodoroDisplay();
-                }
-            }, 1000);
-        }
-
-        function updatePomodoroDisplay() {
-            const m = String(Math.floor(pomodoroSeconds / 60)).padStart(2, '0');
-            const s = String(pomodoroSeconds % 60).padStart(2, '0');
-            const display = document.getElementById('pomodoroDisplay');
-            if (display) display.textContent = `${m}:${s}`;
-
-            const labels = { work: '🎯 Lavoro', break: '☕ Pausa breve', longBreak: '🌴 Pausa lunga' };
-            const phaseLabel = document.getElementById('pomodoroPhaseLabel');
-            if (phaseLabel) phaseLabel.textContent = labels[pomodoroPhase];
-
-            const cycleLabel = document.getElementById('pomodoroCycleLabel');
-            if (cycleLabel) cycleLabel.textContent = `Ciclo ${((pomodoroCycle - 1) % 4) + 1} di 4`;
-        }
-
-        // Un breve segnale acustico generato al volo: non serve un file
-        // audio esterno da caricare sul sito.
-        function pomodoroBeep() {
-            try {
-                const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.frequency.value = 880;
-                gain.gain.setValueAtTime(0.15, ctx.currentTime);
-                osc.start();
-                osc.stop(ctx.currentTime + 0.4);
-            } catch (e) { /* niente audio, pazienza: il timer visivo basta */ }
-        }
-
         function openHelp() {
             if (canSupervise()) openGuide();
             else openUserGuide();
@@ -8171,10 +8126,10 @@
         // =============================================
         const GUIDE_VERSIONS = {
             start: 1, prices: 1, stock: 1, hours: 2, orders: 1, payments: 1,
-            reviews: 1, chores: 1, merch: 1, party: 1, supervisor: 1, study: 1, tech: 1
+            reviews: 1, chores: 1, merch: 1, party: 2, supervisor: 2, study: 2, tech: 1
         };
         const USER_GUIDE_VERSIONS = {
-            order: 1, pay: 1, chores: 1, party: 1, reviews: 1, share: 1, offline: 1, danny: 2
+            order: 1, pay: 1, chores: 1, party: 1, reviews: 1, share: 1, offline: 1, danny: 1
         };
 
         function getSeenGuideVersions(storageKey) {
@@ -8764,11 +8719,20 @@
                     closed: offEl ? offEl.checked : false
                 };
             }
-            updated.service = {
-                manualOverride: (pendingServiceOverride === undefined) ? null : pendingServiceOverride,
-                closeReason: pendingCloseReason || null,
-                hours: hours
-            };
+            // Se il blocco è stato imposto da Renato, il salvataggio di
+            // Daniel non può toccare lo stato del servizio: resta quello
+            // bloccato, qualunque cosa i pulsanti (già disabilitati)
+            // avrebbero selezionato. Difesa in profondità, non solo UI.
+            const currentCfg = getServiceConfig();
+            const lockedBySuper = currentCfg.lockedBy === 'superadmin' && !isSuperAdmin();
+            updated.service = lockedBySuper
+                ? { manualOverride: currentCfg.manualOverride, closeReason: currentCfg.closeReason, lockedBy: currentCfg.lockedBy, hours: hours }
+                : {
+                    manualOverride: (pendingServiceOverride === undefined) ? null : pendingServiceOverride,
+                    closeReason: pendingCloseReason || null,
+                    lockedBy: null, // un cambiamento fatto da Daniel non è mai un blocco del supervisore
+                    hours: hours
+                };
 
             pricing = updated;
             const ok = await savePricing();
@@ -9600,11 +9564,19 @@
             const items = expanded ? `
                 <div class="checklist-items">
                     ${list.map(item => `
-                        <label class="checklist-item${item.done ? ' checklist-item-done' : ''}" style="${editable ? '' : 'cursor:default;'}">
-                            <input type="checkbox" ${item.done ? 'checked' : ''} ${editable ? '' : 'disabled'}
-                                   onchange="toggleChecklistItem(${booking.id}, '${type}', ${item.id})">
-                            <span>${item.label}</span>
-                        </label>
+                        <div class="checklist-item-row">
+                            <label class="checklist-item${item.done ? ' checklist-item-done' : ''}" style="${editable ? '' : 'cursor:default;'}">
+                                <input type="checkbox" ${item.done ? 'checked' : ''} ${editable ? '' : 'disabled'}
+                                       onchange="toggleChecklistItem(${booking.id}, '${type}', ${item.id})">
+                                <span>${item.label}</span>
+                            </label>
+                            ${renderPhotoControls(
+                                item.photo, editable,
+                                `handlePartyPhotoSelected(${booking.id}, '${type}', ${item.id}, this.files[0])`,
+                                `removePartyPhoto(${booking.id}, '${type}', ${item.id})`,
+                                `partyPhotoInput-${booking.id}-${type}-${item.id}`
+                            )}
+                        </div>
                     `).join('')}
                 </div>` : '';
 
@@ -9613,6 +9585,42 @@
                     ${label} (${done}/${list.length})
                 </button>
                 ${items}`;
+        }
+
+        async function handlePartyPhotoSelected(bookingId, type, itemId, file) {
+            if (!file || !isAdmin()) return;
+            const booking = partyBookings_data.find(b => b.id === bookingId);
+            if (!booking) return;
+            const list = type === 'prep' ? booking.prepChecklist : booking.cleanupChecklist;
+            const item = list.find(i => i.id === itemId);
+            if (!item) return;
+            try {
+                item.photo = await compressImageFile(file, 640, 0.55);
+                renderAdminPartyPanel();
+                if (cloudReady()) {
+                    const field = type === 'prep' ? 'prepChecklist' : 'cleanupChecklist';
+                    await firestoreDb.collection('partyBookings').doc(String(bookingId)).update({ [field]: list });
+                }
+            } catch (error) {
+                console.log('Errore allegato foto checklist evento:', error);
+            }
+        }
+
+        async function removePartyPhoto(bookingId, type, itemId) {
+            if (!isAdmin()) return;
+            const booking = partyBookings_data.find(b => b.id === bookingId);
+            if (!booking) return;
+            const list = type === 'prep' ? booking.prepChecklist : booking.cleanupChecklist;
+            const item = list.find(i => i.id === itemId);
+            if (!item) return;
+            delete item.photo;
+            renderAdminPartyPanel();
+            if (cloudReady()) {
+                try {
+                    const field = type === 'prep' ? 'prepChecklist' : 'cleanupChecklist';
+                    await firestoreDb.collection('partyBookings').doc(String(bookingId)).update({ [field]: list });
+                } catch (error) { console.log('Errore rimozione foto evento:', error); }
+            }
         }
 
         // L'admin annulla un evento già confermato per un imprevisto.
@@ -9682,6 +9690,60 @@
         // ma solo Daniel può spuntarla — l'autovalutazione è il punto,
         // non farla segnare a qualcun altro.
         // =============================================
+        // =============================================
+        // FOTO ALLEGATE ALLE CHECKLIST (studio e feste)
+        // Compresse lato client: niente da attivare su Firebase, restano
+        // dentro il documento esistente (limite 1MB per documento, una
+        // foto compressa a ~40-90KB ci sta comoda). Il video richiederebbe
+        // Firebase Storage, non ancora attivo su questo progetto.
+        // =============================================
+        function compressImageFile(file, maxWidth, quality) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const scale = Math.min(1, maxWidth / img.width);
+                        const canvas = document.createElement('canvas');
+                        canvas.width = Math.round(img.width * scale);
+                        canvas.height = Math.round(img.height * scale);
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        resolve(canvas.toDataURL('image/jpeg', quality));
+                    };
+                    img.onerror = reject;
+                    img.src = e.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function openPhotoLightbox(src) {
+            document.getElementById('photoLightboxImg').src = src;
+            document.getElementById('photoLightboxModal').classList.add('active');
+        }
+
+        function closePhotoLightbox() {
+            document.getElementById('photoLightboxModal').classList.remove('active');
+        }
+
+        // Riga HTML riusabile per il pulsante fotocamera + miniatura,
+        // usata sia dalla checklist studio sia da quelle degli eventi.
+        function renderPhotoControls(photo, editable, onSelect, onRemove, inputId) {
+            const thumb = photo
+                ? `<img class="checklist-photo-thumb" src="${photo}" onclick="openPhotoLightbox('${photo}')" alt="Foto allegata">
+                   ${editable ? `<button type="button" class="checklist-photo-remove" onclick="${onRemove}">✕</button>` : ''}`
+                : '';
+            const addBtn = (editable && !photo)
+                ? `<button type="button" class="checklist-photo-btn" onclick="document.getElementById('${inputId}').click()">📷</button>`
+                : '';
+            const input = editable
+                ? `<input type="file" accept="image/*" capture="environment" style="display:none" id="${inputId}" onchange="${onSelect}">`
+                : '';
+            return `<span class="checklist-photo-area">${thumb}${addBtn}${input}</span>`;
+        }
+
         function buildDefaultStudyChecklist() {
             return [
                 'Compiti scritti completati',
@@ -9739,12 +9801,47 @@
 
             const editable = isAdmin();
             document.getElementById('studyChecklistList').innerHTML = studyChecklist.items.map(item => `
-                <label class="checklist-item${item.done ? ' checklist-item-done' : ''}" style="${editable ? '' : 'cursor:default;'}">
-                    <input type="checkbox" ${item.done ? 'checked' : ''} ${editable ? '' : 'disabled'}
-                           onchange="toggleStudyChecklistItem(${item.id})">
-                    <span>${item.label}</span>
-                </label>
+                <div class="checklist-item-row">
+                    <label class="checklist-item${item.done ? ' checklist-item-done' : ''}" style="${editable ? '' : 'cursor:default;'}">
+                        <input type="checkbox" ${item.done ? 'checked' : ''} ${editable ? '' : 'disabled'}
+                               onchange="toggleStudyChecklistItem(${item.id})">
+                        <span>${item.label}</span>
+                    </label>
+                    ${renderPhotoControls(
+                        item.photo, editable,
+                        `handleStudyPhotoSelected(${item.id}, this.files[0])`,
+                        `removeStudyPhoto(${item.id})`,
+                        'studyPhotoInput-' + item.id
+                    )}
+                </div>
             `).join('');
+        }
+
+        async function handleStudyPhotoSelected(itemId, file) {
+            if (!file || !isAdmin()) return;
+            const item = studyChecklist.items.find(i => i.id === itemId);
+            if (!item) return;
+            try {
+                item.photo = await compressImageFile(file, 640, 0.55);
+                renderStudyChecklistPanel();
+                if (cloudReady()) {
+                    await firestoreDb.collection('settings').doc('studyChecklist').set(studyChecklist);
+                }
+            } catch (error) {
+                console.log('Errore allegato foto checklist studio:', error);
+            }
+        }
+
+        async function removeStudyPhoto(itemId) {
+            if (!isAdmin()) return;
+            const item = studyChecklist.items.find(i => i.id === itemId);
+            if (!item) return;
+            delete item.photo;
+            renderStudyChecklistPanel();
+            if (cloudReady()) {
+                try { await firestoreDb.collection('settings').doc('studyChecklist').set(studyChecklist); }
+                catch (error) { console.log('Errore rimozione foto:', error); }
+            }
         }
 
         function renderAdminPartyPanel() {
@@ -11130,16 +11227,28 @@
 
         function refreshServiceButtons() {
             const map = { 'svcAuto': null, 'svcOpen': true, 'svcClosed': false };
+            const lockedBySuper = getServiceConfig().lockedBy === 'superadmin' && !isSuperAdmin();
+
             Object.keys(map).forEach(id => {
                 const el = document.getElementById(id);
                 // "Chiuso" e "Studio" condividono lo stesso valore (false):
                 // si distinguono solo dal motivo, non dal pulsante Chiuso normale.
                 const matches = pendingServiceOverride === map[id]
                     && !(id === 'svcClosed' && pendingCloseReason === 'study');
-                if (el) el.classList.toggle('active', matches);
+                if (el) {
+                    el.classList.toggle('active', matches);
+                    el.disabled = lockedBySuper;
+                }
             });
             const studyBtn = document.getElementById('svcStudy');
-            if (studyBtn) studyBtn.classList.toggle('active', pendingServiceOverride === false && pendingCloseReason === 'study');
+            if (studyBtn) {
+                studyBtn.classList.toggle('active', pendingServiceOverride === false && pendingCloseReason === 'study');
+                studyBtn.disabled = lockedBySuper;
+            }
+
+            // Messaggio esplicito: Daniel deve capire perché non può toccarli
+            const lockNote = document.getElementById('svcLockNote');
+            if (lockNote) lockNote.style.display = lockedBySuper ? 'block' : 'none';
 
             // Anteprima di come apparirà ai clienti
             const stateEl = document.getElementById('svcCurrentState');
@@ -11376,7 +11485,7 @@
             topupModal: closeTopupModal,
             walletChoiceModal: closeWalletChoiceModal,
             partyModal: closePartyModal,
-            pomodoroModal: closePomodoro
+            photoLightboxModal: closePhotoLightbox
         };
 
         Object.keys(MODAL_CLOSERS).forEach(id => {
