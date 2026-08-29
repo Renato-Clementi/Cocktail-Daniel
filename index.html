@@ -2532,7 +2532,7 @@
                     <p>Quando Renato entra scrivendo il suo nome, ottiene un ruolo diverso dal tuo: <strong>supervisore</strong>, non admin. Vede l'etichetta "(SUPERVISORE)" invece di "(ADMIN)".</p>
                     <p>Vede <strong>tutti</strong> i pannelli che vedi tu — richieste feste, lavoretti da fare, pagamenti e ricariche in attesa, scorte in esaurimento, la tua checklist studio — ma <strong>senza un solo pulsante d'azione</strong>. Dove tu hai "Accetta", "Conferma", "Fatto", lui vede solo "👁️ Solo vista". Non ha nemmeno accesso al Listino.</p>
                     <p>L'unica eccezione: un pannello <strong>"🎓 Controllo Modalità Studio"</strong>, visibile solo a lui, con un pulsante per mettere in pausa o riattivare il servizio per motivi scolastici — la stessa 🎓 Modalità Studio che hai tu nel listino, ma azionabile da remoto senza passare dal tuo pannello.</p>
-                    <p class="guide-warn">🔒 <strong>Quando è Renato a mettere in pausa, il blocco è vero:</strong> i tuoi pulsanti Orari/Aperto/Chiuso/Studio nel listino restano disabilitati finché non riattiva lui — non puoi togliere la pausa dal tuo lato. E lui stesso può riattivare solo dopo che la tua checklist studio del giorno è completa al 100%: il pulsante di Renato resta disattivato finché non hai finito tutte le voci.</p>
+                    <p class="guide-warn">🔒 <strong>Quando è Renato a mettere in pausa, il blocco è vero:</strong> i tuoi pulsanti Orari/Aperto/Chiuso/Studio nel listino restano disabilitati finché non riattiva lui — non puoi togliere la pausa dal tuo lato. Lui vede lo stato della tua checklist studio (quante voci su quante) per decidere quando riattivare, ma <strong>può farlo in qualsiasi momento</strong>, anche se non hai ancora finito: se la checklist non è completa, l'app glielo segnala e gli chiede conferma, senza però impedirglielo.</p>
                     <p class="guide-tip">💡 Se sei tu a mettere in pausa lo studio dal tuo listino (senza che sia stato Renato), resta comunque tua: puoi riattivarla quando vuoi, senza vincoli.</p>
                     <p class="guide-tip">💡 L'idea è che Renato possa controllare che tutto proceda bene, senza gestire operativamente al posto tuo: l'attività resta tua.</p>
                 </div>
@@ -7383,13 +7383,14 @@
 
                 statusText.innerHTML = `📚 Il servizio è in pausa per motivi scolastici.<br>` +
                     `Checklist di Daniel: <strong>${done}/${total}</strong> completata` +
-                    (checklistComplete ? ' ✅' : '');
+                    (checklistComplete ? ' ✅' : ' ⏳');
 
                 toggleBtn.textContent = '🟢 Riattiva il servizio';
-                toggleBtn.disabled = !checklistComplete;
-                toggleBtn.title = checklistComplete
-                    ? ''
-                    : 'Puoi riattivare solo dopo che Daniel ha completato tutta la checklist di oggi';
+                // Il pulsante resta sempre attivo: la checklist informa la
+                // decisione di Renato, non gliela impone. La scelta finale
+                // resta sua, anche a checklist non finita.
+                toggleBtn.disabled = false;
+                toggleBtn.title = '';
             } else {
                 statusText.textContent = 'Il servizio segue gli orari/impostazioni normali di Daniel.';
                 toggleBtn.textContent = '🎓 Metti in pausa per studio';
@@ -7405,22 +7406,23 @@
             const inStudyMode = cfg.manualOverride === false && cfg.closeReason === 'study';
 
             if (inStudyMode) {
-                // Si può riattivare solo dopo che la checklist di Daniel è
-                // completa: è la prova che i compiti sono stati fatti, non
-                // basta la sua parola.
+                // La checklist informa la decisione, ma Renato può sempre
+                // riattivare: se non è completa, glielo ricorda e chiede
+                // conferma esplicita invece di impedirglielo.
                 const total = studyChecklist.items.length;
                 const done = studyChecklist.items.filter(i => i.done).length;
-                if (total === 0 || done < total) {
-                    alert('Daniel non ha ancora completato tutta la checklist di oggi. Riattiva il servizio solo dopo che l\'ha finita.');
-                    return;
-                }
-                if (!confirm('Checklist completata! Riattivare il servizio del chiosco?')) return;
+                const checklistComplete = total > 0 && done === total;
+
+                const confirmMsg = checklistComplete
+                    ? 'Checklist completata! Riattivare il servizio del chiosco?'
+                    : `Attenzione: la checklist di Daniel è a ${done}/${total}, non ancora completa. Riattivare comunque il servizio?`;
+                if (!confirm(confirmMsg)) return;
 
                 pricing.service.manualOverride = null; // torna agli orari automatici
                 pricing.service.closeReason = null;
                 pricing.service.lockedBy = null;
             } else {
-                if (!confirm('Mettere in pausa il servizio per motivi scolastici? Solo tu potrai riattivarlo, e solo dopo che Daniel avrà completato la checklist di oggi.')) return;
+                if (!confirm('Mettere in pausa il servizio per motivi scolastici? Solo tu potrai riattivarlo — vedrai lo stato della checklist di Daniel per decidere quando.')) return;
                 pricing.service.manualOverride = false;
                 pricing.service.closeReason = 'study';
                 pricing.service.lockedBy = 'superadmin';
@@ -8128,7 +8130,7 @@
         // =============================================
         const GUIDE_VERSIONS = {
             start: 1, prices: 1, stock: 1, hours: 2, orders: 1, payments: 1,
-            reviews: 1, chores: 1, merch: 1, party: 3, supervisor: 2, study: 3, tech: 1
+            reviews: 1, chores: 1, merch: 1, party: 3, supervisor: 3, study: 3, tech: 1
         };
         const USER_GUIDE_VERSIONS = {
             order: 1, pay: 1, chores: 1, party: 1, reviews: 1, share: 1, offline: 1, danny: 1
@@ -9782,6 +9784,7 @@
                     await firestoreDb.collection('settings').doc('studyChecklist').set(studyChecklist);
                 }
                 renderStudyChecklistPanel();
+                renderSuperStudyControl(); // il pulsante di Renato deve riflettere subito i dati appena arrivati
             } catch (error) {
                 console.log('Checklist studio non disponibile:', error);
             }
