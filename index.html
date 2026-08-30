@@ -1728,6 +1728,34 @@
             box-shadow: var(--shadow-card);
         }
 
+        /* =============================================
+           PANNELLI RICHIUDIBILI (eventi, checklist, feste,
+           storico ordini, libreria...): stesso pattern del
+           pannello scorte, riusato per non allungare la pagina
+           quando ci sono tanti pannelli insieme.
+           ============================================= */
+        .collapsible-panel .collapsible-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            border: none;
+            background: transparent;
+            padding: 0;
+            margin: 0 0 12px;
+            font-family: var(--font-display);
+            font-size: 1em;
+            font-weight: 700;
+            color: var(--dusk);
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .collapsible-panel.collapsed .collapsible-header { margin-bottom: 0; }
+        .collapsible-panel .collapsible-header .pc-chevron { margin-left: auto; transition: transform 0.2s ease; }
+        .collapsible-panel.collapsed .collapsible-header .pc-chevron { transform: rotate(-90deg); }
+        .collapsible-panel.collapsed .collapsible-body { display: none; }
+
         .low-stock-toggle {
             display: flex;
             align-items: center;
@@ -2803,39 +2831,60 @@
         </div>
 
         <!-- Prossimi eventi: visibile a tutta la famiglia, non solo a chi prenota -->
-        <div id="publicPartyPanel" class="orders-section" style="display:none; margin-bottom:20px;">
-            <h2 style="margin-bottom:12px;">🎉 <span data-i18n="publicPartyTitle">Prossimi eventi in programma</span></h2>
-            <div id="publicPartyList"></div>
+        <div id="publicPartyPanel" class="orders-section collapsible-panel collapsed" style="display:none; margin-bottom:20px;">
+            <button type="button" class="collapsible-header" onclick="toggleCollapsible('publicPartyPanel')">
+                🎉 <span data-i18n="publicPartyTitle">Prossimi eventi in programma</span>
+                <span class="badge" id="publicPartyCount">0</span>
+                <span class="pc-chevron">▾</span>
+            </button>
+            <div class="collapsible-body">
+                <div id="publicPartyList"></div>
+            </div>
         </div>
 
         <!-- Checklist studio di Daniel: visibile a tutta la famiglia (per
              sapere a che punto è), ma solo Daniel può spuntarla — non ha
              senso che qualcun altro segni "fatto" al suo posto. -->
-        <div id="studyChecklistPanel" class="orders-section" style="display:none; margin-bottom:20px;">
-            <h2 style="margin-bottom:6px;">🎓 <span>Checklist studio di oggi</span></h2>
-            <p class="ing-help" id="studyChecklistDate" style="margin-bottom:4px;"></p>
-            <p class="ing-help" style="margin-bottom:12px; font-style:italic;">📷 Allega una foto per poter spuntare una voce.</p>
-            <div id="studyChecklistList"></div>
+        <div id="studyChecklistPanel" class="orders-section collapsible-panel collapsed" style="display:none; margin-bottom:20px;">
+            <button type="button" class="collapsible-header" onclick="toggleCollapsible('studyChecklistPanel')">
+                🎓 <span>Checklist studio di oggi</span>
+                <span class="badge" id="studyChecklistCount">0/0</span>
+                <span class="pc-chevron">▾</span>
+            </button>
+            <div class="collapsible-body">
+                <p class="ing-help" id="studyChecklistDate" style="margin-bottom:4px;"></p>
+                <p class="ing-help" style="margin-bottom:12px; font-style:italic;">📷 Allega una foto per poter spuntare una voce.</p>
+                <div id="studyChecklistList"></div>
+            </div>
         </div>
 
         <!-- Richieste feste da confermare (solo admin) -->
-        <div id="adminPartyPanel" class="orders-section" style="display:none; margin-bottom:20px;">
-            <h2 style="margin-bottom:12px;">
+        <div id="adminPartyPanel" class="orders-section collapsible-panel collapsed" style="display:none; margin-bottom:20px;">
+            <button type="button" class="collapsible-header" onclick="toggleCollapsible('adminPartyPanel')">
                 🎉 <span data-i18n="partyRequestsTitle">Richieste feste</span>
                 <span class="badge" id="partyPendingCount">0</span>
-            </h2>
-            <div id="partyPendingList"></div>
+                <span class="pc-chevron">▾</span>
+            </button>
+            <div class="collapsible-body">
+                <div id="partyPendingList"></div>
 
-            <div id="partyUpcomingBox" class="chore-payout-box" style="display:none;">
-                <div class="chore-payout-header">📅 <span data-i18n="partyUpcomingTitle">Prossimi eventi confermati</span></div>
-                <div id="partyUpcomingList"></div>
+                <div id="partyUpcomingBox" class="chore-payout-box" style="display:none;">
+                    <div class="chore-payout-header">📅 <span data-i18n="partyUpcomingTitle">Prossimi eventi confermati</span></div>
+                    <div id="partyUpcomingList"></div>
+                </div>
             </div>
         </div>
 
         <!-- Le mie feste prenotate (clienti/famiglia) -->
-        <div id="myPartyPanel" class="orders-section" style="display:none; margin-bottom:20px;">
-            <h2 style="margin-bottom:12px;">🎉 <span data-i18n="myPartyTitle">Le mie feste prenotate</span></h2>
-            <div id="myPartyList"></div>
+        <div id="myPartyPanel" class="orders-section collapsible-panel collapsed" style="display:none; margin-bottom:20px;">
+            <button type="button" class="collapsible-header" onclick="toggleCollapsible('myPartyPanel')">
+                🎉 <span data-i18n="myPartyTitle">Le mie feste prenotate</span>
+                <span class="badge" id="myPartyCount">0</span>
+                <span class="pc-chevron">▾</span>
+            </button>
+            <div class="collapsible-body">
+                <div id="myPartyList"></div>
+            </div>
         </div>
 
         <!-- La mia libreria digitale: resta per sempre, anche dopo che
@@ -2874,17 +2923,21 @@
         </div>
 
         <!-- Orders Section -->
-        <div class="orders-section">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 style="margin-bottom: 0;" data-i18n="ordersHistory">📋 Storico Ordini</h2>
-            </div>
-            <div id="ordersList"></div>
-            <div id="totalSpent" style="display: none; margin-top: 20px; background: linear-gradient(160deg, var(--dusk) 0%, #2C5578 100%); border-radius: var(--radius); padding: 18px; text-align: center; box-shadow: 0 8px 22px rgba(27,58,92,0.35);">
-                <div style="font-size: 0.8em; color: rgba(255,255,255,0.8); letter-spacing: 0.5px; margin-bottom: 6px;" data-i18n="totalSpentLabel">💰 Totale speso</div>
-                <div id="totalAmount" style="font-family: var(--font-mono); font-size: 1.9em; font-weight: 700; color: #fff;">0,00€</div>
-                <div id="totalCount" style="font-size: 0.78em; color: rgba(255,255,255,0.7); margin-top: 2px;"></div>
-                <div id="openAmountInfo" style="display:none; font-size: 0.85em; color: var(--sand-gold); margin-top: 6px; font-weight: 600;"></div>
-                <button id="payButton" onclick="payAndClose()" style="margin-top: 14px; background: linear-gradient(135deg, var(--coral) 0%, var(--coral-deep) 100%); color: #fff; border: none; border-radius: var(--radius-sm); padding: 13px 26px; font-family: var(--font-body); font-size: 15px; font-weight: 600; cursor: pointer; transition: transform 0.2s ease; box-shadow: 0 4px 14px rgba(224,73,44,0.4);" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform=''" data-i18n="payButton">✅ Paga e chiudi conto</button>
+        <div class="orders-section collapsible-panel collapsed" id="ordersHistoryPanel">
+            <button type="button" class="collapsible-header" onclick="toggleCollapsible('ordersHistoryPanel')">
+                📋 <span data-i18n="ordersHistory">Storico Ordini</span>
+                <span class="badge" id="ordersHistoryCount">0</span>
+                <span class="pc-chevron">▾</span>
+            </button>
+            <div class="collapsible-body">
+                <div id="ordersList"></div>
+                <div id="totalSpent" style="display: none; margin-top: 20px; background: linear-gradient(160deg, var(--dusk) 0%, #2C5578 100%); border-radius: var(--radius); padding: 18px; text-align: center; box-shadow: 0 8px 22px rgba(27,58,92,0.35);">
+                    <div style="font-size: 0.8em; color: rgba(255,255,255,0.8); letter-spacing: 0.5px; margin-bottom: 6px;" data-i18n="totalSpentLabel">💰 Totale speso</div>
+                    <div id="totalAmount" style="font-family: var(--font-mono); font-size: 1.9em; font-weight: 700; color: #fff;">0,00€</div>
+                    <div id="totalCount" style="font-size: 0.78em; color: rgba(255,255,255,0.7); margin-top: 2px;"></div>
+                    <div id="openAmountInfo" style="display:none; font-size: 0.85em; color: var(--sand-gold); margin-top: 6px; font-weight: 600;"></div>
+                    <button id="payButton" onclick="payAndClose()" style="margin-top: 14px; background: linear-gradient(135deg, var(--coral) 0%, var(--coral-deep) 100%); color: #fff; border: none; border-radius: var(--radius-sm); padding: 13px 26px; font-family: var(--font-body); font-size: 15px; font-weight: 600; cursor: pointer; transition: transform 0.2s ease; box-shadow: 0 4px 14px rgba(224,73,44,0.4);" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform=''" data-i18n="payButton">✅ Paga e chiudi conto</button>
+                </div>
             </div>
         </div>
 
@@ -2903,9 +2956,15 @@
     <!-- La mia libreria digitale: dopo "Invita un amico", resta per
          sempre anche dopo che l'ordine è stato pagato e rimosso dallo
          storico -->
-    <div id="myLibraryPanel" class="orders-section" style="display:none; margin-top:20px; margin-bottom:20px;">
-        <h2 style="margin-bottom:12px;">📚 <span data-i18n="myLibraryTitle">La mia libreria</span></h2>
-        <div id="myLibraryList"></div>
+    <div id="myLibraryPanel" class="orders-section collapsible-panel collapsed" style="display:none; margin-top:20px; margin-bottom:20px;">
+        <button type="button" class="collapsible-header" onclick="toggleCollapsible('myLibraryPanel')">
+            📚 <span data-i18n="myLibraryTitle">La mia libreria</span>
+            <span class="badge" id="myLibraryCount">0</span>
+            <span class="pc-chevron">▾</span>
+        </button>
+        <div class="collapsible-body">
+            <div id="myLibraryList"></div>
+        </div>
     </div>
 
     <!-- Reviews Page Modal (pubblica) -->
@@ -3579,6 +3638,7 @@
             if (!customerName || myDigitalPurchases.length === 0) { panel.style.display = 'none'; return; }
 
             panel.style.display = 'block';
+            document.getElementById('myLibraryCount').textContent = myDigitalPurchases.length;
             document.getElementById('myLibraryList').innerHTML = myDigitalPurchases.map(p => `
                 <div class="chore-row">
                     <div class="chore-row-info">
@@ -7077,6 +7137,14 @@
             return Math.round((n + Number.EPSILON) * 100) / 100;
         }
 
+        // Apre/chiude uno qualunque dei pannelli richiudibili (eventi,
+        // checklist, feste, storico, libreria...): un'unica funzione
+        // condivisa invece di scriverne una per ciascuno.
+        function toggleCollapsible(panelId) {
+            const panel = document.getElementById(panelId);
+            if (panel) panel.classList.toggle('collapsed');
+        }
+
         function isSpecial(cocktailName) {
             return !!(pricing.items[cocktailName] && pricing.items[cocktailName].special);
         }
@@ -9966,6 +10034,7 @@
 
             if (upcoming.length === 0) { panel.style.display = 'none'; return; }
             panel.style.display = 'block';
+            document.getElementById('publicPartyCount').textContent = upcoming.length;
 
             document.getElementById('publicPartyList').innerHTML = upcoming.map(b => `
                 <div class="chore-row">
@@ -10102,6 +10171,8 @@
             }
             panel.style.display = 'block';
             document.getElementById('studyChecklistDate').textContent = studyChecklist.date;
+            const doneCount = studyChecklist.items.filter(i => i.done).length;
+            document.getElementById('studyChecklistCount').textContent = `${doneCount}/${studyChecklist.items.length}`;
 
             const editable = isAdmin();
             document.getElementById('studyChecklistList').innerHTML = studyChecklist.items.map(item => `
@@ -10215,6 +10286,7 @@
             if (mine.length === 0) { panel.style.display = 'none'; return; }
 
             panel.style.display = 'block';
+            document.getElementById('myPartyCount').textContent = mine.length;
             document.getElementById('myPartyList').innerHTML = mine.map(b => {
                 const statusLabel = b.status === 'confirmed' ? '✅ ' + t('partyConfirmedLabel')
                     : b.status === 'rejected' ? '❌ ' + t('partyRejectedLabel')
@@ -10714,7 +10786,9 @@
         function renderOrders() {
             const ordersList = document.getElementById('ordersList');
             const totalSpentEl = document.getElementById('totalSpent');
-            
+            const countBadge = document.getElementById('ordersHistoryCount');
+            if (countBadge) countBadge.textContent = orders.length;
+
             if (orders.length === 0) {
                 ordersList.innerHTML = `<div class="no-orders">${t('noOrders')}</div>`;
                 totalSpentEl.style.display = 'none';
