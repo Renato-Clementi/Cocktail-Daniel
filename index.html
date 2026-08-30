@@ -2122,6 +2122,23 @@
 
         .wallet-topup-btn:active { transform: scale(0.94); }
 
+        .wallet-donate-btn {
+            width: 100%;
+            margin-top: 12px;
+            background: rgba(255,255,255,0.18);
+            border: 1.5px dashed rgba(255,255,255,0.6);
+            border-radius: var(--radius-sm);
+            color: #fff;
+            padding: 10px;
+            font-family: var(--font-body);
+            font-size: 0.82em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .wallet-donate-btn:active { background: rgba(255,255,255,0.3); }
+
         .topup-quick-row {
             display: flex;
             gap: 8px;
@@ -2459,6 +2476,7 @@
                     <p>Ti arriva un messaggio WhatsApp e in cima all'app compare <strong>🔔 Richieste di pagamento</strong> col numero in rosso. Ogni richiesta mostra cliente, importo e numero di ordini.</p>
                     <p>Quando hai incassato, tocca <strong>✓ Confermo ricezione</strong>: il conto di quel cliente si chiude.</p>
                     <p class="guide-tip">💡 Se il cliente ordina <em>dopo</em> aver chiesto il conto, i nuovi ordini restano aperti: confermando chiudi solo quelli della richiesta, non gli altri.</p>
+                    <p><strong>💝 Donazioni:</strong> chi ha un saldo sulla carta può scegliere, volontariamente, di donarlo tutto all'attività col pulsante dedicato — azzera solo il proprio saldo, mai quello di altri. Ricevi un WhatsApp e la trovi anche nel pannello <strong>Donazioni ricevute</strong>, con il totale di sempre.</p>
                     <p><strong>💳 Carta prepagata e sconto fedeltà:</strong> il cliente può chiederti una ricarica dall'app (stesso meccanismo del conto: ti arriva un WhatsApp, tu confermi quando hai i contanti in mano nella sezione <strong>🔋 Richieste di ricarica</strong>). Il credito resta sulla sua carta.</p>
                     <p>Quando ha un saldo, al momento di pagare il cliente vede la scelta tra <strong>contanti</strong> e <strong>carta</strong>. Pagando con la carta ottiene il <strong>10% di sconto</strong> — è l'incentivo a ricaricare in anticipo. Se il saldo non copre tutto il conto, copre quello che può (partendo dagli ordini più vecchi) e il resto segue il normale flusso in contanti con la tua conferma.</p>
                     <p class="guide-tip">💡 Il pagamento con la carta <strong>non richiede la tua conferma</strong>: i contanti li avevi già ricevuti al momento della ricarica, quindi l'ordine si chiude subito. Ricevi comunque un WhatsApp informativo.</p>
@@ -2742,6 +2760,15 @@
             <button id="superStudyToggleBtn" class="btn btn-primary" style="width:100%;" onclick="toggleStudyModeDirect()"></button>
         </div>
 
+        <!-- Donazioni ricevute: visibile a Daniel e Renato, in sola lettura -->
+        <div id="donationsPanel" class="orders-section" style="display:none; margin-bottom:20px;">
+            <h2 style="margin-bottom:6px;">💝 <span data-i18n="donationsTitle">Donazioni ricevute</span></h2>
+            <p style="font-size:0.88em; color:var(--dusk-soft); margin-bottom:12px;">
+                <span data-i18n="donationsTotalLabel">Totale donato:</span> <strong id="donationsTotal">0,00€</strong>
+            </p>
+            <div id="donationsList"></div>
+        </div>
+
         <div id="lowStockPanel" class="low-stock-panel collapsed" style="display:none;">
             <button type="button" class="low-stock-toggle" onclick="document.getElementById('lowStockPanel').classList.toggle('collapsed')">
                 <span>⚠️ <span data-i18n="lowStockTitle">Scorte in esaurimento</span></span>
@@ -2841,6 +2868,9 @@
                 </div>
                 <button class="wallet-topup-btn" onclick="openTopupModal()" data-i18n="topupBtn">+ Ricarica</button>
             </div>
+            <button id="walletDonateBtn" class="wallet-donate-btn" style="display:none;" onclick="donateWalletToBusiness()">
+                💝 <span data-i18n="donateBtn">Dona il saldo all'attività</span>
+            </button>
         </div>
 
         <!-- Orders Section -->
@@ -3847,6 +3877,11 @@
 
                 soldOutLabel: "ESAURITO",
 
+                donateBtn: "Dona il saldo all'attività",
+                confirmDonate: "Confermi di donare {amount} all’attività? L’operazione non è reversibile.",
+                donateThanksMsg: "💝 Grazie per la donazione!",
+                donationsTitle: "Donazioni ricevute",
+                donationsTotalLabel: "Totale donato:",
                 supervisorViewOnly: "Solo vista",
                 svcStudy: "🎓 Studio",
                 svcStateStudy: "Chiuso per impegni scolastici",
@@ -3869,7 +3904,7 @@
                 userGuideOrderTitle: "🍹 Come ordinare",
                 userGuideOrderBody: "<p>Scegli una categoria dalle schede in alto (Cocktail, Snack, Soft drink, Dolci, Merchandising...) e tocca il prodotto che vuoi.</p><p>Scegli la variante, la posizione (dove sei, in casa, in giardino) e l'orario preferito, poi tocca <strong>Conferma Ordine</strong>. Il prezzo mostrato è già quello finale.</p><p>A volte compare qualche prodotto consigliato in abbinamento: puoi aggiungerlo con un tocco o ignorarlo, resta comunque opzionale.</p><p><strong>Il libro dei cocktail in PDF</strong> è diverso dagli altri: appena il pagamento si chiude te lo ritrovi in <strong>📚 La mia libreria</strong>, un pannello che resta per sempre — puoi riscaricarlo quando vuoi.</p>",
                 userGuidePayTitle: "💳 Come si paga",
-                userGuidePayBody: "<p>I tuoi ordini restano nello <strong>storico</strong> finché non chiudi il conto. Quando hai finito, tocca <strong>Paga e chiudi conto</strong>.</p><p>Se hai un saldo sulla carta prepagata, puoi scegliere di pagare con quello e ottenere il <strong>10% di sconto</strong>. Altrimenti si paga in contanti: la richiesta parte e il conto si chiude quando Daniel conferma di aver ricevuto i soldi.</p><p>Per ricaricare la carta tocca <strong>+ Ricarica</strong> nel riquadro dorato, scegli l'importo e consegna i contanti a Daniel: il saldo comparirà appena lui conferma.</p>",
+                userGuidePayBody: "<p>I tuoi ordini restano nello <strong>storico</strong> finché non chiudi il conto. Quando hai finito, tocca <strong>Paga e chiudi conto</strong>.</p><p>Se hai un saldo sulla carta prepagata, puoi scegliere di pagare con quello e ottenere il <strong>10% di sconto</strong>. Altrimenti si paga in contanti: la richiesta parte e il conto si chiude quando Daniel conferma di aver ricevuto i soldi.</p><p>Per ricaricare la carta tocca <strong>+ Ricarica</strong> nel riquadro dorato, scegli l'importo e consegna i contanti a Daniel: il saldo comparirà appena lui conferma.</p><p>Se vuoi, puoi anche <strong>donare il tuo saldo</strong> all'attività in qualsiasi momento, col pulsante dedicato nel riquadro della carta.</p>",
                 userGuideChoresTitle: "🧹 Lavoretti per Daniel",
                 userGuideChoresBody: "<p>Nella scheda <strong>Lavoretti</strong> puoi assegnare a Daniel piccoli compiti di casa (portare a spasso il cane, aspirapolvere...) con una mancia già indicata.</p><p>Segui lo stato nel pannello <strong>I miei lavoretti assegnati</strong>: resta \"da fare\" finché Daniel non lo segna completato.</p>",
                 userGuidePartyTitle: "🎉 Prenotare una festa",
@@ -4154,6 +4189,11 @@
 
                 soldOutLabel: "SOLD OUT",
 
+                donateBtn: "Donate balance to the business",
+                confirmDonate: "Confirm donating {amount} to the business? This cannot be undone.",
+                donateThanksMsg: "💝 Thanks for the donation!",
+                donationsTitle: "Donations received",
+                donationsTotalLabel: "Total donated:",
                 supervisorViewOnly: "View only",
                 svcStudy: "🎓 Study",
                 svcStateStudy: "Closed for school commitments",
@@ -4176,7 +4216,7 @@
                 userGuideOrderTitle: "🍹 How to order",
                 userGuideOrderBody: "<p>Pick a category from the tabs at the top (Cocktails, Snacks, Soft drinks, Desserts, Merchandise...) and tap the product you want.</p><p>Choose the variant, the location (where you are, at home, in the garden) and the preferred time, then tap <strong>Confirm Order</strong>. The price shown is already the final one.</p><p>Sometimes a matching product is suggested: you can add it with a tap or ignore it, it's always optional.</p><p>The <strong>PDF cocktail book</strong> works differently: as soon as payment closes, it appears in <strong>📚 My library</strong>, a panel that stays forever — you can download it again anytime.</p>",
                 userGuidePayTitle: "💳 How to pay",
-                userGuidePayBody: "<p>Your orders stay in your <strong>history</strong> until you close the bill. When you're done, tap <strong>Pay and close bill</strong>.</p><p>If you have a balance on your prepaid card, you can choose to pay with it and get <strong>10% off</strong>. Otherwise you pay cash: the request is sent, and the bill closes once Daniel confirms he received the money.</p><p>To top up the card, tap <strong>+ Top up</strong> in the golden box, choose the amount and hand the cash to Daniel: the balance will appear as soon as he confirms.</p>",
+                userGuidePayBody: "<p>Your orders stay in your <strong>history</strong> until you close the bill. When you're done, tap <strong>Pay and close bill</strong>.</p><p>If you have a balance on your prepaid card, you can choose to pay with it and get <strong>10% off</strong>. Otherwise you pay cash: the request is sent, and the bill closes once Daniel confirms he received the money.</p><p>To top up the card, tap <strong>+ Top up</strong> in the golden box, choose the amount and hand the cash to Daniel: the balance will appear as soon as he confirms.</p><p>If you'd like, you can also <strong>donate your balance</strong> to the business at any time, using the dedicated button in the card box.</p>",
                 userGuideChoresTitle: "🧹 Chores for Daniel",
                 userGuideChoresBody: "<p>In the <strong>Chores</strong> tab you can assign Daniel small household tasks (walking the dog, vacuuming...) with a tip already set.</p><p>Follow the status in the <strong>My assigned chores</strong> panel: it stays \"to do\" until Daniel marks it done.</p>",
                 userGuidePartyTitle: "🎉 Booking a party",
@@ -4461,6 +4501,11 @@
 
                 soldOutLabel: "AGOTADO",
 
+                donateBtn: "Donar el saldo al negocio",
+                confirmDonate: "¿Confirmas donar {amount} al negocio? No se puede deshacer.",
+                donateThanksMsg: "💝 ¡Gracias por la donación!",
+                donationsTitle: "Donaciones recibidas",
+                donationsTotalLabel: "Total donado:",
                 supervisorViewOnly: "Solo lectura",
                 svcStudy: "🎓 Estudio",
                 svcStateStudy: "Cerrado por compromisos escolares",
@@ -4483,7 +4528,7 @@
                 userGuideOrderTitle: "🍹 Cómo pedir",
                 userGuideOrderBody: "<p>Elige una categoría en las pestañas de arriba (Cócteles, Aperitivos, Refrescos, Postres, Merchandising...) y toca el producto que quieras.</p><p>Elige la variante, la ubicación (donde estás, en casa, en el jardín) y la hora preferida, luego toca <strong>Confirmar Pedido</strong>. El precio mostrado ya es el final.</p><p>A veces aparece algún producto recomendado a juego: puedes añadirlo con un toque o ignorarlo, siempre es opcional.</p><p>El <strong>libro de cócteles en PDF</strong> funciona distinto: en cuanto se cierra el pago, aparece en <strong>📚 Mi biblioteca</strong>, un panel que queda para siempre — puedes volver a descargarlo cuando quieras.</p>",
                 userGuidePayTitle: "💳 Cómo se paga",
-                userGuidePayBody: "<p>Tus pedidos quedan en tu <strong>historial</strong> hasta que cierres la cuenta. Cuando termines, toca <strong>Pagar y cerrar cuenta</strong>.</p><p>Si tienes saldo en la tarjeta prepago, puedes elegir pagar con ella y obtener un <strong>10% de descuento</strong>. Si no, se paga en efectivo: la solicitud se envía y la cuenta se cierra cuando Daniel confirma que ha recibido el dinero.</p><p>Para recargar la tarjeta, toca <strong>+ Recargar</strong> en el recuadro dorado, elige el importe y entrega el efectivo a Daniel: el saldo aparecerá en cuanto confirme.</p>",
+                userGuidePayBody: "<p>Tus pedidos quedan en tu <strong>historial</strong> hasta que cierres la cuenta. Cuando termines, toca <strong>Pagar y cerrar cuenta</strong>.</p><p>Si tienes saldo en la tarjeta prepago, puedes elegir pagar con ella y obtener un <strong>10% de descuento</strong>. Si no, se paga en efectivo: la solicitud se envía y la cuenta se cierra cuando Daniel confirma que ha recibido el dinero.</p><p>Para recargar la tarjeta, toca <strong>+ Recargar</strong> en el recuadro dorado, elige el importe y entrega el efectivo a Daniel: el saldo aparecerá en cuanto confirme.</p><p>Si quieres, también puedes <strong>donar tu saldo</strong> al negocio en cualquier momento, con el botón dedicado en el recuadro de la tarjeta.</p>",
                 userGuideChoresTitle: "🧹 Tareas para Daniel",
                 userGuideChoresBody: "<p>En la pestaña <strong>Tareas</strong> puedes asignar a Daniel pequeñas tareas domésticas (pasear al perro, pasar la aspiradora...) con una propina ya indicada.</p><p>Sigue el estado en el panel <strong>Mis tareas asignadas</strong>: queda \"pendiente\" hasta que Daniel la marque como hecha.</p>",
                 userGuidePartyTitle: "🎉 Reservar una fiesta",
@@ -4768,6 +4813,11 @@
 
                 soldOutLabel: "AUSVERKAUFT",
 
+                donateBtn: "Guthaben an den Betrieb spenden",
+                confirmDonate: "{amount} an den Betrieb spenden bestätigen? Das kann nicht rückgängig gemacht werden.",
+                donateThanksMsg: "💝 Danke für die Spende!",
+                donationsTitle: "Erhaltene Spenden",
+                donationsTotalLabel: "Insgesamt gespendet:",
                 supervisorViewOnly: "Nur Ansicht",
                 svcStudy: "🎓 Lernen",
                 svcStateStudy: "Wegen schulischer Verpflichtungen geschlossen",
@@ -4790,7 +4840,7 @@
                 userGuideOrderTitle: "🍹 So bestellst du",
                 userGuideOrderBody: "<p>Wähle oben eine Kategorie (Cocktails, Snacks, Softdrinks, Desserts, Merchandise...) und tippe auf das gewünschte Produkt.</p><p>Wähle die Variante, den Ort (wo du bist, zu Hause, im Garten) und die gewünschte Zeit, dann tippe auf <strong>Bestellung bestätigen</strong>. Der angezeigte Preis ist bereits der Endpreis.</p><p>Manchmal wird ein passendes Produkt vorgeschlagen: du kannst es mit einem Tipp hinzufügen oder ignorieren, es ist immer optional.</p><p>Das <strong>Cocktailbuch als PDF</strong> funktioniert anders: sobald die Zahlung abgeschlossen ist, erscheint es in <strong>📚 Meine Bibliothek</strong>, einem Panel, das für immer bleibt — du kannst es jederzeit erneut herunterladen.</p>",
                 userGuidePayTitle: "💳 So bezahlst du",
-                userGuidePayBody: "<p>Deine Bestellungen bleiben in deinem <strong>Verlauf</strong>, bis du die Rechnung schließt. Wenn du fertig bist, tippe auf <strong>Bezahlen und Rechnung schließen</strong>.</p><p>Hast du Guthaben auf der Prepaid-Karte, kannst du damit bezahlen und erhältst <strong>10% Rabatt</strong>. Sonst zahlst du bar: die Anfrage wird gesendet, und die Rechnung schließt, sobald Daniel den Geldeingang bestätigt.</p><p>Zum Aufladen tippe auf <strong>+ Aufladen</strong> im goldenen Kasten, wähle den Betrag und gib Daniel das Bargeld: das Guthaben erscheint, sobald er bestätigt.</p>",
+                userGuidePayBody: "<p>Deine Bestellungen bleiben in deinem <strong>Verlauf</strong>, bis du die Rechnung schließt. Wenn du fertig bist, tippe auf <strong>Bezahlen und Rechnung schließen</strong>.</p><p>Hast du Guthaben auf der Prepaid-Karte, kannst du damit bezahlen und erhältst <strong>10% Rabatt</strong>. Sonst zahlst du bar: die Anfrage wird gesendet, und die Rechnung schließt, sobald Daniel den Geldeingang bestätigt.</p><p>Zum Aufladen tippe auf <strong>+ Aufladen</strong> im goldenen Kasten, wähle den Betrag und gib Daniel das Bargeld: das Guthaben erscheint, sobald er bestätigt.</p><p>Wenn du möchtest, kannst du dein <strong>Guthaben</strong> jederzeit über die entsprechende Schaltfläche im Kartenkasten <strong>an den Betrieb spenden</strong>.</p>",
                 userGuideChoresTitle: "🧹 Aufgaben für Daniel",
                 userGuideChoresBody: "<p>Im Tab <strong>Aufgaben</strong> kannst du Daniel kleine Hausaufgaben zuweisen (Hund ausführen, Staubsaugen...) mit bereits festgelegtem Trinkgeld.</p><p>Verfolge den Status im Panel <strong>Meine zugewiesenen Aufgaben</strong>: bleibt „offen“, bis Daniel sie als erledigt markiert.</p>",
                 userGuidePartyTitle: "🎉 Eine Party buchen",
@@ -5075,6 +5125,11 @@
 
                 soldOutLabel: "ÉPUISÉ",
 
+                donateBtn: "Faire don du solde à l’activité",
+                confirmDonate: "Confirmez le don de {amount} à l’activité ? Action irréversible.",
+                donateThanksMsg: "💝 Merci pour le don !",
+                donationsTitle: "Dons reçus",
+                donationsTotalLabel: "Total donné :",
                 supervisorViewOnly: "Lecture seule",
                 svcStudy: "🎓 Études",
                 svcStateStudy: "Fermé pour obligations scolaires",
@@ -5097,7 +5152,7 @@
                 userGuideOrderTitle: "🍹 Comment commander",
                 userGuideOrderBody: "<p>Choisissez une catégorie dans les onglets en haut (Cocktails, Snacks, Boissons, Desserts, Produits dérivés...) et touchez le produit voulu.</p><p>Choisissez la variante, l'emplacement (où vous êtes, à la maison, au jardin) et l'heure préférée, puis touchez <strong>Confirmer la Commande</strong>. Le prix affiché est déjà le prix final.</p><p>Parfois un produit complémentaire est suggéré : vous pouvez l'ajouter d'un geste ou l'ignorer, c'est toujours facultatif.</p><p>Le <strong>livre de cocktails en PDF</strong> fonctionne différemment : dès que le paiement est clôturé, il apparaît dans <strong>📚 Ma bibliothèque</strong>, un panneau qui reste pour toujours — vous pouvez le retélécharger à tout moment.</p>",
                 userGuidePayTitle: "💳 Comment payer",
-                userGuidePayBody: "<p>Vos commandes restent dans votre <strong>historique</strong> jusqu'à ce que vous clôturiez l'addition. Une fois terminé, touchez <strong>Payer et clôturer l'addition</strong>.</p><p>Si vous avez un solde sur la carte prépayée, vous pouvez payer avec et obtenir <strong>10% de réduction</strong>. Sinon, vous payez en espèces : la demande est envoyée, et l'addition se clôture quand Daniel confirme avoir reçu l'argent.</p><p>Pour recharger la carte, touchez <strong>+ Recharger</strong> dans l'encadré doré, choisissez le montant et remettez l'argent à Daniel : le solde apparaîtra dès sa confirmation.</p>",
+                userGuidePayBody: "<p>Vos commandes restent dans votre <strong>historique</strong> jusqu'à ce que vous clôturiez l'addition. Une fois terminé, touchez <strong>Payer et clôturer l'addition</strong>.</p><p>Si vous avez un solde sur la carte prépayée, vous pouvez payer avec et obtenir <strong>10% de réduction</strong>. Sinon, vous payez en espèces : la demande est envoyée, et l'addition se clôture quand Daniel confirme avoir reçu l'argent.</p><p>Pour recharger la carte, touchez <strong>+ Recharger</strong> dans l'encadré doré, choisissez le montant et remettez l'argent à Daniel : le solde apparaîtra dès sa confirmation.</p><p>Si vous le souhaitez, vous pouvez aussi <strong>faire don de votre solde</strong> à l'activité à tout moment, via le bouton dédié dans l'encadré de la carte.</p>",
                 userGuideChoresTitle: "🧹 Corvées pour Daniel",
                 userGuideChoresBody: "<p>Dans l'onglet <strong>Corvées</strong>, vous pouvez confier à Daniel de petites tâches ménagères (promener le chien, passer l'aspirateur...) avec un pourboire déjà indiqué.</p><p>Suivez le statut dans le panneau <strong>Mes corvées assignées</strong> : reste « à faire » jusqu'à ce que Daniel la marque terminée.</p>",
                 userGuidePartyTitle: "🎉 Réserver une fête",
@@ -5382,6 +5437,11 @@
 
                 soldOutLabel: "ЗАКІНЧИВСЯ",
 
+                donateBtn: "Пожертвувати баланс бізнесу",
+                confirmDonate: "Підтверджуєте пожертву {amount} бізнесу? Дію не можна скасувати.",
+                donateThanksMsg: "💝 Дякуємо за пожертву!",
+                donationsTitle: "Отримані пожертви",
+                donationsTotalLabel: "Всього пожертвувано:",
                 supervisorViewOnly: "Лише перегляд",
                 svcStudy: "🎓 Навчання",
                 svcStateStudy: "Зачинено через шкільні справи",
@@ -5404,7 +5464,7 @@
                 userGuideOrderTitle: "🍹 Як замовити",
                 userGuideOrderBody: "<p>Оберіть категорію на вкладках вгорі (Коктейлі, Закуски, Напої, Десерти, Мерч...) і торкніться потрібного товару.</p><p>Оберіть варіант, місце (де ви, вдома, у саду) та бажаний час, потім торкніться <strong>Підтвердити замовлення</strong>. Показана ціна вже остаточна.</p><p>Іноді пропонується супутній товар: можна додати одним дотиком або проігнорувати — це завжди необов'язково.</p><p><strong>Книга коктейлів у PDF</strong> працює інакше: щойно оплату закрито, вона з'являється в <strong>📚 Моя бібліотека</strong> — панелі, яка залишається назавжди, тож можна завантажити знову будь-коли.</p>",
                 userGuidePayTitle: "💳 Як оплатити",
-                userGuidePayBody: "<p>Ваші замовлення залишаються в <strong>історії</strong>, доки ви не закриєте рахунок. Коли готові, торкніться <strong>Оплатити і закрити рахунок</strong>.</p><p>Якщо на картці є баланс, можна оплатити ним і отримати <strong>знижку 10%</strong>. Інакше оплата готівкою: запит надсилається, і рахунок закривається, коли Денні підтвердить отримання грошей.</p><p>Щоб поповнити картку, торкніться <strong>+ Поповнити</strong> у золотистому блоці, оберіть суму й передайте готівку Денні: баланс з'явиться одразу після підтвердження.</p>",
+                userGuidePayBody: "<p>Ваші замовлення залишаються в <strong>історії</strong>, доки ви не закриєте рахунок. Коли готові, торкніться <strong>Оплатити і закрити рахунок</strong>.</p><p>Якщо на картці є баланс, можна оплатити ним і отримати <strong>знижку 10%</strong>. Інакше оплата готівкою: запит надсилається, і рахунок закривається, коли Денні підтвердить отримання грошей.</p><p>Щоб поповнити картку, торкніться <strong>+ Поповнити</strong> у золотистому блоці, оберіть суму й передайте готівку Денні: баланс з'явиться одразу після підтвердження.</p><p>За бажанням ви також можете будь-коли <strong>пожертвувати свій баланс</strong> бізнесу, скориставшись спеціальною кнопкою в блоці картки.</p>",
                 userGuideChoresTitle: "🧹 Справи для Денні",
                 userGuideChoresBody: "<p>У вкладці <strong>Справи</strong> можна доручити Денні невеликі домашні справи (вигуляти собаку, попилососити...) із заздалегідь вказаними чайовими.</p><p>Стежте за статусом у панелі <strong>Мої доручені справи</strong>: залишається \"не зроблено\", доки Денні не позначить виконаним.</p>",
                 userGuidePartyTitle: "🎉 Забронювати свято",
@@ -5688,6 +5748,11 @@
                 specialOffer: "PROMOÇÃO",
                 soldOutLabel: "ESGOTADO",
 
+                donateBtn: "Doar o saldo ao negócio",
+                confirmDonate: "Confirma doar {amount} ao negócio? Não pode ser desfeito.",
+                donateThanksMsg: "💝 Obrigado pela doação!",
+                donationsTitle: "Doações recebidas",
+                donationsTotalLabel: "Total doado:",
                 supervisorViewOnly: "Apenas vista",
                 svcStudy: "🎓 Estudo",
                 svcStateStudy: "Fechado por compromissos escolares",
@@ -5710,7 +5775,7 @@
                 userGuideOrderTitle: "🍹 Como encomendar",
                 userGuideOrderBody: "<p>Escolha uma categoria nos separadores no topo (Cocktails, Snacks, Bebidas, Sobremesas, Merchandising...) e toque no produto que quer.</p><p>Escolha a variante, a localização (onde está, em casa, no jardim) e o horário preferido, depois toque em <strong>Confirmar Pedido</strong>. O preço mostrado já é o final.</p><p>Por vezes surge um produto sugerido a condizer: pode adicioná-lo com um toque ou ignorar, é sempre opcional.</p><p>O <strong>livro de cocktails em PDF</strong> funciona de forma diferente: assim que o pagamento é fechado, aparece na <strong>📚 A minha biblioteca</strong>, um painel que fica para sempre — pode voltar a descarregá-lo quando quiser.</p>",
                 userGuidePayTitle: "💳 Como se paga",
-                userGuidePayBody: "<p>Os seus pedidos ficam no <strong>histórico</strong> até fechar a conta. Quando terminar, toque em <strong>Pagar e fechar conta</strong>.</p><p>Se tiver saldo no cartão pré-pago, pode optar por pagar com ele e obter <strong>10% de desconto</strong>. Caso contrário paga-se em dinheiro: o pedido é enviado e a conta fecha quando o Daniel confirmar que recebeu o dinheiro.</p><p>Para carregar o cartão, toque em <strong>+ Carregar</strong> na caixa dourada, escolha o valor e entregue o dinheiro ao Daniel: o saldo aparece assim que ele confirmar.</p>",
+                userGuidePayBody: "<p>Os seus pedidos ficam no <strong>histórico</strong> até fechar a conta. Quando terminar, toque em <strong>Pagar e fechar conta</strong>.</p><p>Se tiver saldo no cartão pré-pago, pode optar por pagar com ele e obter <strong>10% de desconto</strong>. Caso contrário paga-se em dinheiro: o pedido é enviado e a conta fecha quando o Daniel confirmar que recebeu o dinheiro.</p><p>Para carregar o cartão, toque em <strong>+ Carregar</strong> na caixa dourada, escolha o valor e entregue o dinheiro ao Daniel: o saldo aparece assim que ele confirmar.</p><p>Se quiser, também pode <strong>doar o seu saldo</strong> ao negócio a qualquer momento, através do botão dedicado na caixa do cartão.</p>",
                 userGuideChoresTitle: "🧹 Tarefas para o Daniel",
                 userGuideChoresBody: "<p>No separador <strong>Tarefas</strong> pode atribuir ao Daniel pequenas tarefas domésticas (passear o cão, aspirar...) com uma gorjeta já indicada.</p><p>Acompanhe o estado no painel <strong>As minhas tarefas atribuídas</strong>: fica \"por fazer\" até o Daniel a marcar como feita.</p>",
                 userGuidePartyTitle: "🎉 Reservar uma festa",
@@ -7686,6 +7751,9 @@
             panel.style.display = 'block';
             document.getElementById('walletBalanceAmount').textContent = formatPrice(walletBalance);
 
+            const donateBtn = document.getElementById('walletDonateBtn');
+            if (donateBtn) donateBtn.style.display = walletBalance > 0 ? 'block' : 'none';
+
             const pendingNote = document.getElementById('walletPendingNote');
             if (myPendingTopup) {
                 pendingNote.style.display = 'block';
@@ -7693,6 +7761,78 @@
             } else {
                 pendingNote.style.display = 'none';
             }
+        }
+
+        // =============================================
+        // DONAZIONE DEL SALDO ALL'ATTIVITÀ
+        // Ognuno decide solo del proprio saldo, mai di quello altrui: è
+        // una scelta volontaria, non un prelievo imposto dall'alto.
+        // =============================================
+        async function donateWalletToBusiness() {
+            if (walletBalance <= 0) return;
+            const amount = walletBalance;
+            if (!confirm(t('confirmDonate').replace('{amount}', formatPrice(amount)))) return;
+
+            await writeWalletBalance(0);
+
+            const donation = {
+                id: Date.now(),
+                userId: getUserId(customerName),
+                customerName: customerName,
+                amount: amount,
+                date: new Date().toLocaleDateString('it-IT'),
+                time: new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })
+            };
+
+            if (cloudReady()) {
+                try { await firestoreDb.collection('donations').doc(String(donation.id)).set(donation); }
+                catch (error) { console.log('Errore salvataggio donazione:', error); }
+            }
+
+            let message = `💝 *DONAZIONE RICEVUTA*\n\n`;
+            message += `👤 *Da:* ${customerName}\n`;
+            message += `💰 *Importo:* ${formatPrice(amount)}\n`;
+            message += `\nHa donato tutto il saldo della sua carta all'attività!`;
+            openWhatsApp(ADMIN_PHONE, encodeURIComponent(message));
+
+            const successMsg = document.getElementById('successMessage');
+            successMsg.textContent = t('donateThanksMsg');
+            successMsg.classList.add('show');
+            setTimeout(() => successMsg.classList.remove('show'), 3500);
+
+            loadDonationsFromCloud();
+        }
+
+        // --- Vista supervisione: quanto è stato donato in totale ---
+        let donationsList = [];
+
+        async function loadDonationsFromCloud() {
+            if (!cloudReady() || !canSupervise()) return;
+            try {
+                const snapshot = await firestoreDb.collection('donations').get();
+                donationsList = snapshot.docs.map(d => d.data()).sort((a, b) => b.id - a.id);
+                renderDonationsPanel();
+            } catch (error) {
+                console.log('Donazioni non disponibili:', error);
+            }
+        }
+
+        function renderDonationsPanel() {
+            const panel = document.getElementById('donationsPanel');
+            if (!panel) return;
+            if (!canSupervise() || donationsList.length === 0) { panel.style.display = 'none'; return; }
+
+            panel.style.display = 'block';
+            const total = donationsList.reduce((sum, d) => sum + d.amount, 0);
+            document.getElementById('donationsTotal').textContent = formatPrice(total);
+            document.getElementById('donationsList').innerHTML = donationsList.map(d => `
+                <div class="chore-row">
+                    <div class="chore-row-info">
+                        <strong>${d.customerName}</strong> — <span class="chore-tip">${formatPrice(d.amount)}</span><br>
+                        <small>${d.date} ${d.time}</small>
+                    </div>
+                </div>
+            `).join('');
         }
 
         // --- Richiesta di ricarica (il cliente la avvia, Daniel la conferma) ---
@@ -8129,11 +8269,11 @@
         // l'utente lo apre almeno una volta.
         // =============================================
         const GUIDE_VERSIONS = {
-            start: 1, prices: 1, stock: 1, hours: 2, orders: 1, payments: 1,
+            start: 1, prices: 1, stock: 1, hours: 2, orders: 1, payments: 2,
             reviews: 1, chores: 1, merch: 1, party: 3, supervisor: 3, study: 3, tech: 1
         };
         const USER_GUIDE_VERSIONS = {
-            order: 1, pay: 1, chores: 1, party: 1, reviews: 1, share: 1, offline: 1, danny: 1
+            order: 1, pay: 2, chores: 1, party: 1, reviews: 1, share: 1, offline: 1, danny: 1
         };
 
         function getSeenGuideVersions(storageKey) {
@@ -11449,6 +11589,7 @@
                 });
                 if (!isAdmin()) loadMyLibraryFromCloud();
                 loadStudyChecklistFromCloud();
+                loadDonationsFromCloud();
             };
             poll();
             setInterval(poll, 15000); // ogni 15 secondi
@@ -11489,6 +11630,7 @@
         loadPartyBookingsFromCloud(); // Carica le prenotazioni feste
         loadMyLibraryFromCloud(); // Carica gli acquisti digitali (es. il libro PDF)
         loadStudyChecklistFromCloud(); // Carica/azzera la checklist studio del giorno
+        loadDonationsFromCloud(); // Carica il totale donazioni (solo per chi supervisiona)
         renderLowStockPanel(); // Avvisi scorte per l'admin
         syncPendingOrders(); // Invia gli ordini rimasti in coda da sessioni offline
         initDanny();         // Attiva il barista virtuale
