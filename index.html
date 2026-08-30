@@ -2371,7 +2371,7 @@
 
         .news-banner-slide {
             position: relative;
-            min-height: 50px;
+            min-height: 100px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -2413,13 +2413,12 @@
             text-shadow: 0 1px 4px rgba(0,0,0,0.4);
         }
 
-        /* Stesso stile a pillola dorata scorrevole del badge "Premium",
-           generalizzato: qui il testo lo decide Daniel messaggio per
-           messaggio, non è fisso su "Premium". */
+        /* Stesso stile a pillola scorrevole del badge "Premium",
+           generalizzato: testo e colore li decide Daniel messaggio per
+           messaggio, e può anche scegliere di non mostrarlo affatto. */
         .news-banner-badge {
             position: relative;
             z-index: 1;
-            background: linear-gradient(100deg, #D4AF37 0%, #F6E27A 45%, #D4AF37 55%, var(--palm) 100%);
             background-size: 220% 100%;
             color: #fff;
             font-family: var(--font-body);
@@ -2431,6 +2430,22 @@
             white-space: nowrap;
             box-shadow: 0 2px 8px rgba(27, 58, 92, 0.3);
             animation: shimmer 3.5s linear infinite;
+        }
+
+        .news-banner-badge--gold {
+            background-image: linear-gradient(100deg, #D4AF37 0%, #F6E27A 45%, #D4AF37 55%, var(--palm) 100%);
+        }
+
+        .news-banner-badge--coral {
+            background-image: linear-gradient(100deg, var(--coral) 0%, #FFC7B8 45%, var(--coral) 55%, var(--coral-deep) 100%);
+        }
+
+        .news-banner-badge--lagoon {
+            background-image: linear-gradient(100deg, var(--lagoon) 0%, #9FEFE7 45%, var(--lagoon) 55%, #1FA396 100%);
+        }
+
+        .news-banner-badge--red {
+            background-image: linear-gradient(100deg, #B03A2E 0%, #FF9C89 45%, #B03A2E 55%, #8E2C22 100%);
         }
 
         .pagination {
@@ -2740,6 +2755,19 @@
                 <button id="superStudyToggleBtn" class="btn btn-primary" style="width:100%;" onclick="toggleStudyModeDirect()"></button>
             </div>
 
+            <!-- Banner novità: anche Renato può modificarne i messaggi,
+                 senza però avere accesso al resto del listino. -->
+            <div id="superNewsBannerPanel" class="orders-section" style="display:none; margin-bottom:20px; border-left:4px solid var(--lagoon);">
+                <h2 style="margin-bottom:10px;">📰 Banner novità</h2>
+                <label class="soldout-toggle" style="margin-bottom:12px;">
+                    <input type="checkbox" id="newsBannerEnabledSuper">
+                    <span data-i18n="newsBannerEnableLabel">Mostra il banner ai clienti</span>
+                </label>
+                <div id="newsMsgRowsSuper"></div>
+                <button type="button" class="checklist-photo-btn" style="width:100%; margin-top:8px;" onclick="addNewsMsgRow('newsMsgRowsSuper')">+ <span data-i18n="newsAddMsg">Aggiungi messaggio</span></button>
+                <button type="button" class="btn btn-primary" style="width:100%; margin-top:12px;" onclick="saveNewsBannerAsSupervisor()" data-i18n="saveNewsBannerBtn">💾 Salva banner</button>
+            </div>
+
             <!-- Donazioni ricevute: visibile a Daniel e Renato, in sola lettura -->
             <div id="donationsPanel" class="orders-section collapsible-panel collapsed" style="display:none; margin-bottom:20px;">
                 <button type="button" class="collapsible-header" onclick="toggleCollapsible('donationsPanel')">
@@ -2903,7 +2931,7 @@
 
     <div id="danny" class="danny" style="display:none;">
         <!-- Un solo pulsante ❓ per tutti: guida admin per Daniel, guida d'uso per i clienti -->
-        <button id="helpBtn" class="help-btn" onclick="openHelp()" style="display:none;" aria-label="Guida" title="Guida">❓</button>
+        <button id="helpBtn" class="help-btn" onclick="openHelp()" style="display:none; font-size:1.5em;" aria-label="Guida" title="Guida">?</button>
         <button id="myAreaBtn" class="help-btn my-area-btn" onclick="openMyArea()" style="display:none;" aria-label="La mia area" title="La mia area">📂</button>
         <div id="dannyBubble" class="danny-bubble" style="display:none;">
             <button class="danny-close" onclick="dismissDanny()" aria-label="Chiudi">✕</button>
@@ -4095,6 +4123,12 @@
 
                 soldOutLabel: "ESAURITO",
 
+                saveNewsBannerBtn: "💾 Salva banner",
+                newsBadgeShowLabel: "Mostra badge",
+                newsColorGold: "Oro",
+                newsColorCoral: "Corallo",
+                newsColorLagoon: "Laguna",
+                newsColorRed: "Rosso",
                 newsBgPlaceholder: "URL immagine sfondo (opzionale)",
                 newsBadgePlaceholder: "Badge animato (opzionale, es: NOVITÀ)",
                 newsBannerSectionTitle: "Banner novità",
@@ -4424,6 +4458,12 @@
 
                 soldOutLabel: "SOLD OUT",
 
+                saveNewsBannerBtn: "💾 Save banner",
+                newsBadgeShowLabel: "Show badge",
+                newsColorGold: "Gold",
+                newsColorCoral: "Coral",
+                newsColorLagoon: "Lagoon",
+                newsColorRed: "Red",
                 newsBgPlaceholder: "Background image URL (optional)",
                 newsBadgePlaceholder: "Animated badge (optional, e.g: NEW)",
                 newsBannerSectionTitle: "News banner",
@@ -4753,6 +4793,12 @@
 
                 soldOutLabel: "AGOTADO",
 
+                saveNewsBannerBtn: "💾 Guardar banner",
+                newsBadgeShowLabel: "Mostrar insignia",
+                newsColorGold: "Oro",
+                newsColorCoral: "Coral",
+                newsColorLagoon: "Laguna",
+                newsColorRed: "Rojo",
                 newsBgPlaceholder: "URL imagen de fondo (opcional)",
                 newsBadgePlaceholder: "Insignia animada (opcional, ej: NOVEDAD)",
                 newsBannerSectionTitle: "Banner de novedades",
@@ -5082,6 +5128,12 @@
 
                 soldOutLabel: "AUSVERKAUFT",
 
+                saveNewsBannerBtn: "💾 Banner speichern",
+                newsBadgeShowLabel: "Badge anzeigen",
+                newsColorGold: "Gold",
+                newsColorCoral: "Koralle",
+                newsColorLagoon: "Lagune",
+                newsColorRed: "Rot",
                 newsBgPlaceholder: "Hintergrundbild-URL (optional)",
                 newsBadgePlaceholder: "Animiertes Badge (optional, z.B.: NEU)",
                 newsBannerSectionTitle: "Neuigkeiten-Banner",
@@ -5411,6 +5463,12 @@
 
                 soldOutLabel: "ÉPUISÉ",
 
+                saveNewsBannerBtn: "💾 Enregistrer le bandeau",
+                newsBadgeShowLabel: "Afficher le badge",
+                newsColorGold: "Or",
+                newsColorCoral: "Corail",
+                newsColorLagoon: "Lagon",
+                newsColorRed: "Rouge",
                 newsBgPlaceholder: "URL de l'image de fond (facultatif)",
                 newsBadgePlaceholder: "Badge animé (facultatif, ex : NOUVEAU)",
                 newsBannerSectionTitle: "Bandeau actualités",
@@ -5740,6 +5798,12 @@
 
                 soldOutLabel: "ЗАКІНЧИВСЯ",
 
+                saveNewsBannerBtn: "💾 Зберегти банер",
+                newsBadgeShowLabel: "Показувати бейдж",
+                newsColorGold: "Золотий",
+                newsColorCoral: "Кораловий",
+                newsColorLagoon: "Лагуна",
+                newsColorRed: "Червоний",
                 newsBgPlaceholder: "URL фонового зображення (необов’язково)",
                 newsBadgePlaceholder: "Анімований бейдж (необов’язково, напр.: НОВИНКА)",
                 newsBannerSectionTitle: "Банер новин",
@@ -6068,6 +6132,12 @@
                 specialOffer: "PROMOÇÃO",
                 soldOutLabel: "ESGOTADO",
 
+                saveNewsBannerBtn: "💾 Guardar banner",
+                newsBadgeShowLabel: "Mostrar selo",
+                newsColorGold: "Dourado",
+                newsColorCoral: "Coral",
+                newsColorLagoon: "Lagoa",
+                newsColorRed: "Vermelho",
                 newsBgPlaceholder: "URL da imagem de fundo (opcional)",
                 newsBadgePlaceholder: "Selo animado (opcional, ex.: NOVIDADE)",
                 newsBannerSectionTitle: "Banner de novidades",
@@ -7244,10 +7314,10 @@
                 newsBanner: {
                     enabled: true,
                     messages: [
-                        { text: '🎉 Scopri i nostri pacchetti festa a tema!', bgImage: '', badge: '' },
-                        { text: '💳 Paga con la carta prepagata e risparmia il 10%!', bgImage: '', badge: '' },
-                        { text: '📖 Il libro dei cocktail di Daniel, ora in PDF!', bgImage: '', badge: 'NOVITÀ' },
-                        { text: '⭐ Lascia una recensione, ci aiuta a crescere!', bgImage: '', badge: '' }
+                        { text: '🎉 Scopri i nostri pacchetti festa a tema!', bgImage: '', badge: '', badgeEnabled: false, badgeColor: 'gold' },
+                        { text: '💳 Paga con la carta prepagata e risparmia il 10%!', bgImage: '', badge: '', badgeEnabled: false, badgeColor: 'gold' },
+                        { text: '📖 Il libro dei cocktail di Daniel, ora in PDF!', bgImage: '', badge: 'NOVITÀ', badgeEnabled: true, badgeColor: 'coral' },
+                        { text: '⭐ Lascia una recensione, ci aiuta a crescere!', bgImage: '', badge: '', badgeEnabled: false, badgeColor: 'gold' }
                     ]
                 },
                 service: {
@@ -7346,8 +7416,47 @@
         // (dati salvati prima di questa funzionalità), lo trattiamo come
         // solo testo, senza sfondo né badge.
         function normalizeNewsMessage(m) {
-            if (typeof m === 'string') return { text: m, bgImage: '', badge: '' };
-            return { text: m.text || '', bgImage: m.bgImage || '', badge: m.badge || '' };
+            if (typeof m === 'string') return { text: m, bgImage: '', badge: '', badgeEnabled: false, badgeColor: 'gold' };
+            return {
+                text: m.text || '',
+                bgImage: m.bgImage || '',
+                badge: m.badge || '',
+                // Se il campo non esiste ancora (dati salvati prima di
+                // questo controllo esplicito), il comportamento resta
+                // quello di prima: badge visibile se c'è del testo.
+                badgeEnabled: (m.badgeEnabled !== undefined) ? m.badgeEnabled : !!m.badge,
+                badgeColor: m.badgeColor || 'gold'
+            };
+        }
+
+        // Le card dei singoli messaggi: condivise tra il listino di
+        // Daniel e il pannello dedicato di Renato, così le due interfacce
+        // restano sempre coerenti tra loro.
+        function buildNewsMsgCardsHTML(messages) {
+            return messages.map(normalizeNewsMessage).map((msg, i) => `
+                <div class="news-msg-card">
+                    <div style="display:flex; gap:6px; align-items:center;">
+                        <input type="text" data-news-text="${i}" value="${msg.text.replace(/"/g, '&quot;')}"
+                               style="flex:1;" placeholder="${t('newsMsgPlaceholder')}">
+                        <button type="button" class="reject-btn" style="padding:8px 12px;" onclick="this.closest('.news-msg-card').remove()">✕</button>
+                    </div>
+                    <input type="text" data-news-bg="${i}" value="${msg.bgImage.replace(/"/g, '&quot;')}"
+                           placeholder="${t('newsBgPlaceholder')}" style="margin-top:6px;">
+                    <input type="text" data-news-badge="${i}" value="${msg.badge.replace(/"/g, '&quot;')}"
+                           placeholder="${t('newsBadgePlaceholder')}" style="margin-top:6px;">
+                    <div style="display:flex; gap:8px; align-items:center; margin-top:8px;">
+                        <label class="soldout-toggle" style="margin:0; flex-shrink:0;">
+                            <input type="checkbox" data-news-badge-enabled="${i}" ${msg.badgeEnabled ? 'checked' : ''}>
+                            <span style="font-size:0.85em;">${t('newsBadgeShowLabel')}</span>
+                        </label>
+                        <select data-news-badge-color="${i}" style="flex:1; padding:6px; border:2px solid var(--sand-deep); border-radius:6px; font-size:0.85em;">
+                            <option value="gold" ${msg.badgeColor === 'gold' ? 'selected' : ''}>${t('newsColorGold')}</option>
+                            <option value="coral" ${msg.badgeColor === 'coral' ? 'selected' : ''}>${t('newsColorCoral')}</option>
+                            <option value="lagoon" ${msg.badgeColor === 'lagoon' ? 'selected' : ''}>${t('newsColorLagoon')}</option>
+                            <option value="red" ${msg.badgeColor === 'red' ? 'selected' : ''}>${t('newsColorRed')}</option>
+                        </select>
+                    </div>
+                </div>`).join('');
         }
 
         function renderNewsBannerSlide(msg) {
@@ -7365,8 +7474,12 @@
 
             textEl.textContent = msg.text;
 
-            if (msg.badge) {
+            // Il badge compare solo se ESPLICITAMENTE attivato e con un
+            // testo: Daniel può preparare il testo e tenerlo spento senza
+            // doverlo cancellare.
+            if (msg.badgeEnabled && msg.badge) {
                 badgeEl.textContent = msg.badge;
+                badgeEl.className = 'news-banner-badge news-banner-badge--' + msg.badgeColor;
                 badgeEl.style.display = 'inline-block';
             } else {
                 badgeEl.style.display = 'none';
@@ -7863,6 +7976,55 @@
         // funzione a parte lascia spazio ad altri controlli futuri.
         function renderSupervisorPanel() {
             renderSuperStudyControl();
+            renderSuperNewsBannerEditor();
+        }
+
+        // Riempie il pannello di Renato con le card correnti dei messaggi:
+        // stessa interfaccia del listino di Daniel, ma un salvataggio a
+        // parte che tocca solo il banner, non il resto dei prezzi.
+        function renderSuperNewsBannerEditor() {
+            const panel = document.getElementById('superNewsBannerPanel');
+            if (!panel) return;
+            if (!isSuperAdmin()) { panel.style.display = 'none'; return; }
+
+            panel.style.display = 'block';
+            const cfg = pricing.newsBanner || { enabled: true, messages: [] };
+            document.getElementById('newsBannerEnabledSuper').checked = cfg.enabled;
+            document.getElementById('newsMsgRowsSuper').innerHTML = buildNewsMsgCardsHTML(cfg.messages);
+        }
+
+        async function saveNewsBannerAsSupervisor() {
+            if (!isSuperAdmin()) return;
+
+            const newsMessages = Array.from(document.querySelectorAll('#newsMsgRowsSuper .news-msg-card'))
+                .map(card => ({
+                    text: card.querySelector('[data-news-text]').value.trim(),
+                    bgImage: card.querySelector('[data-news-bg]').value.trim(),
+                    badge: card.querySelector('[data-news-badge]').value.trim(),
+                    badgeEnabled: card.querySelector('[data-news-badge-enabled]').checked,
+                    badgeColor: card.querySelector('[data-news-badge-color]').value
+                }))
+                .filter(m => m.text);
+
+            pricing.newsBanner = {
+                enabled: document.getElementById('newsBannerEnabledSuper').checked,
+                messages: newsMessages
+            };
+
+            startNewsBanner(); // effetto visibile subito sul proprio dispositivo
+
+            if (cloudReady()) {
+                try {
+                    await firestoreDb.collection('settings').doc('pricing').set(pricing, { merge: true });
+                } catch (error) {
+                    console.log('Errore salvataggio banner (supervisore):', error);
+                }
+            }
+
+            const successMsg = document.getElementById('successMessage');
+            successMsg.textContent = t('priceListSaved');
+            successMsg.classList.add('show');
+            setTimeout(() => successMsg.classList.remove('show'), 3000);
         }
 
         function renderSuperStudyControl() {
@@ -9032,8 +9194,8 @@
             if (section) section.classList.toggle('collapsed');
         }
 
-        function addNewsMsgRow() {
-            const container = document.getElementById('newsMsgRows');
+        function addNewsMsgRow(containerId) {
+            const container = document.getElementById(containerId || 'newsMsgRows');
             const idx = container.children.length;
             const card = document.createElement('div');
             card.className = 'news-msg-card';
@@ -9043,7 +9205,19 @@
                     <button type="button" class="reject-btn" style="padding:8px 12px;" onclick="this.closest('.news-msg-card').remove()">✕</button>
                 </div>
                 <input type="text" data-news-bg="${idx}" value="" placeholder="${t('newsBgPlaceholder')}" style="margin-top:6px;">
-                <input type="text" data-news-badge="${idx}" value="" placeholder="${t('newsBadgePlaceholder')}" style="margin-top:6px;">`;
+                <input type="text" data-news-badge="${idx}" value="" placeholder="${t('newsBadgePlaceholder')}" style="margin-top:6px;">
+                <div style="display:flex; gap:8px; align-items:center; margin-top:8px;">
+                    <label class="soldout-toggle" style="margin:0; flex-shrink:0;">
+                        <input type="checkbox" data-news-badge-enabled="${idx}">
+                        <span style="font-size:0.85em;">${t('newsBadgeShowLabel')}</span>
+                    </label>
+                    <select data-news-badge-color="${idx}" style="flex:1; padding:6px; border:2px solid var(--sand-deep); border-radius:6px; font-size:0.85em;">
+                        <option value="gold">${t('newsColorGold')}</option>
+                        <option value="coral">${t('newsColorCoral')}</option>
+                        <option value="lagoon">${t('newsColorLagoon')}</option>
+                        <option value="red">${t('newsColorRed')}</option>
+                    </select>
+                </div>`;
             container.appendChild(card);
         }
 
@@ -9223,18 +9397,7 @@
             // (testo, sfondo immagine opzionale, badge animato opzionale)
             const buildNewsBannerSection = () => {
                 const cfg = pricing.newsBanner || { enabled: true, messages: [] };
-                const rows = cfg.messages.map(normalizeNewsMessage).map((msg, i) => `
-                    <div class="news-msg-card">
-                        <div style="display:flex; gap:6px; align-items:center;">
-                            <input type="text" data-news-text="${i}" value="${msg.text.replace(/"/g, '&quot;')}"
-                                   style="flex:1;" placeholder="${t('newsMsgPlaceholder')}">
-                            <button type="button" class="reject-btn" style="padding:8px 12px;" onclick="this.closest('.news-msg-card').remove()">✕</button>
-                        </div>
-                        <input type="text" data-news-bg="${i}" value="${msg.bgImage.replace(/"/g, '&quot;')}"
-                               placeholder="${t('newsBgPlaceholder')}" style="margin-top:6px;">
-                        <input type="text" data-news-badge="${i}" value="${msg.badge.replace(/"/g, '&quot;')}"
-                               placeholder="${t('newsBadgePlaceholder')}" style="margin-top:6px;">
-                    </div>`).join('');
+                const rows = buildNewsMsgCardsHTML(cfg.messages);
 
                 return `
                     <div class="price-section collapsed" id="section-newsbanner">
@@ -9249,7 +9412,7 @@
                                 <span>${t('newsBannerEnableLabel')}</span>
                             </label>
                             <div id="newsMsgRows">${rows}</div>
-                            <button type="button" class="checklist-photo-btn" style="width:100%; margin-top:8px;" onclick="addNewsMsgRow()">+ ${t('newsAddMsg')}</button>
+                            <button type="button" class="checklist-photo-btn" style="width:100%; margin-top:8px;" onclick="addNewsMsgRow('newsMsgRows')">+ ${t('newsAddMsg')}</button>
                         </div>
                     </div>`;
             };
@@ -9479,7 +9642,9 @@
                 .map(card => ({
                     text: card.querySelector('[data-news-text]').value.trim(),
                     bgImage: card.querySelector('[data-news-bg]').value.trim(),
-                    badge: card.querySelector('[data-news-badge]').value.trim()
+                    badge: card.querySelector('[data-news-badge]').value.trim(),
+                    badgeEnabled: card.querySelector('[data-news-badge-enabled]').checked,
+                    badgeColor: card.querySelector('[data-news-badge-color]').value
                 }))
                 .filter(m => m.text);
             updated.newsBanner = {
