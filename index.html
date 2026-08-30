@@ -1812,13 +1812,13 @@
             align-items: center;
             justify-content: center;
             align-self: flex-end;
-            width: 40px;
-            height: 40px;
+            width: 56px;
+            height: 56px;
             border-radius: 50%;
             border: 3px solid var(--sand);
             background: linear-gradient(140deg, var(--lagoon) 0%, #1FA396 100%);
             color: #fff;
-            font-size: 1.05em;
+            font-size: 1.3em;
             font-weight: 700;
             cursor: pointer;
             box-shadow: 0 4px 14px rgba(46, 196, 182, 0.5);
@@ -2621,6 +2621,115 @@
         </div>
     </div>
 
+    <!-- "La mia area": raccoglie in un'unica pagina i pannelli personali
+         e gestionali, tenendo la home dedicata solo a sfogliare/ordinare. -->
+    <div class="modal" id="myAreaModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeMyArea()" aria-label="Chiudi">✕</button>
+            <h2 style="margin-bottom:16px;">📂 <span data-i18n="myAreaTitle">La mia area</span></h2>
+
+            <!-- Controllo rapido Modalità studio: l'unica azione concessa al
+                 supervisore (Renato). Tutto il resto dei pannelli è sola vista. -->
+            <div id="superStudyControlPanel" class="orders-section" style="display:none; margin-bottom:20px; border-left:4px solid var(--lagoon);">
+                <h2 style="margin-bottom:10px;">🎓 Controllo Modalità Studio</h2>
+                <p id="superStudyStatusText" style="font-size:0.88em; color:var(--dusk-soft); margin-bottom:12px;"></p>
+                <button id="superStudyToggleBtn" class="btn btn-primary" style="width:100%;" onclick="toggleStudyModeDirect()"></button>
+            </div>
+
+            <!-- Donazioni ricevute: visibile a Daniel e Renato, in sola lettura -->
+            <div id="donationsPanel" class="orders-section collapsible-panel collapsed" style="display:none; margin-bottom:20px;">
+                <button type="button" class="collapsible-header" onclick="toggleCollapsible('donationsPanel')">
+                    💝 <span data-i18n="donationsTitle">Donazioni ricevute</span>
+                    <span class="badge" id="donationsCount">0</span>
+                    <span class="pc-chevron">▾</span>
+                </button>
+                <div class="collapsible-body">
+                    <p style="font-size:0.88em; color:var(--dusk-soft); margin-bottom:12px;">
+                        <span data-i18n="donationsTotalLabel">Totale donato:</span> <strong id="donationsTotal">0,00€</strong>
+                    </p>
+                    <div id="donationsList"></div>
+                </div>
+            </div>
+
+            <!-- Checklist studio di Daniel: visibile a tutta la famiglia (per
+                 sapere a che punto è), ma solo Daniel può spuntarla — non ha
+                 senso che qualcun altro segni "fatto" al suo posto. -->
+            <div id="studyChecklistPanel" class="orders-section collapsible-panel collapsed" style="display:none; margin-bottom:20px;">
+                <button type="button" class="collapsible-header" onclick="toggleCollapsible('studyChecklistPanel')">
+                    🎓 <span>Checklist studio di oggi</span>
+                    <span class="badge" id="studyChecklistCount">0/0</span>
+                    <span class="pc-chevron">▾</span>
+                </button>
+                <div class="collapsible-body">
+                    <p class="ing-help" id="studyChecklistDate" style="margin-bottom:4px;"></p>
+                    <p class="ing-help" style="margin-bottom:12px; font-style:italic;">📷 Allega una foto per poter spuntare una voce.</p>
+                    <div id="studyChecklistList"></div>
+                </div>
+            </div>
+
+            <!-- Richieste feste da confermare (solo admin) -->
+            <div id="adminPartyPanel" class="orders-section collapsible-panel collapsed" style="display:none; margin-bottom:20px;">
+                <button type="button" class="collapsible-header" onclick="toggleCollapsible('adminPartyPanel')">
+                    🎉 <span data-i18n="partyRequestsTitle">Richieste feste</span>
+                    <span class="badge" id="partyPendingCount">0</span>
+                    <span class="pc-chevron">▾</span>
+                </button>
+                <div class="collapsible-body">
+                    <div id="partyPendingList"></div>
+
+                    <div id="partyUpcomingBox" class="chore-payout-box" style="display:none;">
+                        <div class="chore-payout-header">📅 <span data-i18n="partyUpcomingTitle">Prossimi eventi confermati</span></div>
+                        <div id="partyUpcomingList"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Le mie feste prenotate (clienti/famiglia) -->
+            <div id="myPartyPanel" class="orders-section collapsible-panel collapsed" style="display:none; margin-bottom:20px;">
+                <button type="button" class="collapsible-header" onclick="toggleCollapsible('myPartyPanel')">
+                    🎉 <span data-i18n="myPartyTitle">Le mie feste prenotate</span>
+                    <span class="badge" id="myPartyCount">0</span>
+                    <span class="pc-chevron">▾</span>
+                </button>
+                <div class="collapsible-body">
+                    <div id="myPartyList"></div>
+                </div>
+            </div>
+
+            <!-- Storico ordini -->
+            <div class="orders-section collapsible-panel collapsed" id="ordersHistoryPanel">
+                <button type="button" class="collapsible-header" onclick="toggleCollapsible('ordersHistoryPanel')">
+                    📋 <span data-i18n="ordersHistory">Storico Ordini</span>
+                    <span class="badge" id="ordersHistoryCount">0</span>
+                    <span class="pc-chevron">▾</span>
+                </button>
+                <div class="collapsible-body">
+                    <div id="ordersList"></div>
+                    <div id="totalSpent" style="display: none; margin-top: 20px; background: linear-gradient(160deg, var(--dusk) 0%, #2C5578 100%); border-radius: var(--radius); padding: 18px; text-align: center; box-shadow: 0 8px 22px rgba(27,58,92,0.35);">
+                        <div style="font-size: 0.8em; color: rgba(255,255,255,0.8); letter-spacing: 0.5px; margin-bottom: 6px;" data-i18n="totalSpentLabel">💰 Totale speso</div>
+                        <div id="totalAmount" style="font-family: var(--font-mono); font-size: 1.9em; font-weight: 700; color: #fff;">0,00€</div>
+                        <div id="totalCount" style="font-size: 0.78em; color: rgba(255,255,255,0.7); margin-top: 2px;"></div>
+                        <div id="openAmountInfo" style="display:none; font-size: 0.85em; color: var(--sand-gold); margin-top: 6px; font-weight: 600;"></div>
+                        <button id="payButton" onclick="payAndClose()" style="margin-top: 14px; background: linear-gradient(135deg, var(--coral) 0%, var(--coral-deep) 100%); color: #fff; border: none; border-radius: var(--radius-sm); padding: 13px 26px; font-family: var(--font-body); font-size: 15px; font-weight: 600; cursor: pointer; transition: transform 0.2s ease; box-shadow: 0 4px 14px rgba(224,73,44,0.4);" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform=''" data-i18n="payButton">✅ Paga e chiudi conto</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- La mia libreria digitale: resta per sempre, anche dopo che
+                 l'ordine è stato pagato e rimosso dallo storico -->
+            <div id="myLibraryPanel" class="orders-section collapsible-panel collapsed" style="display:none; margin-bottom:0;">
+                <button type="button" class="collapsible-header" onclick="toggleCollapsible('myLibraryPanel')">
+                    📚 <span data-i18n="myLibraryTitle">La mia libreria</span>
+                    <span class="badge" id="myLibraryCount">0</span>
+                    <span class="pc-chevron">▾</span>
+                </button>
+                <div class="collapsible-body">
+                    <div id="myLibraryList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Guida per i clienti (tutte le lingue, come il resto dell'app) -->
     <div class="modal" id="userGuideModal">
         <div class="modal-content">
@@ -2691,6 +2800,7 @@
     <div id="danny" class="danny" style="display:none;">
         <!-- Un solo pulsante ❓ per tutti: guida admin per Daniel, guida d'uso per i clienti -->
         <button id="helpBtn" class="help-btn" onclick="openHelp()" style="display:none;" aria-label="Guida" title="Guida">❓</button>
+        <button id="myAreaBtn" class="help-btn my-area-btn" onclick="openMyArea()" style="display:none;" aria-label="La mia area" title="La mia area">📂</button>
         <div id="dannyBubble" class="danny-bubble" style="display:none;">
             <button class="danny-close" onclick="dismissDanny()" aria-label="Chiudi">✕</button>
             <div id="dannyText" class="danny-text"></div>
@@ -2780,29 +2890,6 @@
         <div class="cocktail-grid" id="cocktailGrid"></div>
 
         <!-- Avviso scorte in esaurimento (solo admin) -->
-        <!-- Controllo rapido Modalità studio: l'unica azione concessa al
-             supervisore (Renato). Tutto il resto dei pannelli è sola vista. -->
-        <div id="superStudyControlPanel" class="orders-section" style="display:none; margin-bottom:20px; border-left:4px solid var(--lagoon);">
-            <h2 style="margin-bottom:10px;">🎓 Controllo Modalità Studio</h2>
-            <p id="superStudyStatusText" style="font-size:0.88em; color:var(--dusk-soft); margin-bottom:12px;"></p>
-            <button id="superStudyToggleBtn" class="btn btn-primary" style="width:100%;" onclick="toggleStudyModeDirect()"></button>
-        </div>
-
-        <!-- Donazioni ricevute: visibile a Daniel e Renato, in sola lettura -->
-        <div id="donationsPanel" class="orders-section collapsible-panel collapsed" style="display:none; margin-bottom:20px;">
-            <button type="button" class="collapsible-header" onclick="toggleCollapsible('donationsPanel')">
-                💝 <span data-i18n="donationsTitle">Donazioni ricevute</span>
-                <span class="badge" id="donationsCount">0</span>
-                <span class="pc-chevron">▾</span>
-            </button>
-            <div class="collapsible-body">
-                <p style="font-size:0.88em; color:var(--dusk-soft); margin-bottom:12px;">
-                    <span data-i18n="donationsTotalLabel">Totale donato:</span> <strong id="donationsTotal">0,00€</strong>
-                </p>
-                <div id="donationsList"></div>
-            </div>
-        </div>
-
         <div id="lowStockPanel" class="low-stock-panel collapsed" style="display:none;">
             <button type="button" class="low-stock-toggle" onclick="document.getElementById('lowStockPanel').classList.toggle('collapsed')">
                 <span>⚠️ <span data-i18n="lowStockTitle">Scorte in esaurimento</span></span>
@@ -2848,53 +2935,6 @@
             </div>
         </div>
 
-        <!-- Checklist studio di Daniel: visibile a tutta la famiglia (per
-             sapere a che punto è), ma solo Daniel può spuntarla — non ha
-             senso che qualcun altro segni "fatto" al suo posto. -->
-        <div id="studyChecklistPanel" class="orders-section collapsible-panel collapsed" style="display:none; margin-bottom:20px;">
-            <button type="button" class="collapsible-header" onclick="toggleCollapsible('studyChecklistPanel')">
-                🎓 <span>Checklist studio di oggi</span>
-                <span class="badge" id="studyChecklistCount">0/0</span>
-                <span class="pc-chevron">▾</span>
-            </button>
-            <div class="collapsible-body">
-                <p class="ing-help" id="studyChecklistDate" style="margin-bottom:4px;"></p>
-                <p class="ing-help" style="margin-bottom:12px; font-style:italic;">📷 Allega una foto per poter spuntare una voce.</p>
-                <div id="studyChecklistList"></div>
-            </div>
-        </div>
-
-        <!-- Richieste feste da confermare (solo admin) -->
-        <div id="adminPartyPanel" class="orders-section collapsible-panel collapsed" style="display:none; margin-bottom:20px;">
-            <button type="button" class="collapsible-header" onclick="toggleCollapsible('adminPartyPanel')">
-                🎉 <span data-i18n="partyRequestsTitle">Richieste feste</span>
-                <span class="badge" id="partyPendingCount">0</span>
-                <span class="pc-chevron">▾</span>
-            </button>
-            <div class="collapsible-body">
-                <div id="partyPendingList"></div>
-
-                <div id="partyUpcomingBox" class="chore-payout-box" style="display:none;">
-                    <div class="chore-payout-header">📅 <span data-i18n="partyUpcomingTitle">Prossimi eventi confermati</span></div>
-                    <div id="partyUpcomingList"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Le mie feste prenotate (clienti/famiglia) -->
-        <div id="myPartyPanel" class="orders-section collapsible-panel collapsed" style="display:none; margin-bottom:20px;">
-            <button type="button" class="collapsible-header" onclick="toggleCollapsible('myPartyPanel')">
-                🎉 <span data-i18n="myPartyTitle">Le mie feste prenotate</span>
-                <span class="badge" id="myPartyCount">0</span>
-                <span class="pc-chevron">▾</span>
-            </button>
-            <div class="collapsible-body">
-                <div id="myPartyList"></div>
-            </div>
-        </div>
-
-        <!-- La mia libreria digitale: resta per sempre, anche dopo che
-             l'ordine è stato pagato e rimosso dallo storico -->
         <!-- Sezione admin: richieste di pagamento da confermare -->
         <div id="pendingPaymentsSection" class="orders-section" style="display:none; margin-bottom:20px;">
             <h2 style="margin-bottom:15px;">
@@ -2928,25 +2968,6 @@
             </button>
         </div>
 
-        <!-- Orders Section -->
-        <div class="orders-section collapsible-panel collapsed" id="ordersHistoryPanel">
-            <button type="button" class="collapsible-header" onclick="toggleCollapsible('ordersHistoryPanel')">
-                📋 <span data-i18n="ordersHistory">Storico Ordini</span>
-                <span class="badge" id="ordersHistoryCount">0</span>
-                <span class="pc-chevron">▾</span>
-            </button>
-            <div class="collapsible-body">
-                <div id="ordersList"></div>
-                <div id="totalSpent" style="display: none; margin-top: 20px; background: linear-gradient(160deg, var(--dusk) 0%, #2C5578 100%); border-radius: var(--radius); padding: 18px; text-align: center; box-shadow: 0 8px 22px rgba(27,58,92,0.35);">
-                    <div style="font-size: 0.8em; color: rgba(255,255,255,0.8); letter-spacing: 0.5px; margin-bottom: 6px;" data-i18n="totalSpentLabel">💰 Totale speso</div>
-                    <div id="totalAmount" style="font-family: var(--font-mono); font-size: 1.9em; font-weight: 700; color: #fff;">0,00€</div>
-                    <div id="totalCount" style="font-size: 0.78em; color: rgba(255,255,255,0.7); margin-top: 2px;"></div>
-                    <div id="openAmountInfo" style="display:none; font-size: 0.85em; color: var(--sand-gold); margin-top: 6px; font-weight: 600;"></div>
-                    <button id="payButton" onclick="payAndClose()" style="margin-top: 14px; background: linear-gradient(135deg, var(--coral) 0%, var(--coral-deep) 100%); color: #fff; border: none; border-radius: var(--radius-sm); padding: 13px 26px; font-family: var(--font-body); font-size: 15px; font-weight: 600; cursor: pointer; transition: transform 0.2s ease; box-shadow: 0 4px 14px rgba(224,73,44,0.4);" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform=''" data-i18n="payButton">✅ Paga e chiudi conto</button>
-                </div>
-            </div>
-        </div>
-
         <!-- Review Buttons -->
         <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
             <button onclick="openReviewModal()" style="flex: 1; min-width: 150px; background: rgba(255,244,230,0.72); backdrop-filter: blur(20px) saturate(1.15); -webkit-backdrop-filter: blur(20px) saturate(1.15); color: var(--dusk); border: none; border-radius: var(--radius); padding: 16px 20px; font-family: var(--font-body); font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: var(--shadow-card); transition: transform 0.3s ease, box-shadow 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''" data-i18n="reviewButton">⭐ Lascia una recensione</button>
@@ -2956,20 +2977,6 @@
         <!-- Share Button -->
         <div style="margin-top: 10px;">
             <button onclick="shareApp()" style="width: 100%; background: linear-gradient(135deg, var(--coral) 0%, var(--coral-deep) 100%); color: #fff; border: none; border-radius: var(--radius); padding: 16px 20px; font-family: var(--font-body); font-size: 15px; font-weight: 600; letter-spacing: 0.3px; cursor: pointer; box-shadow: 0 8px 22px rgba(224,73,44,0.4); transition: transform 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''" data-i18n="shareButton">📤 Invita un amico</button>
-        </div>
-    </div>
-
-    <!-- La mia libreria digitale: dopo "Invita un amico", resta per
-         sempre anche dopo che l'ordine è stato pagato e rimosso dallo
-         storico -->
-    <div id="myLibraryPanel" class="orders-section collapsible-panel collapsed" style="display:none; margin-top:20px; margin-bottom:20px;">
-        <button type="button" class="collapsible-header" onclick="toggleCollapsible('myLibraryPanel')">
-            📚 <span data-i18n="myLibraryTitle">La mia libreria</span>
-            <span class="badge" id="myLibraryCount">0</span>
-            <span class="pc-chevron">▾</span>
-        </button>
-        <div class="collapsible-body">
-            <div id="myLibraryList"></div>
         </div>
     </div>
 
@@ -3970,6 +3977,7 @@
 
                 soldOutLabel: "ESAURITO",
 
+                myAreaTitle: "La mia area",
                 donateModalTitle: "💝 Dona all'attività",
                 donateQuarter: "1/4",
                 donateHalf: "Metà",
@@ -4291,6 +4299,7 @@
 
                 soldOutLabel: "SOLD OUT",
 
+                myAreaTitle: "My area",
                 donateModalTitle: "💝 Donate to the business",
                 donateQuarter: "1/4",
                 donateHalf: "Half",
@@ -4612,6 +4621,7 @@
 
                 soldOutLabel: "AGOTADO",
 
+                myAreaTitle: "Mi área",
                 donateModalTitle: "💝 Donar al negocio",
                 donateQuarter: "1/4",
                 donateHalf: "Mitad",
@@ -4933,6 +4943,7 @@
 
                 soldOutLabel: "AUSVERKAUFT",
 
+                myAreaTitle: "Mein Bereich",
                 donateModalTitle: "💝 An den Betrieb spenden",
                 donateQuarter: "1/4",
                 donateHalf: "Hälfte",
@@ -5254,6 +5265,7 @@
 
                 soldOutLabel: "ÉPUISÉ",
 
+                myAreaTitle: "Mon espace",
                 donateModalTitle: "💝 Faire un don à l'activité",
                 donateQuarter: "1/4",
                 donateHalf: "Moitié",
@@ -5575,6 +5587,7 @@
 
                 soldOutLabel: "ЗАКІНЧИВСЯ",
 
+                myAreaTitle: "Мій розділ",
                 donateModalTitle: "💝 Пожертвувати бізнесу",
                 donateQuarter: "1/4",
                 donateHalf: "Половину",
@@ -5895,6 +5908,7 @@
                 specialOffer: "PROMOÇÃO",
                 soldOutLabel: "ESGOTADO",
 
+                myAreaTitle: "A minha área",
                 donateModalTitle: "💝 Doar ao negócio",
                 donateQuarter: "1/4",
                 donateHalf: "Metade",
@@ -7733,6 +7747,8 @@
             if (avatar) avatar.style.display = isAdmin() ? 'inline-block' : 'none';
             const helpBtn = document.getElementById('helpBtn');
             if (helpBtn) helpBtn.style.display = 'flex'; // guida disponibile per tutti, admin e clienti
+            const myAreaBtn = document.getElementById('myAreaBtn');
+            if (myAreaBtn) myAreaBtn.style.display = 'flex';
             updateHelpButtonDot();
             renderWalletPanel();
             renderSupervisorPanel();
@@ -8461,6 +8477,23 @@
         // Un solo pulsante ❓, due guide diverse: Daniel vede quella
         // amministrativa (solo italiano), i clienti quella d'uso
         // (tradotta come il resto dell'app).
+        // "La mia area": raccoglie i pannelli personali/gestionali in una
+        // pagina a parte. Li aggiorniamo appena si apre, così non si vede
+        // mai un dato vecchio in attesa del prossimo giro di polling.
+        function openMyArea() {
+            document.getElementById('myAreaModal').classList.add('active');
+            renderSupervisorPanel();
+            renderDonationsPanel();
+            renderStudyChecklistPanel();
+            renderPartyPanels();
+            renderOrders();
+            renderMyLibraryPanel();
+        }
+
+        function closeMyArea() {
+            document.getElementById('myAreaModal').classList.remove('active');
+        }
+
         function openHelp() {
             if (canSupervise()) openGuide();
             else openUserGuide();
@@ -11875,7 +11908,8 @@
             walletChoiceModal: closeWalletChoiceModal,
             partyModal: closePartyModal,
             photoLightboxModal: closePhotoLightbox,
-            donateModal: closeDonateModal
+            donateModal: closeDonateModal,
+            myAreaModal: closeMyArea
         };
 
         Object.keys(MODAL_CLOSERS).forEach(id => {
