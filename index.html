@@ -999,7 +999,7 @@
             position: fixed;
             right: 16px;
             bottom: 16px;
-            z-index: 2500;
+            z-index: 900;
             display: flex;
             flex-direction: column;
             align-items: flex-end;
@@ -2697,9 +2697,9 @@
             </div>
 
             <!-- Storico ordini -->
-            <div class="orders-section collapsible-panel collapsed" id="ordersHistoryPanel">
+            <div class="orders-section collapsible-panel collapsed" id="ordersHistoryPanel" style="margin-bottom:20px;">
                 <button type="button" class="collapsible-header" onclick="toggleCollapsible('ordersHistoryPanel')">
-                    📋 <span data-i18n="ordersHistory">Storico Ordini</span>
+                    <span data-i18n="ordersHistory">📋 Storico Ordini</span>
                     <span class="badge" id="ordersHistoryCount">0</span>
                     <span class="pc-chevron">▾</span>
                 </button>
