@@ -2757,15 +2757,21 @@
 
             <!-- Banner novità: anche Renato può modificarne i messaggi,
                  senza però avere accesso al resto del listino. -->
-            <div id="superNewsBannerPanel" class="orders-section" style="display:none; margin-bottom:20px; border-left:4px solid var(--lagoon);">
-                <h2 style="margin-bottom:10px;">📰 Banner novità</h2>
-                <label class="soldout-toggle" style="margin-bottom:12px;">
-                    <input type="checkbox" id="newsBannerEnabledSuper">
-                    <span data-i18n="newsBannerEnableLabel">Mostra il banner ai clienti</span>
-                </label>
-                <div id="newsMsgRowsSuper"></div>
-                <button type="button" class="checklist-photo-btn" style="width:100%; margin-top:8px;" onclick="addNewsMsgRow('newsMsgRowsSuper')">+ <span data-i18n="newsAddMsg">Aggiungi messaggio</span></button>
-                <button type="button" class="btn btn-primary" style="width:100%; margin-top:12px;" onclick="saveNewsBannerAsSupervisor()" data-i18n="saveNewsBannerBtn">💾 Salva banner</button>
+            <div id="superNewsBannerPanel" class="orders-section collapsible-panel collapsed" style="display:none; margin-bottom:20px; border-left:4px solid var(--lagoon);">
+                <button type="button" class="collapsible-header" onclick="toggleCollapsible('superNewsBannerPanel')">
+                    📰 <span>Banner novità</span>
+                    <span class="badge" id="superNewsBannerCount">0</span>
+                    <span class="pc-chevron">▾</span>
+                </button>
+                <div class="collapsible-body">
+                    <label class="soldout-toggle" style="margin-bottom:12px;">
+                        <input type="checkbox" id="newsBannerEnabledSuper">
+                        <span data-i18n="newsBannerEnableLabel">Mostra il banner ai clienti</span>
+                    </label>
+                    <div id="newsMsgRowsSuper"></div>
+                    <button type="button" class="checklist-photo-btn" style="width:100%; margin-top:8px;" onclick="addNewsMsgRow('newsMsgRowsSuper')">+ <span data-i18n="newsAddMsg">Aggiungi messaggio</span></button>
+                    <button type="button" class="btn btn-primary" style="width:100%; margin-top:12px;" onclick="saveNewsBannerAsSupervisor()" data-i18n="saveNewsBannerBtn">💾 Salva banner</button>
+                </div>
             </div>
 
             <!-- Donazioni ricevute: visibile a Daniel e Renato, in sola lettura -->
@@ -7989,6 +7995,7 @@
 
             panel.style.display = 'block';
             const cfg = pricing.newsBanner || { enabled: true, messages: [] };
+            document.getElementById('superNewsBannerCount').textContent = cfg.messages.length;
             document.getElementById('newsBannerEnabledSuper').checked = cfg.enabled;
             document.getElementById('newsMsgRowsSuper').innerHTML = buildNewsMsgCardsHTML(cfg.messages);
         }
