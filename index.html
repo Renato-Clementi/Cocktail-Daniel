@@ -2476,7 +2476,7 @@
                     <p>Ti arriva un messaggio WhatsApp e in cima all'app compare <strong>🔔 Richieste di pagamento</strong> col numero in rosso. Ogni richiesta mostra cliente, importo e numero di ordini.</p>
                     <p>Quando hai incassato, tocca <strong>✓ Confermo ricezione</strong>: il conto di quel cliente si chiude.</p>
                     <p class="guide-tip">💡 Se il cliente ordina <em>dopo</em> aver chiesto il conto, i nuovi ordini restano aperti: confermando chiudi solo quelli della richiesta, non gli altri.</p>
-                    <p><strong>💝 Donazioni:</strong> chi ha un saldo sulla carta può scegliere, volontariamente, di donarlo tutto all'attività col pulsante dedicato — azzera solo il proprio saldo, mai quello di altri. Ricevi un WhatsApp e la trovi anche nel pannello <strong>Donazioni ricevute</strong>, con il totale di sempre.</p>
+                    <p><strong>💝 Donazioni:</strong> chi ha un saldo sulla carta può scegliere, volontariamente, di donarne tutto o parte all'attività — un modale gli permette di scegliere l'importo (1/4, metà, tutto, o una cifra libera), non è tutto-o-niente. Tocca solo il proprio saldo, mai quello di altri. Ricevi un WhatsApp e la trovi anche nel pannello <strong>Donazioni ricevute</strong>, con il totale di sempre.</p>
                     <p><strong>💳 Carta prepagata e sconto fedeltà:</strong> il cliente può chiederti una ricarica dall'app (stesso meccanismo del conto: ti arriva un WhatsApp, tu confermi quando hai i contanti in mano nella sezione <strong>🔋 Richieste di ricarica</strong>). Il credito resta sulla sua carta.</p>
                     <p>Quando ha un saldo, al momento di pagare il cliente vede la scelta tra <strong>contanti</strong> e <strong>carta</strong>. Pagando con la carta ottiene il <strong>10% di sconto</strong> — è l'incentivo a ricaricare in anticipo. Se il saldo non copre tutto il conto, copre quello che può (partendo dagli ordini più vecchi) e il resto segue il normale flusso in contanti con la tua conferma.</p>
                     <p class="guide-tip">💡 Il pagamento con la carta <strong>non richiede la tua conferma</strong>: i contanti li avevi già ricevuti al momento della ricarica, quindi l'ordine si chiude subito. Ricevi comunque un WhatsApp informativo.</p>
@@ -2868,7 +2868,7 @@
                 </div>
                 <button class="wallet-topup-btn" onclick="openTopupModal()" data-i18n="topupBtn">+ Ricarica</button>
             </div>
-            <button id="walletDonateBtn" class="wallet-donate-btn" style="display:none;" onclick="donateWalletToBusiness()">
+            <button id="walletDonateBtn" class="wallet-donate-btn" style="display:none;" onclick="openDonateModal()">
                 💝 <span data-i18n="donateBtn">Dona il saldo all'attività</span>
             </button>
         </div>
@@ -2930,6 +2930,33 @@
             <div class="btn-group">
                 <button class="btn btn-secondary" onclick="closeTopupModal()" data-i18n="cancel">Annulla</button>
                 <button class="btn btn-primary" onclick="confirmTopupRequest()" data-i18n="topupConfirmBtn">Richiedi ricarica</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale donazione: importo libero, non necessariamente tutto il saldo -->
+    <div class="modal" id="donateModal">
+        <div class="modal-content" style="max-width:400px; text-align:center;">
+            <button class="modal-close" onclick="closeDonateModal()" aria-label="Chiudi">✕</button>
+            <h2 data-i18n="donateModalTitle">💝 Dona all'attività</h2>
+            <p style="color:var(--dusk-soft); font-size:0.85em; margin-bottom:10px;">
+                <span data-i18n="walletCurrentBalance">Saldo sulla carta:</span> <strong id="donateModalBalance">0,00€</strong>
+            </p>
+
+            <div class="topup-quick-row">
+                <button type="button" class="topup-quick-btn" onclick="setDonateAmount(0.25)" data-i18n="donateQuarter">1/4</button>
+                <button type="button" class="topup-quick-btn" onclick="setDonateAmount(0.5)" data-i18n="donateHalf">Metà</button>
+                <button type="button" class="topup-quick-btn" onclick="setDonateAmount(1)" data-i18n="donateAll">Tutto</button>
+            </div>
+
+            <div class="form-group" style="text-align:left;">
+                <label data-i18n="donateAmountLabel">Importo da donare:</label>
+                <input type="number" step="0.5" min="0.5" id="donateAmount" data-i18n-placeholder="donateAmountPlaceholder" placeholder="Scegli un importo">
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="closeDonateModal()" data-i18n="cancel">Annulla</button>
+                <button class="btn btn-primary" onclick="confirmDonateAmount()" data-i18n="confirmDonateBtn">Dona</button>
             </div>
         </div>
     </div>
@@ -3877,6 +3904,15 @@
 
                 soldOutLabel: "ESAURITO",
 
+                donateModalTitle: "💝 Dona all'attività",
+                donateQuarter: "1/4",
+                donateHalf: "Metà",
+                donateAll: "Tutto",
+                donateAmountLabel: "Importo da donare:",
+                donateAmountPlaceholder: "Scegli un importo",
+                confirmDonateBtn: "Dona",
+                donateInvalidAmount: "Inserisci un importo valido.",
+                donateExceedsBalance: "Non puoi donare più del saldo disponibile.",
                 donateBtn: "Dona il saldo all'attività",
                 confirmDonate: "Confermi di donare {amount} all’attività? L’operazione non è reversibile.",
                 donateThanksMsg: "💝 Grazie per la donazione!",
@@ -3904,7 +3940,7 @@
                 userGuideOrderTitle: "🍹 Come ordinare",
                 userGuideOrderBody: "<p>Scegli una categoria dalle schede in alto (Cocktail, Snack, Soft drink, Dolci, Merchandising...) e tocca il prodotto che vuoi.</p><p>Scegli la variante, la posizione (dove sei, in casa, in giardino) e l'orario preferito, poi tocca <strong>Conferma Ordine</strong>. Il prezzo mostrato è già quello finale.</p><p>A volte compare qualche prodotto consigliato in abbinamento: puoi aggiungerlo con un tocco o ignorarlo, resta comunque opzionale.</p><p><strong>Il libro dei cocktail in PDF</strong> è diverso dagli altri: appena il pagamento si chiude te lo ritrovi in <strong>📚 La mia libreria</strong>, un pannello che resta per sempre — puoi riscaricarlo quando vuoi.</p>",
                 userGuidePayTitle: "💳 Come si paga",
-                userGuidePayBody: "<p>I tuoi ordini restano nello <strong>storico</strong> finché non chiudi il conto. Quando hai finito, tocca <strong>Paga e chiudi conto</strong>.</p><p>Se hai un saldo sulla carta prepagata, puoi scegliere di pagare con quello e ottenere il <strong>10% di sconto</strong>. Altrimenti si paga in contanti: la richiesta parte e il conto si chiude quando Daniel conferma di aver ricevuto i soldi.</p><p>Per ricaricare la carta tocca <strong>+ Ricarica</strong> nel riquadro dorato, scegli l'importo e consegna i contanti a Daniel: il saldo comparirà appena lui conferma.</p><p>Se vuoi, puoi anche <strong>donare il tuo saldo</strong> all'attività in qualsiasi momento, col pulsante dedicato nel riquadro della carta.</p>",
+                userGuidePayBody: "<p>I tuoi ordini restano nello <strong>storico</strong> finché non chiudi il conto. Quando hai finito, tocca <strong>Paga e chiudi conto</strong>.</p><p>Se hai un saldo sulla carta prepagata, puoi scegliere di pagare con quello e ottenere il <strong>10% di sconto</strong>. Altrimenti si paga in contanti: la richiesta parte e il conto si chiude quando Daniel conferma di aver ricevuto i soldi.</p><p>Per ricaricare la carta tocca <strong>+ Ricarica</strong> nel riquadro dorato, scegli l'importo e consegna i contanti a Daniel: il saldo comparirà appena lui conferma.</p><p>Se vuoi, puoi anche <strong>donare il tuo saldo</strong> all'attività in qualsiasi momento — anche solo in parte, scegliendo tu l'importo — col pulsante dedicato nel riquadro della carta.</p>",
                 userGuideChoresTitle: "🧹 Lavoretti per Daniel",
                 userGuideChoresBody: "<p>Nella scheda <strong>Lavoretti</strong> puoi assegnare a Daniel piccoli compiti di casa (portare a spasso il cane, aspirapolvere...) con una mancia già indicata.</p><p>Segui lo stato nel pannello <strong>I miei lavoretti assegnati</strong>: resta \"da fare\" finché Daniel non lo segna completato.</p>",
                 userGuidePartyTitle: "🎉 Prenotare una festa",
@@ -4189,6 +4225,15 @@
 
                 soldOutLabel: "SOLD OUT",
 
+                donateModalTitle: "💝 Donate to the business",
+                donateQuarter: "1/4",
+                donateHalf: "Half",
+                donateAll: "All",
+                donateAmountLabel: "Amount to donate:",
+                donateAmountPlaceholder: "Choose an amount",
+                confirmDonateBtn: "Donate",
+                donateInvalidAmount: "Please enter a valid amount.",
+                donateExceedsBalance: "You can't donate more than your available balance.",
                 donateBtn: "Donate balance to the business",
                 confirmDonate: "Confirm donating {amount} to the business? This cannot be undone.",
                 donateThanksMsg: "💝 Thanks for the donation!",
@@ -4216,7 +4261,7 @@
                 userGuideOrderTitle: "🍹 How to order",
                 userGuideOrderBody: "<p>Pick a category from the tabs at the top (Cocktails, Snacks, Soft drinks, Desserts, Merchandise...) and tap the product you want.</p><p>Choose the variant, the location (where you are, at home, in the garden) and the preferred time, then tap <strong>Confirm Order</strong>. The price shown is already the final one.</p><p>Sometimes a matching product is suggested: you can add it with a tap or ignore it, it's always optional.</p><p>The <strong>PDF cocktail book</strong> works differently: as soon as payment closes, it appears in <strong>📚 My library</strong>, a panel that stays forever — you can download it again anytime.</p>",
                 userGuidePayTitle: "💳 How to pay",
-                userGuidePayBody: "<p>Your orders stay in your <strong>history</strong> until you close the bill. When you're done, tap <strong>Pay and close bill</strong>.</p><p>If you have a balance on your prepaid card, you can choose to pay with it and get <strong>10% off</strong>. Otherwise you pay cash: the request is sent, and the bill closes once Daniel confirms he received the money.</p><p>To top up the card, tap <strong>+ Top up</strong> in the golden box, choose the amount and hand the cash to Daniel: the balance will appear as soon as he confirms.</p><p>If you'd like, you can also <strong>donate your balance</strong> to the business at any time, using the dedicated button in the card box.</p>",
+                userGuidePayBody: "<p>Your orders stay in your <strong>history</strong> until you close the bill. When you're done, tap <strong>Pay and close bill</strong>.</p><p>If you have a balance on your prepaid card, you can choose to pay with it and get <strong>10% off</strong>. Otherwise you pay cash: the request is sent, and the bill closes once Daniel confirms he received the money.</p><p>To top up the card, tap <strong>+ Top up</strong> in the golden box, choose the amount and hand the cash to Daniel: the balance will appear as soon as he confirms.</p><p>If you'd like, you can also <strong>donate your balance</strong> to the business at any time — even just part of it, you choose the amount — using the dedicated button in the card box.</p>",
                 userGuideChoresTitle: "🧹 Chores for Daniel",
                 userGuideChoresBody: "<p>In the <strong>Chores</strong> tab you can assign Daniel small household tasks (walking the dog, vacuuming...) with a tip already set.</p><p>Follow the status in the <strong>My assigned chores</strong> panel: it stays \"to do\" until Daniel marks it done.</p>",
                 userGuidePartyTitle: "🎉 Booking a party",
@@ -4501,6 +4546,15 @@
 
                 soldOutLabel: "AGOTADO",
 
+                donateModalTitle: "💝 Donar al negocio",
+                donateQuarter: "1/4",
+                donateHalf: "Mitad",
+                donateAll: "Todo",
+                donateAmountLabel: "Importe a donar:",
+                donateAmountPlaceholder: "Elige un importe",
+                confirmDonateBtn: "Donar",
+                donateInvalidAmount: "Introduce un importe válido.",
+                donateExceedsBalance: "No puedes donar más del saldo disponible.",
                 donateBtn: "Donar el saldo al negocio",
                 confirmDonate: "¿Confirmas donar {amount} al negocio? No se puede deshacer.",
                 donateThanksMsg: "💝 ¡Gracias por la donación!",
@@ -4528,7 +4582,7 @@
                 userGuideOrderTitle: "🍹 Cómo pedir",
                 userGuideOrderBody: "<p>Elige una categoría en las pestañas de arriba (Cócteles, Aperitivos, Refrescos, Postres, Merchandising...) y toca el producto que quieras.</p><p>Elige la variante, la ubicación (donde estás, en casa, en el jardín) y la hora preferida, luego toca <strong>Confirmar Pedido</strong>. El precio mostrado ya es el final.</p><p>A veces aparece algún producto recomendado a juego: puedes añadirlo con un toque o ignorarlo, siempre es opcional.</p><p>El <strong>libro de cócteles en PDF</strong> funciona distinto: en cuanto se cierra el pago, aparece en <strong>📚 Mi biblioteca</strong>, un panel que queda para siempre — puedes volver a descargarlo cuando quieras.</p>",
                 userGuidePayTitle: "💳 Cómo se paga",
-                userGuidePayBody: "<p>Tus pedidos quedan en tu <strong>historial</strong> hasta que cierres la cuenta. Cuando termines, toca <strong>Pagar y cerrar cuenta</strong>.</p><p>Si tienes saldo en la tarjeta prepago, puedes elegir pagar con ella y obtener un <strong>10% de descuento</strong>. Si no, se paga en efectivo: la solicitud se envía y la cuenta se cierra cuando Daniel confirma que ha recibido el dinero.</p><p>Para recargar la tarjeta, toca <strong>+ Recargar</strong> en el recuadro dorado, elige el importe y entrega el efectivo a Daniel: el saldo aparecerá en cuanto confirme.</p><p>Si quieres, también puedes <strong>donar tu saldo</strong> al negocio en cualquier momento, con el botón dedicado en el recuadro de la tarjeta.</p>",
+                userGuidePayBody: "<p>Tus pedidos quedan en tu <strong>historial</strong> hasta que cierres la cuenta. Cuando termines, toca <strong>Pagar y cerrar cuenta</strong>.</p><p>Si tienes saldo en la tarjeta prepago, puedes elegir pagar con ella y obtener un <strong>10% de descuento</strong>. Si no, se paga en efectivo: la solicitud se envía y la cuenta se cierra cuando Daniel confirma que ha recibido el dinero.</p><p>Para recargar la tarjeta, toca <strong>+ Recargar</strong> en el recuadro dorado, elige el importe y entrega el efectivo a Daniel: el saldo aparecerá en cuanto confirme.</p><p>Si quieres, también puedes <strong>donar tu saldo</strong> al negocio en cualquier momento — incluso solo una parte, eligiendo tú el importe — con el botón dedicado en el recuadro de la tarjeta.</p>",
                 userGuideChoresTitle: "🧹 Tareas para Daniel",
                 userGuideChoresBody: "<p>En la pestaña <strong>Tareas</strong> puedes asignar a Daniel pequeñas tareas domésticas (pasear al perro, pasar la aspiradora...) con una propina ya indicada.</p><p>Sigue el estado en el panel <strong>Mis tareas asignadas</strong>: queda \"pendiente\" hasta que Daniel la marque como hecha.</p>",
                 userGuidePartyTitle: "🎉 Reservar una fiesta",
@@ -4813,6 +4867,15 @@
 
                 soldOutLabel: "AUSVERKAUFT",
 
+                donateModalTitle: "💝 An den Betrieb spenden",
+                donateQuarter: "1/4",
+                donateHalf: "Hälfte",
+                donateAll: "Alles",
+                donateAmountLabel: "Zu spendender Betrag:",
+                donateAmountPlaceholder: "Betrag wählen",
+                confirmDonateBtn: "Spenden",
+                donateInvalidAmount: "Bitte einen gültigen Betrag eingeben.",
+                donateExceedsBalance: "Du kannst nicht mehr als dein verfügbares Guthaben spenden.",
                 donateBtn: "Guthaben an den Betrieb spenden",
                 confirmDonate: "{amount} an den Betrieb spenden bestätigen? Das kann nicht rückgängig gemacht werden.",
                 donateThanksMsg: "💝 Danke für die Spende!",
@@ -4840,7 +4903,7 @@
                 userGuideOrderTitle: "🍹 So bestellst du",
                 userGuideOrderBody: "<p>Wähle oben eine Kategorie (Cocktails, Snacks, Softdrinks, Desserts, Merchandise...) und tippe auf das gewünschte Produkt.</p><p>Wähle die Variante, den Ort (wo du bist, zu Hause, im Garten) und die gewünschte Zeit, dann tippe auf <strong>Bestellung bestätigen</strong>. Der angezeigte Preis ist bereits der Endpreis.</p><p>Manchmal wird ein passendes Produkt vorgeschlagen: du kannst es mit einem Tipp hinzufügen oder ignorieren, es ist immer optional.</p><p>Das <strong>Cocktailbuch als PDF</strong> funktioniert anders: sobald die Zahlung abgeschlossen ist, erscheint es in <strong>📚 Meine Bibliothek</strong>, einem Panel, das für immer bleibt — du kannst es jederzeit erneut herunterladen.</p>",
                 userGuidePayTitle: "💳 So bezahlst du",
-                userGuidePayBody: "<p>Deine Bestellungen bleiben in deinem <strong>Verlauf</strong>, bis du die Rechnung schließt. Wenn du fertig bist, tippe auf <strong>Bezahlen und Rechnung schließen</strong>.</p><p>Hast du Guthaben auf der Prepaid-Karte, kannst du damit bezahlen und erhältst <strong>10% Rabatt</strong>. Sonst zahlst du bar: die Anfrage wird gesendet, und die Rechnung schließt, sobald Daniel den Geldeingang bestätigt.</p><p>Zum Aufladen tippe auf <strong>+ Aufladen</strong> im goldenen Kasten, wähle den Betrag und gib Daniel das Bargeld: das Guthaben erscheint, sobald er bestätigt.</p><p>Wenn du möchtest, kannst du dein <strong>Guthaben</strong> jederzeit über die entsprechende Schaltfläche im Kartenkasten <strong>an den Betrieb spenden</strong>.</p>",
+                userGuidePayBody: "<p>Deine Bestellungen bleiben in deinem <strong>Verlauf</strong>, bis du die Rechnung schließt. Wenn du fertig bist, tippe auf <strong>Bezahlen und Rechnung schließen</strong>.</p><p>Hast du Guthaben auf der Prepaid-Karte, kannst du damit bezahlen und erhältst <strong>10% Rabatt</strong>. Sonst zahlst du bar: die Anfrage wird gesendet, und die Rechnung schließt, sobald Daniel den Geldeingang bestätigt.</p><p>Zum Aufladen tippe auf <strong>+ Aufladen</strong> im goldenen Kasten, wähle den Betrag und gib Daniel das Bargeld: das Guthaben erscheint, sobald er bestätigt.</p><p>Wenn du möchtest, kannst du dein <strong>Guthaben</strong> jederzeit über die entsprechende Schaltfläche im Kartenkasten <strong>an den Betrieb spenden</strong> — auch nur teilweise, den Betrag wählst du selbst.</p>",
                 userGuideChoresTitle: "🧹 Aufgaben für Daniel",
                 userGuideChoresBody: "<p>Im Tab <strong>Aufgaben</strong> kannst du Daniel kleine Hausaufgaben zuweisen (Hund ausführen, Staubsaugen...) mit bereits festgelegtem Trinkgeld.</p><p>Verfolge den Status im Panel <strong>Meine zugewiesenen Aufgaben</strong>: bleibt „offen“, bis Daniel sie als erledigt markiert.</p>",
                 userGuidePartyTitle: "🎉 Eine Party buchen",
@@ -5125,6 +5188,15 @@
 
                 soldOutLabel: "ÉPUISÉ",
 
+                donateModalTitle: "💝 Faire un don à l'activité",
+                donateQuarter: "1/4",
+                donateHalf: "Moitié",
+                donateAll: "Tout",
+                donateAmountLabel: "Montant à donner :",
+                donateAmountPlaceholder: "Choisissez un montant",
+                confirmDonateBtn: "Donner",
+                donateInvalidAmount: "Veuillez entrer un montant valide.",
+                donateExceedsBalance: "Vous ne pouvez pas donner plus que votre solde disponible.",
                 donateBtn: "Faire don du solde à l’activité",
                 confirmDonate: "Confirmez le don de {amount} à l’activité ? Action irréversible.",
                 donateThanksMsg: "💝 Merci pour le don !",
@@ -5152,7 +5224,7 @@
                 userGuideOrderTitle: "🍹 Comment commander",
                 userGuideOrderBody: "<p>Choisissez une catégorie dans les onglets en haut (Cocktails, Snacks, Boissons, Desserts, Produits dérivés...) et touchez le produit voulu.</p><p>Choisissez la variante, l'emplacement (où vous êtes, à la maison, au jardin) et l'heure préférée, puis touchez <strong>Confirmer la Commande</strong>. Le prix affiché est déjà le prix final.</p><p>Parfois un produit complémentaire est suggéré : vous pouvez l'ajouter d'un geste ou l'ignorer, c'est toujours facultatif.</p><p>Le <strong>livre de cocktails en PDF</strong> fonctionne différemment : dès que le paiement est clôturé, il apparaît dans <strong>📚 Ma bibliothèque</strong>, un panneau qui reste pour toujours — vous pouvez le retélécharger à tout moment.</p>",
                 userGuidePayTitle: "💳 Comment payer",
-                userGuidePayBody: "<p>Vos commandes restent dans votre <strong>historique</strong> jusqu'à ce que vous clôturiez l'addition. Une fois terminé, touchez <strong>Payer et clôturer l'addition</strong>.</p><p>Si vous avez un solde sur la carte prépayée, vous pouvez payer avec et obtenir <strong>10% de réduction</strong>. Sinon, vous payez en espèces : la demande est envoyée, et l'addition se clôture quand Daniel confirme avoir reçu l'argent.</p><p>Pour recharger la carte, touchez <strong>+ Recharger</strong> dans l'encadré doré, choisissez le montant et remettez l'argent à Daniel : le solde apparaîtra dès sa confirmation.</p><p>Si vous le souhaitez, vous pouvez aussi <strong>faire don de votre solde</strong> à l'activité à tout moment, via le bouton dédié dans l'encadré de la carte.</p>",
+                userGuidePayBody: "<p>Vos commandes restent dans votre <strong>historique</strong> jusqu'à ce que vous clôturiez l'addition. Une fois terminé, touchez <strong>Payer et clôturer l'addition</strong>.</p><p>Si vous avez un solde sur la carte prépayée, vous pouvez payer avec et obtenir <strong>10% de réduction</strong>. Sinon, vous payez en espèces : la demande est envoyée, et l'addition se clôture quand Daniel confirme avoir reçu l'argent.</p><p>Pour recharger la carte, touchez <strong>+ Recharger</strong> dans l'encadré doré, choisissez le montant et remettez l'argent à Daniel : le solde apparaîtra dès sa confirmation.</p><p>Si vous le souhaitez, vous pouvez aussi <strong>faire don de votre solde</strong> à l'activité à tout moment — même partiellement, vous choisissez le montant — via le bouton dédié dans l'encadré de la carte.</p>",
                 userGuideChoresTitle: "🧹 Corvées pour Daniel",
                 userGuideChoresBody: "<p>Dans l'onglet <strong>Corvées</strong>, vous pouvez confier à Daniel de petites tâches ménagères (promener le chien, passer l'aspirateur...) avec un pourboire déjà indiqué.</p><p>Suivez le statut dans le panneau <strong>Mes corvées assignées</strong> : reste « à faire » jusqu'à ce que Daniel la marque terminée.</p>",
                 userGuidePartyTitle: "🎉 Réserver une fête",
@@ -5437,6 +5509,15 @@
 
                 soldOutLabel: "ЗАКІНЧИВСЯ",
 
+                donateModalTitle: "💝 Пожертвувати бізнесу",
+                donateQuarter: "1/4",
+                donateHalf: "Половину",
+                donateAll: "Все",
+                donateAmountLabel: "Сума для пожертви:",
+                donateAmountPlaceholder: "Оберіть суму",
+                confirmDonateBtn: "Пожертвувати",
+                donateInvalidAmount: "Введіть коректну суму.",
+                donateExceedsBalance: "Не можна пожертвувати більше за наявний баланс.",
                 donateBtn: "Пожертвувати баланс бізнесу",
                 confirmDonate: "Підтверджуєте пожертву {amount} бізнесу? Дію не можна скасувати.",
                 donateThanksMsg: "💝 Дякуємо за пожертву!",
@@ -5464,7 +5545,7 @@
                 userGuideOrderTitle: "🍹 Як замовити",
                 userGuideOrderBody: "<p>Оберіть категорію на вкладках вгорі (Коктейлі, Закуски, Напої, Десерти, Мерч...) і торкніться потрібного товару.</p><p>Оберіть варіант, місце (де ви, вдома, у саду) та бажаний час, потім торкніться <strong>Підтвердити замовлення</strong>. Показана ціна вже остаточна.</p><p>Іноді пропонується супутній товар: можна додати одним дотиком або проігнорувати — це завжди необов'язково.</p><p><strong>Книга коктейлів у PDF</strong> працює інакше: щойно оплату закрито, вона з'являється в <strong>📚 Моя бібліотека</strong> — панелі, яка залишається назавжди, тож можна завантажити знову будь-коли.</p>",
                 userGuidePayTitle: "💳 Як оплатити",
-                userGuidePayBody: "<p>Ваші замовлення залишаються в <strong>історії</strong>, доки ви не закриєте рахунок. Коли готові, торкніться <strong>Оплатити і закрити рахунок</strong>.</p><p>Якщо на картці є баланс, можна оплатити ним і отримати <strong>знижку 10%</strong>. Інакше оплата готівкою: запит надсилається, і рахунок закривається, коли Денні підтвердить отримання грошей.</p><p>Щоб поповнити картку, торкніться <strong>+ Поповнити</strong> у золотистому блоці, оберіть суму й передайте готівку Денні: баланс з'явиться одразу після підтвердження.</p><p>За бажанням ви також можете будь-коли <strong>пожертвувати свій баланс</strong> бізнесу, скориставшись спеціальною кнопкою в блоці картки.</p>",
+                userGuidePayBody: "<p>Ваші замовлення залишаються в <strong>історії</strong>, доки ви не закриєте рахунок. Коли готові, торкніться <strong>Оплатити і закрити рахунок</strong>.</p><p>Якщо на картці є баланс, можна оплатити ним і отримати <strong>знижку 10%</strong>. Інакше оплата готівкою: запит надсилається, і рахунок закривається, коли Денні підтвердить отримання грошей.</p><p>Щоб поповнити картку, торкніться <strong>+ Поповнити</strong> у золотистому блоці, оберіть суму й передайте готівку Денні: баланс з'явиться одразу після підтвердження.</p><p>За бажанням ви також можете будь-коли <strong>пожертвувати свій баланс</strong> бізнесу — навіть лише частину, суму обираєте самі — скориставшись спеціальною кнопкою в блоці картки.</p>",
                 userGuideChoresTitle: "🧹 Справи для Денні",
                 userGuideChoresBody: "<p>У вкладці <strong>Справи</strong> можна доручити Денні невеликі домашні справи (вигуляти собаку, попилососити...) із заздалегідь вказаними чайовими.</p><p>Стежте за статусом у панелі <strong>Мої доручені справи</strong>: залишається \"не зроблено\", доки Денні не позначить виконаним.</p>",
                 userGuidePartyTitle: "🎉 Забронювати свято",
@@ -5748,6 +5829,15 @@
                 specialOffer: "PROMOÇÃO",
                 soldOutLabel: "ESGOTADO",
 
+                donateModalTitle: "💝 Doar ao negócio",
+                donateQuarter: "1/4",
+                donateHalf: "Metade",
+                donateAll: "Tudo",
+                donateAmountLabel: "Valor a doar:",
+                donateAmountPlaceholder: "Escolha um valor",
+                confirmDonateBtn: "Doar",
+                donateInvalidAmount: "Introduza um valor válido.",
+                donateExceedsBalance: "Não pode doar mais do que o saldo disponível.",
                 donateBtn: "Doar o saldo ao negócio",
                 confirmDonate: "Confirma doar {amount} ao negócio? Não pode ser desfeito.",
                 donateThanksMsg: "💝 Obrigado pela doação!",
@@ -5775,7 +5865,7 @@
                 userGuideOrderTitle: "🍹 Como encomendar",
                 userGuideOrderBody: "<p>Escolha uma categoria nos separadores no topo (Cocktails, Snacks, Bebidas, Sobremesas, Merchandising...) e toque no produto que quer.</p><p>Escolha a variante, a localização (onde está, em casa, no jardim) e o horário preferido, depois toque em <strong>Confirmar Pedido</strong>. O preço mostrado já é o final.</p><p>Por vezes surge um produto sugerido a condizer: pode adicioná-lo com um toque ou ignorar, é sempre opcional.</p><p>O <strong>livro de cocktails em PDF</strong> funciona de forma diferente: assim que o pagamento é fechado, aparece na <strong>📚 A minha biblioteca</strong>, um painel que fica para sempre — pode voltar a descarregá-lo quando quiser.</p>",
                 userGuidePayTitle: "💳 Como se paga",
-                userGuidePayBody: "<p>Os seus pedidos ficam no <strong>histórico</strong> até fechar a conta. Quando terminar, toque em <strong>Pagar e fechar conta</strong>.</p><p>Se tiver saldo no cartão pré-pago, pode optar por pagar com ele e obter <strong>10% de desconto</strong>. Caso contrário paga-se em dinheiro: o pedido é enviado e a conta fecha quando o Daniel confirmar que recebeu o dinheiro.</p><p>Para carregar o cartão, toque em <strong>+ Carregar</strong> na caixa dourada, escolha o valor e entregue o dinheiro ao Daniel: o saldo aparece assim que ele confirmar.</p><p>Se quiser, também pode <strong>doar o seu saldo</strong> ao negócio a qualquer momento, através do botão dedicado na caixa do cartão.</p>",
+                userGuidePayBody: "<p>Os seus pedidos ficam no <strong>histórico</strong> até fechar a conta. Quando terminar, toque em <strong>Pagar e fechar conta</strong>.</p><p>Se tiver saldo no cartão pré-pago, pode optar por pagar com ele e obter <strong>10% de desconto</strong>. Caso contrário paga-se em dinheiro: o pedido é enviado e a conta fecha quando o Daniel confirmar que recebeu o dinheiro.</p><p>Para carregar o cartão, toque em <strong>+ Carregar</strong> na caixa dourada, escolha o valor e entregue o dinheiro ao Daniel: o saldo aparece assim que ele confirmar.</p><p>Se quiser, também pode <strong>doar o seu saldo</strong> ao negócio a qualquer momento — mesmo só uma parte, escolhendo o valor — através do botão dedicado na caixa do cartão.</p>",
                 userGuideChoresTitle: "🧹 Tarefas para o Daniel",
                 userGuideChoresBody: "<p>No separador <strong>Tarefas</strong> pode atribuir ao Daniel pequenas tarefas domésticas (passear o cão, aspirar...) com uma gorjeta já indicada.</p><p>Acompanhe o estado no painel <strong>As minhas tarefas atribuídas</strong>: fica \"por fazer\" até o Daniel a marcar como feita.</p>",
                 userGuidePartyTitle: "🎉 Reservar uma festa",
@@ -6978,6 +7068,15 @@
             return value.toFixed(2).replace('.', ',') + '€';
         }
 
+        // Arrotonda a 2 cifre decimali, da usare ogni volta che un
+        // numero viene CALCOLATO o SALVATO (non solo mostrato): la somma
+        // ripetuta di piccoli importi in JavaScript (es. scalare il
+        // magazzino cl per cl) accumula altrimenti errori come
+        // 19.999999999999996 invece di 20, che poi riaffiorano altrove.
+        function round2(n) {
+            return Math.round((n + Number.EPSILON) * 100) / 100;
+        }
+
         function isSpecial(cocktailName) {
             return !!(pricing.items[cocktailName] && pricing.items[cocktailName].special);
         }
@@ -7065,7 +7164,7 @@
                 Object.keys(recipe).forEach(id => {
                     const q = pricing.ingredientStock[id];
                     if (typeof q === 'number' && q >= 0) {
-                        pricing.ingredientStock[id] = Math.max(0, q - recipe[id]);
+                        pricing.ingredientStock[id] = round2(Math.max(0, q - recipe[id]));
                         changed = true;
                     }
                 });
@@ -7768,12 +7867,49 @@
         // Ognuno decide solo del proprio saldo, mai di quello altrui: è
         // una scelta volontaria, non un prelievo imposto dall'alto.
         // =============================================
-        async function donateWalletToBusiness() {
+        // La donazione può essere parziale: si apre un modale con
+        // l'importo libero, invece di donare per forza tutto il saldo.
+        function openDonateModal() {
             if (walletBalance <= 0) return;
-            const amount = walletBalance;
+            document.getElementById('donateModalBalance').textContent = formatPrice(walletBalance);
+            const input = document.getElementById('donateAmount');
+            input.max = walletBalance;
+            input.value = '';
+            document.getElementById('donateModal').classList.add('active');
+        }
+
+        function closeDonateModal() {
+            document.getElementById('donateModal').classList.remove('active');
+        }
+
+        function setDonateAmount(fraction) {
+            // Per "Tutto" usiamo il saldo esatto, non un ricalcolo:
+            // moltiplicare e poi arrotondare può introdurre un errore
+            // di pochi centesimi che farebbe rifiutare la donazione.
+            const amount = (fraction === 1) ? walletBalance : Math.round(walletBalance * fraction * 100) / 100;
+            document.getElementById('donateAmount').value = amount;
+        }
+
+        async function confirmDonateAmount() {
+            let amount = round2(parseFloat(document.getElementById('donateAmount').value));
+            if (!amount || amount <= 0) {
+                alert(t('donateInvalidAmount'));
+                return;
+            }
+            // Non si può mai donare più di quanto si possiede — ma una
+            // tolleranza di un centesimo assorbe i normali errori di
+            // arrotondamento dei numeri decimali in JavaScript, senza
+            // aprire una vera falla: un eccesso reale resta bloccato.
+            const EPSILON = 0.01;
+            if (amount > walletBalance + EPSILON) {
+                alert(t('donateExceedsBalance'));
+                return;
+            }
+            amount = Math.min(amount, walletBalance); // mai oltre il saldo reale, arrotondamenti compresi
             if (!confirm(t('confirmDonate').replace('{amount}', formatPrice(amount)))) return;
 
-            await writeWalletBalance(0);
+            closeDonateModal();
+            await writeWalletBalance(walletBalance - amount);
 
             const donation = {
                 id: Date.now(),
@@ -7789,10 +7925,16 @@
                 catch (error) { console.log('Errore salvataggio donazione:', error); }
             }
 
+            // A questo punto walletBalance è già il saldo RESIDUO dopo la
+            // donazione (writeWalletBalance l'ha appena aggiornato):
+            // se è ancora positivo, la donazione era parziale.
+            const partial = walletBalance > 0;
             let message = `💝 *DONAZIONE RICEVUTA*\n\n`;
             message += `👤 *Da:* ${customerName}\n`;
             message += `💰 *Importo:* ${formatPrice(amount)}\n`;
-            message += `\nHa donato tutto il saldo della sua carta all'attività!`;
+            message += partial
+                ? `\nHa donato parte del saldo della sua carta all'attività! Saldo residuo: ${formatPrice(walletBalance)}`
+                : `\nHa donato tutto il saldo della sua carta all'attività!`;
             openWhatsApp(ADMIN_PHONE, encodeURIComponent(message));
 
             const successMsg = document.getElementById('successMessage');
@@ -7850,7 +7992,7 @@
         }
 
         async function confirmTopupRequest() {
-            const amount = parseFloat(document.getElementById('topupAmount').value);
+            const amount = round2(parseFloat(document.getElementById('topupAmount').value));
             if (!amount || amount <= 0) {
                 alert(t('topupInvalidAmount'));
                 return;
@@ -8269,11 +8411,11 @@
         // l'utente lo apre almeno una volta.
         // =============================================
         const GUIDE_VERSIONS = {
-            start: 1, prices: 1, stock: 1, hours: 2, orders: 1, payments: 2,
+            start: 1, prices: 1, stock: 1, hours: 2, orders: 1, payments: 3,
             reviews: 1, chores: 1, merch: 1, party: 3, supervisor: 3, study: 3, tech: 1
         };
         const USER_GUIDE_VERSIONS = {
-            order: 1, pay: 2, chores: 1, party: 1, reviews: 1, share: 1, offline: 1, danny: 1
+            order: 1, pay: 3, chores: 1, party: 1, reviews: 1, share: 1, offline: 1, danny: 1
         };
 
         function getSeenGuideVersions(storageKey) {
@@ -8666,7 +8808,7 @@
                 const stock = pricing.ingredientStock || {};
                 const links = pricing.amazonLinks || {};
                 const rows = ingredients.map(i => {
-                    const q = (typeof stock[i.id] === 'number') ? stock[i.id] : -1;
+                    const q = (typeof stock[i.id] === 'number') ? round2(stock[i.id]) : -1;
                     const out = q === 0;
                     return `
                         <div class="ingredient-row${out ? ' ingredient-out' : ''}">
@@ -8748,7 +8890,7 @@
                 const idx = parseInt(input.getAttribute('data-index'), 10);
                 const val = parseFloat(input.value);
                 if (!updated.items[name]) updated.items[name] = { prices: [], special: false };
-                updated.items[name].prices[idx] = isNaN(val) ? 0.5 : val;
+                updated.items[name].prices[idx] = isNaN(val) ? 0.5 : round2(val);
             });
 
             // Offerte speciali
@@ -8777,7 +8919,7 @@
             document.querySelectorAll('#priceListForm input[data-ingredient]').forEach(input => {
                 const id = input.getAttribute('data-ingredient');
                 const val = parseInt(input.value, 10);
-                ingStock[id] = isNaN(val) ? -1 : val;
+                ingStock[id] = isNaN(val) ? -1 : round2(val);
             });
             if (Object.keys(ingStock).length) updated.ingredientStock = ingStock;
 
@@ -8796,7 +8938,7 @@
             document.querySelectorAll('#priceListForm input[data-chore-tip]').forEach(input => {
                 const id = input.getAttribute('data-chore-tip');
                 const val = parseFloat(input.value);
-                if (choreItems[id]) choreItems[id].tip = isNaN(val) ? 1 : val;
+                if (choreItems[id]) choreItems[id].tip = isNaN(val) ? 1 : round2(val);
             });
             document.querySelectorAll('#priceListForm input[data-chore-pause]').forEach(input => {
                 const id = input.getAttribute('data-chore-pause');
@@ -8811,7 +8953,7 @@
                 const id = input.getAttribute('data-party-tier');
                 const idx = parseInt(input.getAttribute('data-tier-index'), 10);
                 const val = parseFloat(input.value);
-                if (partyItems[id]) partyItems[id].tiers[idx] = isNaN(val) ? 0 : val;
+                if (partyItems[id]) partyItems[id].tiers[idx] = isNaN(val) ? 0 : round2(val);
             });
             document.querySelectorAll('#priceListForm input[data-party-pause]').forEach(input => {
                 const id = input.getAttribute('data-party-pause');
@@ -8836,14 +8978,14 @@
                 const name = input.getAttribute('data-premium-surcharge');
                 const val = parseFloat(input.value);
                 if (updated.items[name]) {
-                    updated.items[name].premiumSurcharge = isNaN(val) ? 2.00 : val;
+                    updated.items[name].premiumSurcharge = isNaN(val) ? 2.00 : round2(val);
                 }
             });
 
             // Supplementi orario
             const num = (id, fallback) => {
                 const v = parseFloat(document.getElementById(id).value);
-                return isNaN(v) ? fallback : v;
+                return isNaN(v) ? fallback : round2(v);
             };
             updated.timeSurcharge = {
                 'Subito': num('surchargeNow', 1),
@@ -11651,7 +11793,8 @@
             topupModal: closeTopupModal,
             walletChoiceModal: closeWalletChoiceModal,
             partyModal: closePartyModal,
-            photoLightboxModal: closePhotoLightbox
+            photoLightboxModal: closePhotoLightbox,
+            donateModal: closeDonateModal
         };
 
         Object.keys(MODAL_CLOSERS).forEach(id => {
