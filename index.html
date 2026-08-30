@@ -721,6 +721,25 @@
             margin-bottom: 6px;
         }
 
+        /* Mini-card per ogni messaggio del banner novità: raggruppa
+           testo, sfondo e badge visivamente separati dagli altri. */
+        .news-msg-card {
+            border: 1px solid var(--sand-deep);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: rgba(255,255,255,0.5);
+        }
+
+        .news-msg-card input {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid var(--sand-deep);
+            border-radius: 6px;
+            font-size: 14px;
+            margin: 0;
+        }
+
         .price-variant {
             flex: 1;
             font-size: 0.9em;
@@ -1816,12 +1835,12 @@
             height: 56px;
             border-radius: 50%;
             border: 3px solid var(--sand);
-            background: linear-gradient(140deg, var(--lagoon) 0%, #1FA396 100%);
+            background: linear-gradient(140deg, var(--coral) 0%, var(--coral-deep) 100%);
             color: #fff;
             font-size: 1.3em;
             font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 4px 14px rgba(46, 196, 182, 0.5);
+            box-shadow: 0 4px 14px rgba(224, 73, 44, 0.5);
             transition: transform 0.2s var(--ease-bounce);
             position: relative;
         }
@@ -2335,6 +2354,83 @@
         .checklist-item-done span {
             text-decoration: line-through;
             color: var(--dusk-soft);
+        }
+
+        /* =============================================
+           BANNER NOVITÀ: un messaggio alla volta con dissolvenza.
+           Ogni messaggio può avere sfondo immagine e badge propri:
+           tutto il "vassoio" (sfondo+badge+testo) sfuma insieme, così
+           il cambio non sembra a pezzi.
+           ============================================= */
+        .news-banner {
+            margin-top: 14px;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            box-shadow: 0 4px 14px rgba(27,58,92,0.3);
+        }
+
+        .news-banner-slide {
+            position: relative;
+            min-height: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, var(--dusk) 0%, #2C5578 100%);
+            opacity: 1;
+            transition: opacity 0.4s ease;
+        }
+
+        .news-banner-slide.news-fade-out { opacity: 0; }
+
+        .news-banner-bg {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            z-index: 0;
+        }
+
+        /* Solo quando c'è un'immagine: una sfumatura scura sopra, per
+           tenere il testo leggibile qualunque sia la foto scelta. */
+        .news-banner-bg.has-image::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(27,58,92,0.4) 0%, rgba(27,58,92,0.8) 100%);
+        }
+
+        .news-banner-text {
+            position: relative;
+            z-index: 1;
+            color: #fff;
+            font-family: var(--font-body);
+            font-size: 0.85em;
+            font-weight: 600;
+            text-align: center;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+        }
+
+        /* Stesso stile a pillola dorata scorrevole del badge "Premium",
+           generalizzato: qui il testo lo decide Daniel messaggio per
+           messaggio, non è fisso su "Premium". */
+        .news-banner-badge {
+            position: relative;
+            z-index: 1;
+            background: linear-gradient(100deg, #D4AF37 0%, #F6E27A 45%, #D4AF37 55%, var(--palm) 100%);
+            background-size: 220% 100%;
+            color: #fff;
+            font-family: var(--font-body);
+            font-size: 0.62em;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            padding: 3px 12px;
+            border-radius: 999px;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(27, 58, 92, 0.3);
+            animation: shimmer 3.5s linear infinite;
         }
 
         .pagination {
@@ -2985,6 +3081,18 @@
         <!-- Share Button -->
         <div style="margin-top: 10px;">
             <button onclick="shareApp()" style="width: 100%; background: linear-gradient(135deg, var(--coral) 0%, var(--coral-deep) 100%); color: #fff; border: none; border-radius: var(--radius); padding: 16px 20px; font-family: var(--font-body); font-size: 15px; font-weight: 600; letter-spacing: 0.3px; cursor: pointer; box-shadow: 0 8px 22px rgba(224,73,44,0.4); transition: transform 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''" data-i18n="shareButton">📤 Invita un amico</button>
+        </div>
+
+        <!-- Banner novità: un messaggio alla volta, con dissolvenza nel
+             successivo. Ogni messaggio può avere sfondo immagine e un
+             badge animato propri. Contenuto modificabile da Daniel dal
+             listino. -->
+        <div id="newsBanner" class="news-banner" style="display:none;">
+            <div id="newsBannerSlide" class="news-banner-slide">
+                <div id="newsBannerBg" class="news-banner-bg"></div>
+                <div id="newsBannerBadge" class="news-banner-badge" style="display:none;"></div>
+                <span id="newsBannerText" class="news-banner-text"></span>
+            </div>
         </div>
     </div>
 
@@ -3987,6 +4095,12 @@
 
                 soldOutLabel: "ESAURITO",
 
+                newsBgPlaceholder: "URL immagine sfondo (opzionale)",
+                newsBadgePlaceholder: "Badge animato (opzionale, es: NOVITÀ)",
+                newsBannerSectionTitle: "Banner novità",
+                newsBannerEnableLabel: "Mostra il banner ai clienti",
+                newsMsgPlaceholder: "Scrivi un messaggio (es: 🎉 Novità...)",
+                newsAddMsg: "Aggiungi messaggio",
                 myAreaTitle: "La mia area",
                 donateModalTitle: "💝 Dona all'attività",
                 donateQuarter: "1/4",
@@ -4310,6 +4424,12 @@
 
                 soldOutLabel: "SOLD OUT",
 
+                newsBgPlaceholder: "Background image URL (optional)",
+                newsBadgePlaceholder: "Animated badge (optional, e.g: NEW)",
+                newsBannerSectionTitle: "News banner",
+                newsBannerEnableLabel: "Show the banner to customers",
+                newsMsgPlaceholder: "Write a message (e.g: 🎉 News...)",
+                newsAddMsg: "Add message",
                 myAreaTitle: "My area",
                 donateModalTitle: "💝 Donate to the business",
                 donateQuarter: "1/4",
@@ -4633,6 +4753,12 @@
 
                 soldOutLabel: "AGOTADO",
 
+                newsBgPlaceholder: "URL imagen de fondo (opcional)",
+                newsBadgePlaceholder: "Insignia animada (opcional, ej: NOVEDAD)",
+                newsBannerSectionTitle: "Banner de novedades",
+                newsBannerEnableLabel: "Mostrar el banner a los clientes",
+                newsMsgPlaceholder: "Escribe un mensaje (ej: 🎉 Novedad...)",
+                newsAddMsg: "Añadir mensaje",
                 myAreaTitle: "Mi área",
                 donateModalTitle: "💝 Donar al negocio",
                 donateQuarter: "1/4",
@@ -4956,6 +5082,12 @@
 
                 soldOutLabel: "AUSVERKAUFT",
 
+                newsBgPlaceholder: "Hintergrundbild-URL (optional)",
+                newsBadgePlaceholder: "Animiertes Badge (optional, z.B.: NEU)",
+                newsBannerSectionTitle: "Neuigkeiten-Banner",
+                newsBannerEnableLabel: "Banner den Kunden anzeigen",
+                newsMsgPlaceholder: "Nachricht schreiben (z.B.: 🎉 Neuigkeit...)",
+                newsAddMsg: "Nachricht hinzufügen",
                 myAreaTitle: "Mein Bereich",
                 donateModalTitle: "💝 An den Betrieb spenden",
                 donateQuarter: "1/4",
@@ -5279,6 +5411,12 @@
 
                 soldOutLabel: "ÉPUISÉ",
 
+                newsBgPlaceholder: "URL de l'image de fond (facultatif)",
+                newsBadgePlaceholder: "Badge animé (facultatif, ex : NOUVEAU)",
+                newsBannerSectionTitle: "Bandeau actualités",
+                newsBannerEnableLabel: "Afficher le bandeau aux clients",
+                newsMsgPlaceholder: "Écrivez un message (ex : 🎉 Nouveauté...)",
+                newsAddMsg: "Ajouter un message",
                 myAreaTitle: "Mon espace",
                 donateModalTitle: "💝 Faire un don à l'activité",
                 donateQuarter: "1/4",
@@ -5602,6 +5740,12 @@
 
                 soldOutLabel: "ЗАКІНЧИВСЯ",
 
+                newsBgPlaceholder: "URL фонового зображення (необов’язково)",
+                newsBadgePlaceholder: "Анімований бейдж (необов’язково, напр.: НОВИНКА)",
+                newsBannerSectionTitle: "Банер новин",
+                newsBannerEnableLabel: "Показувати банер клієнтам",
+                newsMsgPlaceholder: "Напишіть повідомлення (напр.: 🎉 Новина...)",
+                newsAddMsg: "Додати повідомлення",
                 myAreaTitle: "Мій розділ",
                 donateModalTitle: "💝 Пожертвувати бізнесу",
                 donateQuarter: "1/4",
@@ -5924,6 +6068,12 @@
                 specialOffer: "PROMOÇÃO",
                 soldOutLabel: "ESGOTADO",
 
+                newsBgPlaceholder: "URL da imagem de fundo (opcional)",
+                newsBadgePlaceholder: "Selo animado (opcional, ex.: NOVIDADE)",
+                newsBannerSectionTitle: "Banner de novidades",
+                newsBannerEnableLabel: "Mostrar o banner aos clientes",
+                newsMsgPlaceholder: "Escreva uma mensagem (ex.: 🎉 Novidade...)",
+                newsAddMsg: "Adicionar mensagem",
                 myAreaTitle: "A minha área",
                 donateModalTitle: "💝 Doar ao negócio",
                 donateQuarter: "1/4",
@@ -7091,6 +7241,15 @@
                 amazonLinks: {}, // link salvati per il riordino rapido su Amazon
                 choreItems: buildDefaultChorePricing(),
                 partyItems: buildDefaultPartyPricing(),
+                newsBanner: {
+                    enabled: true,
+                    messages: [
+                        { text: '🎉 Scopri i nostri pacchetti festa a tema!', bgImage: '', badge: '' },
+                        { text: '💳 Paga con la carta prepagata e risparmia il 10%!', bgImage: '', badge: '' },
+                        { text: '📖 Il libro dei cocktail di Daniel, ora in PDF!', bgImage: '', badge: 'NOVITÀ' },
+                        { text: '⭐ Lascia una recensione, ci aiuta a crescere!', bgImage: '', badge: '' }
+                    ]
+                },
                 service: {
                     manualOverride: null,
                     closeReason: null,
@@ -7172,6 +7331,77 @@
         // 19.999999999999996 invece di 20, che poi riaffiorano altrove.
         function round2(n) {
             return Math.round((n + Number.EPSILON) * 100) / 100;
+        }
+
+        // =============================================
+        // BANNER NOVITÀ: un messaggio alla volta, con dissolvenza nel
+        // successivo ogni 5 secondi. Ogni messaggio è un oggetto
+        // {text, bgImage, badge} — sfondo e badge sono opzionali.
+        // Contenuto modificabile da Daniel dal listino.
+        // =============================================
+        let newsBannerIndex = 0;
+        let newsBannerInterval = null;
+
+        // Compatibilità: se un messaggio è ancora una stringa semplice
+        // (dati salvati prima di questa funzionalità), lo trattiamo come
+        // solo testo, senza sfondo né badge.
+        function normalizeNewsMessage(m) {
+            if (typeof m === 'string') return { text: m, bgImage: '', badge: '' };
+            return { text: m.text || '', bgImage: m.bgImage || '', badge: m.badge || '' };
+        }
+
+        function renderNewsBannerSlide(msg) {
+            const bgEl = document.getElementById('newsBannerBg');
+            const textEl = document.getElementById('newsBannerText');
+            const badgeEl = document.getElementById('newsBannerBadge');
+
+            if (msg.bgImage) {
+                bgEl.style.backgroundImage = `url('${msg.bgImage}')`;
+                bgEl.classList.add('has-image');
+            } else {
+                bgEl.style.backgroundImage = '';
+                bgEl.classList.remove('has-image');
+            }
+
+            textEl.textContent = msg.text;
+
+            if (msg.badge) {
+                badgeEl.textContent = msg.badge;
+                badgeEl.style.display = 'inline-block';
+            } else {
+                badgeEl.style.display = 'none';
+            }
+        }
+
+        function startNewsBanner() {
+            clearInterval(newsBannerInterval);
+            const banner = document.getElementById('newsBanner');
+            const slide = document.getElementById('newsBannerSlide');
+            if (!banner || !slide) return;
+
+            const cfg = pricing.newsBanner || {};
+            const messages = (cfg.messages || []).map(normalizeNewsMessage).filter(m => m.text.trim());
+
+            if (!cfg.enabled || messages.length === 0) {
+                banner.style.display = 'none';
+                return;
+            }
+
+            banner.style.display = 'block';
+            newsBannerIndex = newsBannerIndex % messages.length;
+            renderNewsBannerSlide(messages[newsBannerIndex]);
+            slide.classList.remove('news-fade-out');
+
+            if (messages.length <= 1) return; // niente da alternare
+
+            newsBannerInterval = setInterval(() => {
+                slide.classList.add('news-fade-out');
+                setTimeout(() => {
+                    newsBannerIndex = (newsBannerIndex + 1) % messages.length;
+                    renderNewsBannerSlide(messages[newsBannerIndex]);
+                    slide.classList.remove('news-fade-out');
+                }, 400); // combacia con la durata della transizione CSS
+            }, 5000);
         }
 
         // Apre/chiude uno qualunque dei pannelli richiudibili (eventi,
@@ -7368,6 +7598,7 @@
                     if (data.amazonLinks) merged.amazonLinks = data.amazonLinks;
                     if (data.choreItems) merged.choreItems = { ...merged.choreItems, ...data.choreItems };
                     if (data.partyItems) merged.partyItems = { ...merged.partyItems, ...data.partyItems };
+                    if (data.newsBanner) merged.newsBanner = data.newsBanner;
                     if (data.service) {
                         merged.service = {
                             manualOverride: (data.service.manualOverride === undefined) ? null : data.service.manualOverride,
@@ -7389,6 +7620,7 @@
                         updateServiceBanner();
                         renderLowStockPanel();
                         renderSupervisorPanel();
+                        startNewsBanner();
                     }
                 }
             } catch (error) {
@@ -8800,6 +9032,21 @@
             if (section) section.classList.toggle('collapsed');
         }
 
+        function addNewsMsgRow() {
+            const container = document.getElementById('newsMsgRows');
+            const idx = container.children.length;
+            const card = document.createElement('div');
+            card.className = 'news-msg-card';
+            card.innerHTML = `
+                <div style="display:flex; gap:6px; align-items:center;">
+                    <input type="text" data-news-text="${idx}" value="" style="flex:1;" placeholder="${t('newsMsgPlaceholder')}">
+                    <button type="button" class="reject-btn" style="padding:8px 12px;" onclick="this.closest('.news-msg-card').remove()">✕</button>
+                </div>
+                <input type="text" data-news-bg="${idx}" value="" placeholder="${t('newsBgPlaceholder')}" style="margin-top:6px;">
+                <input type="text" data-news-badge="${idx}" value="" placeholder="${t('newsBadgePlaceholder')}" style="margin-top:6px;">`;
+            container.appendChild(card);
+        }
+
         function openPriceList() {
             if (!isAdmin()) return;
 
@@ -8972,6 +9219,41 @@
                     </div>`;
             };
 
+            // Banner novità: attiva/disattiva + una mini-card per messaggio
+            // (testo, sfondo immagine opzionale, badge animato opzionale)
+            const buildNewsBannerSection = () => {
+                const cfg = pricing.newsBanner || { enabled: true, messages: [] };
+                const rows = cfg.messages.map(normalizeNewsMessage).map((msg, i) => `
+                    <div class="news-msg-card">
+                        <div style="display:flex; gap:6px; align-items:center;">
+                            <input type="text" data-news-text="${i}" value="${msg.text.replace(/"/g, '&quot;')}"
+                                   style="flex:1;" placeholder="${t('newsMsgPlaceholder')}">
+                            <button type="button" class="reject-btn" style="padding:8px 12px;" onclick="this.closest('.news-msg-card').remove()">✕</button>
+                        </div>
+                        <input type="text" data-news-bg="${i}" value="${msg.bgImage.replace(/"/g, '&quot;')}"
+                               placeholder="${t('newsBgPlaceholder')}" style="margin-top:6px;">
+                        <input type="text" data-news-badge="${i}" value="${msg.badge.replace(/"/g, '&quot;')}"
+                               placeholder="${t('newsBadgePlaceholder')}" style="margin-top:6px;">
+                    </div>`).join('');
+
+                return `
+                    <div class="price-section collapsed" id="section-newsbanner">
+                        <button type="button" class="price-section-toggle" onclick="togglePriceSection('newsbanner')">
+                            <span>📰 ${t('newsBannerSectionTitle')}</span>
+                            <span class="ps-count">${cfg.messages.length}</span>
+                            <span class="pc-chevron">▾</span>
+                        </button>
+                        <div class="price-section-body" id="sectionBody-newsbanner">
+                            <label class="soldout-toggle" style="margin-bottom:12px;">
+                                <input type="checkbox" id="newsBannerEnabled" ${cfg.enabled ? 'checked' : ''}>
+                                <span>${t('newsBannerEnableLabel')}</span>
+                            </label>
+                            <div id="newsMsgRows">${rows}</div>
+                            <button type="button" class="checklist-photo-btn" style="width:100%; margin-top:8px;" onclick="addNewsMsgRow()">+ ${t('newsAddMsg')}</button>
+                        </div>
+                    </div>`;
+            };
+
             const buildIngredientsSection = () => {
                 const stock = pricing.ingredientStock || {};
                 const links = pricing.amazonLinks || {};
@@ -9021,7 +9303,8 @@
                 buildSection('tabMerch', '🛍️', merch, false) +
                 buildIngredientsSection() +
                 buildChoresSection() +
-                buildPartySection();
+                buildPartySection() +
+                buildNewsBannerSection();
 
             const ts = pricing.timeSurcharge || {};
             document.getElementById('surchargeNow').value = (ts['Subito'] ?? 1).toFixed(2);
@@ -9188,6 +9471,22 @@
                     hours: hours
                 };
 
+            // Banner novità: una card per messaggio, con testo/sfondo/badge.
+            // Le card rimosse col ✕ non esistono più nel DOM, quindi
+            // spariscono automaticamente dall'elenco salvato.
+            const newsEnabledEl = document.getElementById('newsBannerEnabled');
+            const newsMessages = Array.from(document.querySelectorAll('#newsMsgRows .news-msg-card'))
+                .map(card => ({
+                    text: card.querySelector('[data-news-text]').value.trim(),
+                    bgImage: card.querySelector('[data-news-bg]').value.trim(),
+                    badge: card.querySelector('[data-news-badge]').value.trim()
+                }))
+                .filter(m => m.text);
+            updated.newsBanner = {
+                enabled: newsEnabledEl ? newsEnabledEl.checked : true,
+                messages: newsMessages
+            };
+
             pricing = updated;
             const ok = await savePricing();
 
@@ -9196,6 +9495,7 @@
             updatePriceDisplay();
             updateServiceBanner();
             renderLowStockPanel();
+            startNewsBanner();
 
             const successMsg = document.getElementById('successMessage');
             successMsg.textContent = ok ? t('priceListSaved') : t('priceListSavedLocal');
@@ -11946,6 +12246,7 @@
         loadPartyBookingsFromCloud(); // Carica le prenotazioni feste
         loadMyLibraryFromCloud(); // Carica gli acquisti digitali (es. il libro PDF)
         loadStudyChecklistFromCloud(); // Carica/azzera la checklist studio del giorno
+        startNewsBanner(); // Avvia il banner novità
         loadDonationsFromCloud(); // Carica il totale donazioni (solo per chi supervisiona)
         renderLowStockPanel(); // Avvisi scorte per l'admin
         syncPendingOrders(); // Invia gli ordini rimasti in coda da sessioni offline
