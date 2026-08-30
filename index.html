@@ -2837,7 +2837,7 @@
         <div id="userGreeting" style="display: none; text-align: center; margin-bottom: 15px;">
             <img id="adminAvatar" src="danny-avatar.png" alt="" style="display:none; width:26px; height:26px; border-radius:50%; vertical-align:middle; margin-right:6px; border:2px solid rgba(255,255,255,0.6);">
             <span style="color: white; font-size: 1em; text-shadow: 1px 1px 4px rgba(0,0,0,0.6);">👤 <strong id="greetingName"></strong></span>
-            <button onclick="changeUserName()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; padding: 3px 8px; font-size: 0.7em; cursor: pointer; margin-left: 6px;">✏️</button>
+            <button id="changeNameBtn" onclick="changeUserName()" style="display:none; background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; padding: 3px 8px; font-size: 0.7em; cursor: pointer; margin-left: 6px;">✏️</button>
             <button id="priceListBtn" onclick="openPriceList()" style="display:none; background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; padding: 3px 10px; font-size: 0.7em; cursor: pointer; margin-left: 6px;" data-i18n="priceListBtn">💵 Listino</button>
         </div>
 
@@ -3780,7 +3780,8 @@
             { id: 'compiti',       name: 'Completare i compiti del giorno', icon: '🎓', category: 'Studio' },
             { id: 'ripasso',       name: 'Ripassare per una verifica', icon: '📖', category: 'Studio' },
             { id: 'lettura',       name: 'Leggere almeno 30 minuti',   icon: '📚', category: 'Studio' },
-            { id: 'progetto',      name: 'Consegnare un progetto scolastico', icon: '🗂️', category: 'Studio' }
+            { id: 'progetto',      name: 'Consegnare un progetto scolastico', icon: '🗂️', category: 'Studio' },
+            { id: 'pulizia_bar',   name: 'Pulire bancone bar, pulire il lavandino bar, svuotare immondizia', icon: '🧽', category: 'Bar' }
         ];
 
         // Mance predefinite (l'admin può cambiarle dal listino)
@@ -3792,7 +3793,8 @@
                 piante: 1.00, erba: 4.00,
                 cameretta: 2.00, bucato: 1.50,
                 auto: 3.00,
-                compiti: 2.00, ripasso: 3.00, lettura: 1.50, progetto: 4.00
+                compiti: 2.00, ripasso: 3.00, lettura: 1.50, progetto: 4.00,
+                pulizia_bar: 4.00
             };
             const items = {};
             chores.forEach(c => { items[c.id] = { tip: defaults[c.id] ?? 1.00, paused: false }; });
@@ -4102,7 +4104,8 @@
                 choresPausedButton: "In pausa",
                 chorePausedLabel: "IN PAUSA",
                 choreCat_Casa: "Casa",
-                choreCat_Cucina: "Cucina",
+
+                choreCat_Bar: "Bar",                choreCat_Cucina: "Cucina",
                 choreCat_Animali: "Animali",
                 choreCat_Esterno: "Esterno",
                 choreCat_Ordine: "Ordine",
@@ -4424,7 +4427,8 @@
                 choresPausedButton: "Paused",
                 chorePausedLabel: "PAUSED",
                 choreCat_Casa: "Home",
-                choreCat_Cucina: "Kitchen",
+
+                choreCat_Bar: "Bar",                choreCat_Cucina: "Kitchen",
                 choreCat_Animali: "Pets",
                 choreCat_Esterno: "Outdoor",
                 choreCat_Ordine: "Tidying",
@@ -4746,7 +4750,8 @@
                 choresPausedButton: "En pausa",
                 chorePausedLabel: "EN PAUSA",
                 choreCat_Casa: "Casa",
-                choreCat_Cucina: "Cocina",
+
+                choreCat_Bar: "Bar",                choreCat_Cucina: "Cocina",
                 choreCat_Animali: "Mascotas",
                 choreCat_Esterno: "Exterior",
                 choreCat_Ordine: "Orden",
@@ -5068,7 +5073,8 @@
                 choresPausedButton: "Pausiert",
                 chorePausedLabel: "PAUSIERT",
                 choreCat_Casa: "Haus",
-                choreCat_Cucina: "Küche",
+
+                choreCat_Bar: "Bar",                choreCat_Cucina: "Küche",
                 choreCat_Animali: "Haustiere",
                 choreCat_Esterno: "Außen",
                 choreCat_Ordine: "Ordnung",
@@ -5390,7 +5396,8 @@
                 choresPausedButton: "En pause",
                 chorePausedLabel: "EN PAUSE",
                 choreCat_Casa: "Maison",
-                choreCat_Cucina: "Cuisine",
+
+                choreCat_Bar: "Bar",                choreCat_Cucina: "Cuisine",
                 choreCat_Animali: "Animaux",
                 choreCat_Esterno: "Extérieur",
                 choreCat_Ordine: "Rangement",
@@ -5712,7 +5719,8 @@
                 choresPausedButton: "Призупинено",
                 chorePausedLabel: "ПРИЗУПИНЕНО",
                 choreCat_Casa: "Дім",
-                choreCat_Cucina: "Кухня",
+
+                choreCat_Bar: "Бар",                choreCat_Cucina: "Кухня",
                 choreCat_Animali: "Тварини",
                 choreCat_Esterno: "Двір",
                 choreCat_Ordine: "Порядок",
@@ -6033,7 +6041,8 @@
                 choresPausedButton: "Em pausa",
                 chorePausedLabel: "EM PAUSA",
                 choreCat_Casa: "Casa",
-                choreCat_Cucina: "Cozinha",
+
+                choreCat_Bar: "Bar",                choreCat_Cucina: "Cozinha",
                 choreCat_Animali: "Animais",
                 choreCat_Esterno: "Exterior",
                 choreCat_Ordine: "Arrumação",
@@ -7721,6 +7730,11 @@
 
         // Change name (pencil button)
         function changeUserName() {
+            // Difesa in profondità: anche se il pulsante è nascosto,
+            // la funzione stessa rifiuta di procedere per chiunque non
+            // sia il supervisore.
+            if (!isSuperAdmin()) return;
+
             const newName = prompt(t('changeName'), customerName);
             if (newName && newName.trim()) {
                 customerName = newName.trim();
@@ -7750,6 +7764,11 @@
             const myAreaBtn = document.getElementById('myAreaBtn');
             if (myAreaBtn) myAreaBtn.style.display = 'flex';
             updateHelpButtonDot();
+            // Solo il supervisore può cambiare utente: evita che chiunque
+            // sul dispositivo passi a un altro nome (es. diventare admin
+            // scrivendo "Daniel") senza che sia una scelta deliberata di Renato.
+            const changeNameBtn = document.getElementById('changeNameBtn');
+            if (changeNameBtn) changeNameBtn.style.display = isSuperAdmin() ? 'inline-block' : 'none';
             renderWalletPanel();
             renderSupervisorPanel();
         }
