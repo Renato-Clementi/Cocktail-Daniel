@@ -2105,6 +2105,14 @@
             padding: 16px 18px;
             margin-bottom: 20px;
             box-shadow: 0 8px 22px rgba(184, 134, 11, 0.4);
+            transition: box-shadow 0.3s ease;
+        }
+
+        /* Breve lampeggio quando si tocca la carta per aggiornare il
+           saldo: conferma visiva che è successo qualcosa, non solo un
+           tocco a vuoto. */
+        .wallet-panel.wallet-refreshing {
+            box-shadow: 0 0 0 3px var(--lagoon), 0 8px 22px rgba(184, 134, 11, 0.4);
         }
 
         .wallet-panel-row {
@@ -2954,16 +2962,16 @@
         </div>
 
         <!-- La mia carta prepagata (clienti) -->
-        <div id="myWalletPanel" class="wallet-panel" style="display:none;">
+        <div id="myWalletPanel" class="wallet-panel" style="display:none; cursor:pointer;" onclick="refreshWalletOnTap()" title="Tocca per aggiornare il saldo">
             <div class="wallet-panel-row">
                 <div>
                     <div class="wallet-label" data-i18n="walletTitle">💳 La mia carta</div>
                     <div class="wallet-balance" id="walletBalanceAmount">0,00€</div>
                     <div id="walletPendingNote" class="wallet-pending-note" style="display:none;"></div>
                 </div>
-                <button class="wallet-topup-btn" onclick="openTopupModal()" data-i18n="topupBtn">+ Ricarica</button>
+                <button class="wallet-topup-btn" onclick="event.stopPropagation(); openTopupModal()" data-i18n="topupBtn">+ Ricarica</button>
             </div>
-            <button id="walletDonateBtn" class="wallet-donate-btn" style="display:none;" onclick="openDonateModal()">
+            <button id="walletDonateBtn" class="wallet-donate-btn" style="display:none;" onclick="event.stopPropagation(); openDonateModal()">
                 💝 <span data-i18n="donateBtn">Dona il saldo all'attività</span>
             </button>
         </div>
@@ -7934,6 +7942,17 @@
             }
         }
 
+        // Tocco sulla scheda "La mia carta": rilegge subito il saldo da
+        // Firestore invece di aspettare il prossimo giro di polling
+        // automatico (~15s) — utile appena dopo che Daniel ha confermato
+        // una ricarica, per vederla comparire senza attendere.
+        async function refreshWalletOnTap() {
+            const panel = document.getElementById('myWalletPanel');
+            if (panel) panel.classList.add('wallet-refreshing');
+            await loadWalletFromCloud();
+            if (panel) setTimeout(() => panel.classList.remove('wallet-refreshing'), 400);
+        }
+
         async function writeWalletBalance(newBalance) {
             walletBalance = Math.max(0, Math.round(newBalance * 100) / 100);
             localStorage.setItem('walletBalance', String(walletBalance));
@@ -7978,7 +7997,11 @@
         // =============================================
         // La donazione può essere parziale: si apre un modale con
         // l'importo libero, invece di donare per forza tutto il saldo.
-        function openDonateModal() {
+        async function openDonateModal() {
+            // Anche qui: mai fidarsi del saldo già in memoria quando si sta
+            // per decidere quanto donare. Si rilegge da Firestore prima
+            // di mostrare la cifra su cui l'utente baserà la scelta.
+            await loadWalletFromCloud();
             if (walletBalance <= 0) return;
             document.getElementById('donateModalBalance').textContent = formatPrice(walletBalance);
             const input = document.getElementById('donateAmount');
@@ -8005,6 +8028,12 @@
                 alert(t('donateInvalidAmount'));
                 return;
             }
+
+            // Ultima rilettura da Firestore appena prima di validare e
+            // scrivere: tra l'apertura del modale e questo tocco può essere
+            // passato del tempo, e il saldo vero potrebbe essere cambiato.
+            await loadWalletFromCloud();
+
             // Non si può mai donare più di quanto si possiede — ma una
             // tolleranza di un centesimo assorbe i normali errori di
             // arrotondamento dei numeri decimali in JavaScript, senza
@@ -8290,6 +8319,13 @@
         }
 
         async function payWithCard() {
+            // Rilettura appena prima di addebitare davvero: tra l'apertura
+            // della scelta e questo click può essere passato tempo, e il
+            // saldo mostrato potrebbe non essere più quello vero. Firestore
+            // resta l'unica fonte di verità per il denaro, mai il valore
+            // già in memoria.
+            await loadWalletFromCloud();
+
             const preview = previewCardAllocation(orders.slice(), walletBalance);
             closeWalletChoiceModal();
 
@@ -8340,6 +8376,11 @@
                 alert('Sei in modalità admin: conferma i pagamenti dalla sezione "Richieste di pagamento".');
                 return;
             }
+
+            // Il saldo locale potrebbe essere quello di 15 secondi fa: prima
+            // di decidere come pagare, rileggiamo da Firestore — è l'unica
+            // fonte di verità per quanto riguarda i soldi.
+            await loadWalletFromCloud();
 
             // Se c'è un saldo sulla carta, prima si sceglie come pagare.
             // Senza saldo si va dritti al flusso in contanti di sempre.
