@@ -2789,12 +2789,18 @@
         </div>
 
         <!-- Donazioni ricevute: visibile a Daniel e Renato, in sola lettura -->
-        <div id="donationsPanel" class="orders-section" style="display:none; margin-bottom:20px;">
-            <h2 style="margin-bottom:6px;">💝 <span data-i18n="donationsTitle">Donazioni ricevute</span></h2>
-            <p style="font-size:0.88em; color:var(--dusk-soft); margin-bottom:12px;">
-                <span data-i18n="donationsTotalLabel">Totale donato:</span> <strong id="donationsTotal">0,00€</strong>
-            </p>
-            <div id="donationsList"></div>
+        <div id="donationsPanel" class="orders-section collapsible-panel collapsed" style="display:none; margin-bottom:20px;">
+            <button type="button" class="collapsible-header" onclick="toggleCollapsible('donationsPanel')">
+                💝 <span data-i18n="donationsTitle">Donazioni ricevute</span>
+                <span class="badge" id="donationsCount">0</span>
+                <span class="pc-chevron">▾</span>
+            </button>
+            <div class="collapsible-body">
+                <p style="font-size:0.88em; color:var(--dusk-soft); margin-bottom:12px;">
+                    <span data-i18n="donationsTotalLabel">Totale donato:</span> <strong id="donationsTotal">0,00€</strong>
+                </p>
+                <div id="donationsList"></div>
+            </div>
         </div>
 
         <div id="lowStockPanel" class="low-stock-panel collapsed" style="display:none;">
@@ -8033,6 +8039,7 @@
             if (!canSupervise() || donationsList.length === 0) { panel.style.display = 'none'; return; }
 
             panel.style.display = 'block';
+            document.getElementById('donationsCount').textContent = donationsList.length;
             const total = donationsList.reduce((sum, d) => sum + d.amount, 0);
             document.getElementById('donationsTotal').textContent = formatPrice(total);
             document.getElementById('donationsList').innerHTML = donationsList.map(d => `
