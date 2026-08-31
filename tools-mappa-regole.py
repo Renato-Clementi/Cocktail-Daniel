@@ -60,7 +60,7 @@ for blocco in re.finditer(r'match /(\w+)(?:/\{?(\w+)\}?)?\s*\{(.*?)\n    \}', RU
         cond = ' '.join(m.group(2).split())
         ruolo = ('admin' if cond == 'admin()' else
                  'staff' if cond == 'staff()' else
-                 'cliente' if cond == 'signedIn()' else
+                 'cliente' if cond == 'utente()' else
                  'condizionato')
         for op in [o.strip() for o in m.group(1).split(',')]:
             for reale in (['read','create','update','delete'] if op == 'write' else [op]):

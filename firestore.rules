@@ -31,15 +31,26 @@ rules_version = '2';
 // anonimo lo può ottenere anche chi legge il sorgente: il muro è attorno
 // ai poteri e al denaro, non attorno alla lettura dei dati fra clienti.
 //
-// ⚠️ PRIMA DI PUBBLICARE, in questo ordine:
+// ⚠️ SI PUBBLICA IN DUE TEMPI, e il primo non rompe niente.
+//
+// TEMPO 1 — la parte che protegge, subito
 //   1. Authentication → Sign-in method → abilita "Anonimo" e "Email/password".
 //   2. Authentication → Users → crea gli account di Daniel e Renato,
 //      copia i loro UID.
-//   3. Incollali sia qui sotto (admin/superadmin) sia in ADMIN_UIDS e
-//      SUPERADMIN_UIDS dentro index.html.
-//   4. Pubblica queste regole e ricarica l'app.
-// Saltare il passo 1 o 3 lascia l'app senza permessi: si vedrebbero
-// pannelli vuoti e scritture rifiutate.
+//   3. Incollali sia qui sotto (adminUids/superadminUids) sia in ADMIN_UIDS
+//      e SUPERADMIN_UIDS dentro app.js. Gli stessi, senza refusi: se non
+//      coincidono, il browser crede una cosa e il server un'altra.
+//   4. Pubblica l'app, poi queste regole, con transizione() a true.
+//      Da questo momento nessuno cambia prezzi né si accredita credito,
+//      e i telefoni non ancora aggiornati continuano a funzionare.
+//
+// TEMPO 2 — la chiusura, quando conviene
+//   5. Quando tutti hanno aperto l'app almeno una volta e accettato il
+//      banner di aggiornamento, metti transizione() a false e ripubblica.
+//      Da lì serve un token anche per leggere.
+//
+// Saltare il passo 1 o 3 lascia Daniel senza poteri: senza UID admin() è
+// sempre falsa, e il listino diventa di nessuno.
 //
 // Da provare senza rischi: Firestore Database → Regole → Playground.
 // Oppure `firebase deploy --only firestore:rules` con la CLI.
@@ -55,9 +66,34 @@ service cloud.firestore {
     function adminUids()      { return []; }   // ← UID di Daniel
     function superadminUids() { return []; }   // ← UID di Renato
 
-    function signedIn() { return request.auth != null; }
-    function admin()    { return signedIn() && request.auth.uid in adminUids(); }
-    function super_()   { return signedIn() && request.auth.uid in superadminUids(); }
+    // ---------- L'INTERRUTTORE DELLA TRANSIZIONE ----------
+    // Il problema pratico: queste regole pretendono un token, e il token lo
+    // sa chiedere solo la versione nuova dell'app. Un telefono che ha ancora
+    // la versione vecchia in cache — e su iOS il service worker può essere
+    // pigro per giorni — si troverebbe letture e scritture rifiutate.
+    //
+    // Con transizione() a true, chi non è autenticato continua a funzionare
+    // come prima. Quello che NON aspetta la transizione è la parte che conta:
+    // admin() richiede un uid vero, quindi da subito nessuno può cambiare i
+    // prezzi, spuntare le checklist al posto di Daniel, confermare pagamenti
+    // o — soprattutto — FAR SALIRE un saldo. Quella porta si chiude nel
+    // momento in cui pubblichi queste regole, non quando tutti i telefoni
+    // sono aggiornati.
+    //
+    // Quando tutti hanno la versione nuova (basta aprire l'app e accettare il
+    // banner), metti transizione() a false e ripubblica: da quel momento
+    // serve un token anche per leggere, e l'API REST non risponde più a
+    // chiamate anonime. È una riga sola, e si può rimettere a true in dieci
+    // secondi se qualcosa non torna.
+    function transizione() { return true; }
+
+    // "utente" = chi sta usando l'app. Durante la transizione include anche
+    // chi non è autenticato; dopo, solo chi ha un token. Il nome non dice
+    // "signedIn" proprio perché durante la transizione non sarebbe vero.
+    function autenticato() { return request.auth != null; }
+    function utente()      { return transizione() || autenticato(); }
+    function admin()    { return autenticato() && request.auth.uid in adminUids(); }
+    function super_()   { return autenticato() && request.auth.uid in superadminUids(); }
     function staff()    { return admin() || super_(); }
 
     // ---------- LISTINO, ORARI, CHECKLIST ----------
@@ -65,7 +101,7 @@ service cloud.firestore {
     // leggono (l'app deve mostrare i prezzi), solo la gestione scrive.
     // Renato ci scrive due sottoalberi: il banner novità e la modalità studio.
     match /settings/pricing {
-      allow read:  if signedIn();
+      allow read:  if utente();
       allow write: if staff();
     }
 
@@ -75,14 +111,14 @@ service cloud.firestore {
     // parte proprio per questo: finché era dentro pricing, permettere di
     // scalare le scorte significava permettere di riscrivere i prezzi.
     match /settings/stock {
-      allow read:  if signedIn();
-      allow write: if signedIn();
+      allow read:  if utente();
+      allow write: if utente();
     }
 
     // settings/studyChecklist_<data>: la spunta è di Daniel e di nessun
     // altro — l'autovalutazione è il punto. Tutta la famiglia la legge.
     match /settings/{doc} {
-      allow read:  if signedIn();
+      allow read:  if utente();
       allow write: if admin();
     }
 
@@ -91,11 +127,11 @@ service cloud.firestore {
     // di chi paga, ma può SALIRE solo per mano di Daniel, che è quello che
     // incassa i contanti. Nessuno può regalarsi credito.
     match /wallets/{uid} {
-      allow read:   if signedIn();
+      allow read:   if utente();
       allow create: if admin();
       allow delete: if admin();
       allow update: if admin()
-                    || (signedIn()
+                    || (utente()
                         && request.resource.data.balance is number
                         && request.resource.data.balance >= 0
                         && request.resource.data.balance < resource.data.balance);
@@ -104,8 +140,8 @@ service cloud.firestore {
     // Il cliente chiede una ricarica; solo Daniel la chiude, ed è la
     // chiusura che accredita (vedi wallets: create/salita = admin).
     match /topupRequests/{id} {
-      allow read:   if signedIn();
-      allow create: if signedIn();
+      allow read:   if utente();
+      allow create: if utente();
       allow update: if admin();
       allow delete: if admin();
     }
@@ -116,18 +152,18 @@ service cloud.firestore {
     // contante. Senza identità stabile per i clienti non si può stringere
     // oltre: è il limite dichiarato in testa al file.
     match /orders/{id} {
-      allow read:   if signedIn();
-      allow create: if signedIn();
-      allow update: if signedIn();
-      allow delete: if signedIn();
+      allow read:   if utente();
+      allow create: if utente();
+      allow update: if utente();
+      allow delete: if utente();
     }
 
     // La richiesta di chiusura conto la crea il cliente; la conferma —
     // cioè la cancellazione — è di Daniel: è lui che ha ricevuto i soldi.
     match /payments/{uid} {
-      allow read:   if signedIn();
-      allow create: if signedIn();
-      allow update: if signedIn();
+      allow read:   if utente();
+      allow create: if utente();
+      allow update: if utente();
       allow delete: if admin();
     }
 
@@ -136,18 +172,18 @@ service cloud.firestore {
     // rimuove la propria una volta letto l'avviso di rifiuto o
     // annullamento. Daniel accetta, rifiuta, annulla e spunta le checklist.
     match /partyBookings/{id} {
-      allow read:   if signedIn();
-      allow create: if signedIn();
-      allow update: if signedIn();
-      allow delete: if signedIn();
+      allow read:   if utente();
+      allow create: if utente();
+      allow update: if utente();
+      allow delete: if utente();
     }
 
     // ---------- LAVORETTI ----------
     // La famiglia assegna un lavoretto a Daniel; solo Daniel lo spunta
     // come fatto e salda le mance.
     match /chores/{id} {
-      allow read:   if signedIn();
-      allow create: if signedIn();
+      allow read:   if utente();
+      allow create: if utente();
       allow update: if admin();
       allow delete: if admin();
     }
@@ -155,15 +191,15 @@ service cloud.firestore {
     // ---------- PROVE FOTOGRAFICHE ----------
     // Le carica e le rimuove solo Daniel: sono la prova del suo lavoro.
     match /checklistPhotos/{id} {
-      allow read:  if signedIn();
+      allow read:  if utente();
       allow write: if admin();
     }
 
     // ---------- RECENSIONI ----------
     // Pubbliche per chi usa l'app; le cancella solo Daniel.
     match /reviews/{id} {
-      allow read:   if signedIn();
-      allow create: if signedIn();
+      allow read:   if utente();
+      allow create: if utente();
       allow update: if admin();
       allow delete: if admin();
     }
@@ -173,16 +209,16 @@ service cloud.firestore {
     // con la carta, da Daniel col contante) e non si tocca più: senza
     // update né delete, il libro comprato resta comprato.
     match /digitalPurchases/{id} {
-      allow read:   if signedIn();
-      allow create: if signedIn();
+      allow read:   if utente();
+      allow create: if utente();
       allow update: if admin();
       allow delete: if admin();
     }
 
     // La ricevuta di una donazione: la scrive chi dona, non si modifica.
     match /donations/{id} {
-      allow read:   if signedIn();
-      allow create: if signedIn();
+      allow read:   if utente();
+      allow create: if utente();
       allow update: if admin();
       allow delete: if admin();
     }

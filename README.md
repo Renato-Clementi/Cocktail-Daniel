@@ -135,9 +135,19 @@ stesso nome continua a ritrovare i propri ordini da un altro dispositivo.
 7. Incolla quegli UID in **due** posti: `ADMIN_UIDS` / `SUPERADMIN_UIDS` dentro `app.js`, e `adminUids()` / `superadminUids()` dentro `firestore.rules`
 8. Ripubblica le regole
 
-> L'ordine conta. Finché gli UID non sono incollati, l'app funziona col ruolo
-> dedotto dal nome (come prima) e le regole nuove **non** vanno pubblicate: senza
-> UID `admin()` è sempre falsa e Daniel non potrebbe scrivere niente.
+9. Quando tutti hanno aperto l'app almeno una volta e accettato il banner di aggiornamento, metti `transizione()` a `false` in `firestore.rules` e ripubblica
+
+> **Perché due tempi.** Le regole strette pretendono un token, e il token lo sa
+> chiedere solo la versione nuova dell'app. Un telefono con la versione vecchia
+> ancora in cache — e su iOS il service worker può essere pigro per giorni — si
+> troverebbe letture e scritture rifiutate. Con `transizione()` a `true` quei
+> telefoni continuano a funzionare, mentre la parte che conta è già attiva:
+> `admin()` richiede un uid vero, quindi da subito nessuno cambia i prezzi né si
+> accredita credito. Il passo 9 chiude anche la lettura anonima, senza fretta e
+> reversibile in dieci secondi.
+>
+> Finché gli UID non sono incollati (passi 6-7) non pubblicare le regole: senza
+> UID `admin()` è sempre falsa e il listino diventa di nessuno.
 
 **Cosa protegge, e cosa no.** Protegge i poteri di gestione, il listino, gli
 orari, le checklist, e soprattutto il fatto che nessuno possa accreditarsi
