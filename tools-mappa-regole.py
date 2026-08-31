@@ -4,7 +4,10 @@ danno, e sul ruolo che la esegue. Non esegue le regole (l'emulatore non è
 raggiungibile da qui): confronta due elenchi e segnala le incoerenze."""
 import io, re, sys
 
-SRC = io.open('/home/user/Cocktail-Daniel/index.html', encoding='utf-8').read().split('\n')
+# app.js dopo la separazione dei file; il percorso è relativo alla radice del repo
+import os
+BASE = os.path.dirname(os.path.abspath(__file__))
+SRC = io.open(os.path.join(BASE, 'app.js'), encoding='utf-8').read().split('\n')
 
 # ---- 1. Chi esegue ogni funzione: si guarda la guardia in testa
 def guardia(nome_funzione):
@@ -44,7 +47,7 @@ for i, l in enumerate(SRC):
         ops.append((coll, op, funzione_di(i), i+1, '(tx)'))
 
 # ---- 3. Cosa concedono le regole (letto dal file, non riscritto a mano)
-RULES = io.open('/home/user/Cocktail-Daniel/firestore.rules', encoding='utf-8').read()
+RULES = io.open(os.path.join(BASE, 'firestore.rules'), encoding='utf-8').read()
 concessioni = {}   # (collezione) -> {op: ruolo minimo}
 for blocco in re.finditer(r'match /(\w+)(?:/\{?(\w+)\}?)?\s*\{(.*?)\n    \}', RULES, re.S):
     nome = blocco.group(1)

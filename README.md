@@ -9,7 +9,7 @@ PWA (Progressive Web App) per la gestione di un chiosco di cocktail a conduzione
 
 ## Cos'è
 
-Un'unica pagina HTML (`index.html`), senza framework, che funziona come un vero e-commerce in miniatura: i clienti (famiglia e amici) sfogliano il catalogo e ordinano dal telefono, Daniel (l'amministratore) gestisce tutto da un pannello nascosto nella stessa app, e un genitore (Renato) supervisiona da remoto senza intromettersi nella gestione operativa.
+Una singola pagina, senza framework e senza build, che funziona come un vero e-commerce in miniatura: i clienti (famiglia e amici) sfogliano il catalogo e ordinano dal telefono, Daniel (l'amministratore) gestisce tutto da un pannello nascosto nella stessa app, e un genitore (Renato) supervisiona da remoto senza intromettersi nella gestione operativa.
 
 Installabile come app sul telefono (PWA), funziona offline, e si aggiorna da sola quando viene pubblicata una nuova versione.
 
@@ -75,11 +75,11 @@ stesso nome continua a ritrovare i propri ordini da un altro dispositivo.
 
 ## Stack tecnico
 
-- **Frontend**: HTML/CSS/JS puro, nessun framework, un solo file (`index.html`)
+- **Frontend**: HTML/CSS/JS puro, nessun framework, nessuna build — quattro file caricati con `<link>` e `<script>`
 - **Backend**: [Firebase Firestore](https://firebase.google.com/) (database), niente server proprio
 - **Hosting**: [GitHub Pages](https://pages.github.com/)
 - **Auth**: Firebase Authentication — accesso anonimo per i clienti, email/password per la gestione
-- **PWA**: service worker con versionamento automatico (ETag di `index.html`), cache offline, banner di aggiornamento non invasivo
+- **PWA**: service worker con versionamento automatico (ETag dei file dell'app), cache offline, banner di aggiornamento non invasivo
 
 ### Struttura dati (collezioni Firestore)
 
@@ -104,7 +104,11 @@ stesso nome continua a ritrovare i propri ordini da un altro dispositivo.
 ## File del progetto
 
 ```
-├── index.html                          # L'intera applicazione
+├── index.html                          # Struttura della pagina e modali
+├── app.css                             # Fogli di stile
+├── catalog.js                          # Catalogo prodotti, feste, lavoretti, ricette
+├── i18n.js                             # Traduzioni, 7 lingue
+├── app.js                              # Logica dell'applicazione
 ├── manifest.json                       # Configurazione PWA
 ├── service-worker.js                   # Cache offline + auto-aggiornamento
 ├── danny-avatar.png                    # Illustrazione di Danny
@@ -124,11 +128,11 @@ stesso nome continua a ritrovare i propri ordini da un altro dispositivo.
 
 1. Crea un progetto su [Firebase Console](https://console.firebase.google.com/)
 2. Attiva **Firestore Database** (modalità produzione)
-3. Copia la configurazione del progetto nella costante `firebaseConfig` dentro `index.html`
+3. Copia la configurazione del progetto nella costante `firebaseConfig` dentro `app.js`
 4. Pubblica le regole di sicurezza da `firestore.rules` in **Firestore Database → Regole**
 5. **Authentication → Sign-in method**: abilita *Anonimo* e *Email/password*
 6. **Authentication → Users**: crea gli account di Daniel e Renato, copia i loro UID
-7. Incolla quegli UID in **due** posti: `ADMIN_UIDS` / `SUPERADMIN_UIDS` dentro `index.html`, e `adminUids()` / `superadminUids()` dentro `firestore.rules`
+7. Incolla quegli UID in **due** posti: `ADMIN_UIDS` / `SUPERADMIN_UIDS` dentro `app.js`, e `adminUids()` / `superadminUids()` dentro `firestore.rules`
 8. Ripubblica le regole
 
 > L'ordine conta. Finché gli UID non sono incollati, l'app funziona col ruolo
@@ -149,13 +153,13 @@ sorgente.
 
 ## Aggiornare l'app
 
-1. Modifica `index.html` (o altri file)
+1. Modifica `app.js` (o `app.css`, `i18n.js`, `catalog.js`, `index.html`)
 2. Carica su GitHub Pages
 3. Il service worker rileva da solo il cambiamento e mostra ai clienti già connessi un banner **"Nuova versione disponibile"** — nessun aggiornamento forzato, la scelta di quando ricaricare resta all'utente
 
 Non serve incrementare manualmente numeri di versione: è tutto automatico.
 
-Come fa a rilevarlo: chiede al server solo gli **header** di `index.html` (richiesta `HEAD`) e guarda `ETag`, o in mancanza `Last-Modified`. Cambiano quando il file cambia, e non si scarica il contenuto — utile perché il controllo parte anche a ogni ritorno sull'app. Se il server non fornisse nessuno dei due, ricade sull'hash del contenuto: automatico in ogni caso.
+Come fa a rilevarlo: chiede al server solo gli **header** dei cinque file dell'app (richieste `HEAD`) e guarda `ETag`, o in mancanza `Last-Modified`. Cambiano quando il file cambia, e non si scarica il contenuto — utile perché il controllo parte anche a ogni ritorno sull'app. Se il server non fornisse nessuno dei due, ricade sull'hash del contenuto: automatico in ogni caso.
 
 ---
 
@@ -163,4 +167,4 @@ Come fa a rilevarlo: chiede al server solo gli **header** di `index.html` (richi
 
 - Il progetto è nato come esperimento educativo: insegnare a un adolescente a gestire un'attività reale (prezzi, magazzino, clienti, pagamenti) mantenendo lo studio come priorità — da cui le funzionalità di Modalità Studio, checklist e supervisione.
 - Il libro PDF è ospitato come file pubblico statico: non c'è un vero controllo d'accesso, solo il fatto che il link non è pubblicizzato. Adeguato per un contesto familiare, non per una vendita anti-pirateria seria.
-- Nessun framework, nessuna build: si edita `index.html` direttamente e si ricarica la pagina.
+- Nessun framework, nessuna build: si editano i file direttamente e si ricarica la pagina.
