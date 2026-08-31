@@ -67,6 +67,7 @@ stesso nome continua a ritrovare i propri ordini da un altro dispositivo.
 
 ### ⭐ Extra
 - Recensioni pubbliche con stelle e commento
+- **Banner novità**: messaggi a rotazione componibili da Daniel o Renato, ognuno con un'immagine di sfondo scelta dal telefono (si ricomprime nel browser e finisce in un documento a parte, non nel listino)
 - Assistente virtuale "Danny" con suggerimenti contestuali
 - Guida in-app **con notifica dei capitoli aggiornati** (pallino rosso, sparisce dopo la lettura) — guida gestionale per Daniel (solo italiano) e guida d'uso per i clienti (tutte le lingue)
 - Supporto a 7 lingue: 🇮🇹 🇬🇧 🇪🇸 🇩🇪 🇫🇷 🇺🇦 🇵🇹
@@ -98,6 +99,7 @@ stesso nome continua a ritrovare i propri ordini da un altro dispositivo.
 | `digitalPurchases` | Prova d'acquisto permanente per prodotti digitali (es. il libro PDF) |
 | `donations` | Donazioni volontarie del saldo carta |
 | `checklistPhotos` | Foto-prova delle checklist, una per documento (studio ed eventi) |
+| `bannerImages` | Immagini di sfondo del banner novità, una per documento |
 
 ---
 
