@@ -1289,7 +1289,7 @@ ${newsBgAreaHTML(msg.bgImage)}
         // come prima, col ruolo dedotto dal nome: così questo aggiornamento si
         // può pubblicare subito, senza restare a metà. Ma il muro non c'è
         // ancora — arriva col punto 4.
-        const ADMIN_UIDS = [];       // es. ['aBcD1234...']  ← UID di Daniel
+        const ADMIN_UIDS = ['F04Sa446I8MGK2sPaLbgNHQ6RLc2'];       // ← UID di Daniel
         const SUPERADMIN_UIDS = ['o59GV04RJiVJeb5ZIiUabg1cHYX2'];  // ← UID di Renato
 
         // Pubblicare gli UID qui non è un problema: conoscere un uid non

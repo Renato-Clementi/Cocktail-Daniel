@@ -63,10 +63,11 @@ service cloud.firestore {
     // Gli UID vanno incollati qui dopo aver creato gli account.
     // Finché le liste sono vuote, admin() è sempre falsa: NON pubblicare
     // queste regole prima di aver fatto i passi 1-3, o l'app resta muta.
-    // ⚠️ NON PUBBLICARE finché adminUids() è vuota: admin() sarebbe sempre
-    // falsa e Daniel non potrebbe più toccare prezzi, checklist, conferme di
-    // pagamento né accrediti. Il listino diventerebbe di nessuno.
-    function adminUids()      { return []; }   // ← UID di Daniel: MANCA
+    // Questi due devono essere IDENTICI a ADMIN_UIDS e SUPERADMIN_UIDS in
+    // app.js: se non coincidono, il browser crede una cosa e il server
+    // un'altra. Svuotare adminUids() renderebbe admin() sempre falsa, e il
+    // listino di nessuno.
+    function adminUids()      { return ['F04Sa446I8MGK2sPaLbgNHQ6RLc2']; }   // ← Daniel
     function superadminUids() { return ['o59GV04RJiVJeb5ZIiUabg1cHYX2']; }   // ← Renato
 
     // ---------- L'INTERRUTTORE DELLA TRANSIZIONE ----------
