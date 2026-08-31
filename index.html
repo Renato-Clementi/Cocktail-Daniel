@@ -7942,7 +7942,12 @@
         let myPaymentPending = false;    // Il cliente ha una richiesta in attesa?
         let myPendingOrderIds = [];      // ID degli ordini inclusi nella richiesta in attesa
         let customerName = localStorage.getItem('customerName') || '';
-        const ADMIN_PHONE = '3515292930';
+        // Numero di Daniel in formato internazionale, prefisso paese incluso
+        // e senza + né spazi né zeri iniziali: è il formato che vogliono sia
+        // wa.me sia lo schema whatsapp://. Con il solo numero locale il
+        // collegamento può non risolvere, tipicamente da SIM estera o da
+        // desktop, dove non c'è un paese da cui dedurre il prefisso.
+        const ADMIN_PHONE = '393515292930';
 
         // Genera un ID utente univoco a partire dal nome (case/spazi insensitive)
         // Es: " Marco Rossi " e "marco rossi" → "marco_rossi"
