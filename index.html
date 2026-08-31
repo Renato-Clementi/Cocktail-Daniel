@@ -3805,10 +3805,10 @@
             document.getElementById('myLibraryList').innerHTML = myDigitalPurchases.map(p => `
                 <div class="chore-row">
                     <div class="chore-row-info">
-                        <strong>${p.icon} ${p.productName}</strong><br>
-                        <small>${t('purchasedOn')} ${p.purchasedDate}</small>
+                        <strong>${escapeHtml(p.icon)} ${escapeHtml(p.productName)}</strong><br>
+                        <small>${t('purchasedOn')} ${escapeHtml(p.purchasedDate)}</small>
                     </div>
-                    <a href="${p.fileUrl}" download class="chore-done-btn" style="text-decoration:none; display:inline-block;">📥 ${t('downloadPdf')}</a>
+                    <a href="${safeFileUrl(p.fileUrl)}" download class="chore-done-btn" style="text-decoration:none; display:inline-block;">📥 ${t('downloadPdf')}</a>
                 </div>
             `).join('');
         }
@@ -7442,13 +7442,13 @@
             return messages.map(normalizeNewsMessage).map((msg, i) => `
                 <div class="news-msg-card">
                     <div style="display:flex; gap:6px; align-items:center;">
-                        <input type="text" data-news-text="${i}" value="${msg.text.replace(/"/g, '&quot;')}"
+                        <input type="text" data-news-text="${i}" value="${escapeAttr(msg.text)}"
                                style="flex:1;" placeholder="${t('newsMsgPlaceholder')}">
                         <button type="button" class="reject-btn" style="padding:8px 12px;" onclick="this.closest('.news-msg-card').remove()">✕</button>
                     </div>
-                    <input type="text" data-news-bg="${i}" value="${msg.bgImage.replace(/"/g, '&quot;')}"
+                    <input type="text" data-news-bg="${i}" value="${escapeAttr(msg.bgImage)}"
                            placeholder="${t('newsBgPlaceholder')}" style="margin-top:6px;">
-                    <input type="text" data-news-badge="${i}" value="${msg.badge.replace(/"/g, '&quot;')}"
+                    <input type="text" data-news-badge="${i}" value="${escapeAttr(msg.badge)}"
                            placeholder="${t('newsBadgePlaceholder')}" style="margin-top:6px;">
                     <div style="display:flex; gap:8px; align-items:center; margin-top:8px;">
                         <label class="soldout-toggle" style="margin:0; flex-shrink:0;">
@@ -8510,8 +8510,8 @@
             document.getElementById('donationsList').innerHTML = donationsList.map(d => `
                 <div class="chore-row">
                     <div class="chore-row-info">
-                        <strong>${d.customerName}</strong> — <span class="chore-tip">${formatPrice(d.amount)}</span><br>
-                        <small>${d.date} ${d.time}</small>
+                        <strong>${escapeHtml(d.customerName)}</strong> — <span class="chore-tip">${formatPrice(d.amount)}</span><br>
+                        <small>${escapeHtml(d.date)} ${escapeHtml(d.time)}</small>
                     </div>
                 </div>
             `).join('');
@@ -8615,11 +8615,11 @@
             document.getElementById('pendingTopupsList').innerHTML = pendingTopups.map(r => `
                 <div class="payment-request">
                     <div class="payment-request-info">
-                        <strong>${r.customerName}</strong><br>
+                        <strong>${escapeHtml(r.customerName)}</strong><br>
                         <span class="payment-amount">${formatPrice(r.amount)}</span><br>
-                        <small style="color:#666;">${r.requestedDate} ${r.requestedTime}</small>
+                        <small style="color:#666;">${escapeHtml(r.requestedDate)} ${escapeHtml(r.requestedTime)}</small>
                     </div>
-                    ${isAdmin() ? `<button class="confirm-payment-btn" onclick="confirmTopupReceived('${r.userId}', ${r.id})">${t('confirmReceived')}</button>` : `<span class="chore-status">👁️ ${t('supervisorViewOnly')}</span>`}
+                    ${isAdmin() ? `<button class="confirm-payment-btn" data-uid="${escapeAttr(r.userId)}" onclick="confirmTopupReceived(this.dataset.uid, ${Number(r.id)})">${t('confirmReceived')}</button>` : `<span class="chore-status">👁️ ${t('supervisorViewOnly')}</span>`}
                 </div>
             `).join('');
         }
@@ -9130,12 +9130,12 @@
             list.innerHTML = pendingPayments.map(p => `
                 <div class="payment-request">
                     <div class="payment-request-info">
-                        <strong>${p.customerName}</strong><br>
-                        <span class="payment-amount">${p.totalFormatted}</span>
-                        <small style="color:#666;"> · ${p.orderCount} ${p.orderCount === 1 ? t('orderSingular') : t('orderPlural')}</small><br>
-                        <small style="color:#666;">${p.requestedDate} ${p.requestedTime}</small>
+                        <strong>${escapeHtml(p.customerName)}</strong><br>
+                        <span class="payment-amount">${escapeHtml(p.totalFormatted)}</span>
+                        <small style="color:#666;"> · ${escapeHtml(p.orderCount)} ${p.orderCount === 1 ? t('orderSingular') : t('orderPlural')}</small><br>
+                        <small style="color:#666;">${escapeHtml(p.requestedDate)} ${escapeHtml(p.requestedTime)}</small>
                     </div>
-                    ${isAdmin() ? `<button class="confirm-payment-btn" onclick="confirmPaymentReceived('${p.userId}')">${t('confirmReceived')}</button>` : `<span class="chore-status">👁️ ${t('supervisorViewOnly')}</span>`}
+                    ${isAdmin() ? `<button class="confirm-payment-btn" data-uid="${escapeAttr(p.userId)}" onclick="confirmPaymentReceived(this.dataset.uid)">${t('confirmReceived')}</button>` : `<span class="chore-status">👁️ ${t('supervisorViewOnly')}</span>`}
                 </div>
             `).join('');
         }
@@ -9299,14 +9299,14 @@
                                 <span class="price-variant">📦 ${t('stockLabel')}</span>
                                 <input type="number" step="1" min="-1"
                                        data-stock="${c.name}"
-                                       value="${item.stock ?? -1}">
+                                       value="${escapeAttr(item.stock ?? -1)}">
                                 <span class="stock-hint">${t('stockUnlimited')}</span>
                             </div>
                             <div class="amazon-link-row">
                                 <span class="amazon-link-label">🛒</span>
                                 <input type="url" data-amazon="prod_${c.name}"
                                        placeholder="${t('amazonLinkPlaceholder')}"
-                                       value="${(pricing.amazonLinks && pricing.amazonLinks['prod_' + c.name] || '').replace(/"/g, '&quot;')}">
+                                       value="${escapeAttr(pricing.amazonLinks && pricing.amazonLinks['prod_' + c.name] || '')}">
                             </div>
                             ${recipes[c.name] ? `<div class="recipe-note">🧪 ${t('usesIngredients')}: ${Object.keys(recipes[c.name]).map(id => {
                                 const ing = ingredientById(id);
@@ -9442,7 +9442,7 @@
                             <span class="amazon-link-label">🛒</span>
                             <input type="url" data-amazon="ing_${i.id}"
                                    placeholder="${t('amazonLinkPlaceholder')}"
-                                   value="${(links['ing_' + i.id] || '').replace(/"/g, '&quot;')}">
+                                   value="${escapeAttr(links['ing_' + i.id] || '')}">
                         </div>`;
                 }).join('');
 
@@ -9458,7 +9458,7 @@
                             <div class="price-row" style="margin-bottom:12px;">
                                 <span class="price-variant">⚠️ ${t('lowStockThreshold')}</span>
                                 <input type="number" step="1" min="0" id="lowStockThreshold"
-                                       value="${pricing.lowStockThreshold ?? 2}">
+                                       value="${escapeAttr(pricing.lowStockThreshold ?? 2)}">
                             </div>
                             ${rows}
                         </div>
@@ -9980,9 +9980,9 @@
                 ? todo.map(c => `
                     <div class="chore-row">
                         <div class="chore-row-info">
-                            <strong>${c.icon} ${c.name}</strong> — <span class="chore-tip">${c.tip}</span><br>
-                            <small>${t('requestedBy')} ${c.assignedBy} · ${c.date} ${c.time}</small>
-                            ${c.note ? `<br><small>📝 ${c.note}</small>` : ''}
+                            <strong>${escapeHtml(c.icon)} ${escapeHtml(c.name)}</strong> — <span class="chore-tip">${escapeHtml(c.tip)}</span><br>
+                            <small>${t('requestedBy')} ${escapeHtml(c.assignedBy)} · ${escapeHtml(c.date)} ${escapeHtml(c.time)}</small>
+                            ${c.note ? `<br><small>📝 ${escapeHtml(c.note)}</small>` : ''}
                         </div>
                         ${isAdmin() ? `<button class="chore-done-btn" onclick="markChoreDone(${c.id})">✓ ${t('choreDone')}</button>` : `<span class="chore-status">👁️ ${t('supervisorViewOnly')}</span>`}
                     </div>`).join('')
@@ -9994,7 +9994,7 @@
                 payoutBox.style.display = 'block';
                 document.getElementById('chorePayoutTotal').textContent = formatPrice(totalOwed);
                 document.getElementById('chorePayoutList').innerHTML = done.map(c =>
-                    `<div class="chore-payout-item">${c.icon} ${c.name} — ${c.tip} <em>(${c.assignedBy})</em></div>`
+                    `<div class="chore-payout-item">${escapeHtml(c.icon)} ${escapeHtml(c.name)} — ${escapeHtml(c.tip)} <em>(${escapeHtml(c.assignedBy)})</em></div>`
                 ).join('');
                 const settleBtn = document.getElementById('settleChoresBtn');
                 if (settleBtn) settleBtn.style.display = isAdmin() ? 'block' : 'none'; // saldare è compito di Daniel
@@ -10016,7 +10016,7 @@
             document.getElementById('myChoresList').innerHTML = mine.map(c => `
                 <div class="chore-row">
                     <div class="chore-row-info">
-                        <strong>${c.icon} ${c.name}</strong> — <span class="chore-tip">${c.tip}</span>
+                        <strong>${escapeHtml(c.icon)} ${escapeHtml(c.name)}</strong> — <span class="chore-tip">${escapeHtml(c.tip)}</span>
                     </div>
                     <span class="chore-status ${c.done ? 'chore-status-done' : ''}">${c.done ? '✅ ' + t('choreDoneLabel') : '⏳ ' + t('choreTodoLabel')}</span>
                 </div>`).join('');
@@ -10501,7 +10501,7 @@
                             <label class="checklist-item${item.done ? ' checklist-item-done' : ''}" style="${editable ? '' : 'cursor:default;'}">
                                 <input type="checkbox" ${item.done ? 'checked' : ''} ${editable ? '' : 'disabled'}
                                        onchange="toggleChecklistItem(${booking.id}, '${type}', ${item.id})">
-                                <span>${item.label}</span>
+                                <span>${escapeHtml(item.label)}</span>
                             </label>
                             ${renderPhotoControls(
                                 item.photo, editable,
@@ -10611,8 +10611,8 @@
             document.getElementById('publicPartyList').innerHTML = upcoming.map(b => `
                 <div class="chore-row">
                     <div class="chore-row-info">
-                        <strong>${b.icon} ${t('party_' + b.partyId)}</strong><br>
-                        <small>📅 ${formatEventDate(b.eventDate)} · ⏰ ${b.eventTime || '-'} · 👥 ${b.guests} ${t('guestsLabel')} · ${t('hostedBy')} ${b.requestedBy}</small>
+                        <strong>${escapeHtml(b.icon)} ${escapeHtml(t('party_' + b.partyId))}</strong><br>
+                        <small>📅 ${formatEventDate(b.eventDate)} · ⏰ ${escapeHtml(b.eventTime || '-')} · 👥 ${escapeHtml(b.guests)} ${t('guestsLabel')} · ${t('hostedBy')} ${escapeHtml(b.requestedBy)}</small>
                     </div>
                 </div>
             `).join('');
@@ -10667,7 +10667,7 @@
         // usata sia dalla checklist studio sia da quelle degli eventi.
         function renderPhotoControls(photo, editable, onSelect, onRemove, inputId) {
             const thumb = photo
-                ? `<img class="checklist-photo-thumb" src="${photo}" onclick="openPhotoLightbox('${photo}')" alt="Foto allegata">
+                ? `<img class="checklist-photo-thumb" src="${escapeAttr(photo)}" onclick="openPhotoLightbox(this.src)" alt="Foto allegata">
                    ${editable ? `<button type="button" class="checklist-photo-remove" onclick="${onRemove}">✕</button>` : ''}`
                 : '';
             const addBtn = (editable && !photo)
@@ -10752,7 +10752,7 @@
                     <label class="checklist-item${item.done ? ' checklist-item-done' : ''}" style="${editable ? '' : 'cursor:default;'}">
                         <input type="checkbox" ${item.done ? 'checked' : ''} ${editable ? '' : 'disabled'}
                                onchange="toggleStudyChecklistItem(${item.id})">
-                        <span>${item.label}</span>
+                        <span>${escapeHtml(item.label)}</span>
                     </label>
                     ${renderPhotoControls(
                         item.photo, editable,
@@ -10810,9 +10810,9 @@
                 ? pending.map(b => `
                     <div class="chore-row">
                         <div class="chore-row-info">
-                            <strong>${b.icon} ${b.partyName}</strong> — <span class="chore-tip">${b.price}</span><br>
-                            <small>${t('requestedBy')} ${b.requestedBy} · 📅 ${formatEventDate(b.eventDate)} · ⏰ ${b.eventTime || '-'} · 👥 ${b.guests}</small>
-                            ${b.note ? `<br><small>📝 ${b.note}</small>` : ''}
+                            <strong>${escapeHtml(b.icon)} ${escapeHtml(b.partyName)}</strong> — <span class="chore-tip">${escapeHtml(b.price)}</span><br>
+                            <small>${t('requestedBy')} ${escapeHtml(b.requestedBy)} · 📅 ${formatEventDate(b.eventDate)} · ⏰ ${escapeHtml(b.eventTime || '-')} · 👥 ${escapeHtml(b.guests)}</small>
+                            ${b.note ? `<br><small>📝 ${escapeHtml(b.note)}</small>` : ''}
                         </div>
                         <div style="display:flex; flex-direction:column; gap:6px;">
                             ${isAdmin() ? `
@@ -10836,8 +10836,8 @@
                 document.getElementById('partyUpcomingList').innerHTML = confirmed.map(b => `
                     <div class="party-confirmed-card">
                         <div class="chore-payout-item">
-                            📅 ${formatEventDate(b.eventDate)} ⏰ ${b.eventTime || '-'} — ${b.icon} ${b.partyName}
-                            (${b.guests} ${t('guestsLabel')}) <em>${b.requestedBy}</em>
+                            📅 ${formatEventDate(b.eventDate)} ⏰ ${escapeHtml(b.eventTime || '-')} — ${escapeHtml(b.icon)} ${escapeHtml(b.partyName)}
+                            (${escapeHtml(b.guests)} ${t('guestsLabel')}) <em>${escapeHtml(b.requestedBy)}</em>
                         </div>
                         ${renderChecklistBlock(b, 'prep')}
                         ${renderChecklistBlock(b, 'cleanup')}
@@ -10873,12 +10873,12 @@
                     ? `<button class="chore-done-btn" style="margin-top:4px;" onclick="openRebookPartyModal(${b.id})">🔄 ${t('rebookParty')}</button>`
                     : '';
                 const reasonNote = (b.status === 'cancelled' && b.cancelReason)
-                    ? `<br><small>📝 ${b.cancelReason}</small>` : '';
+                    ? `<br><small>📝 ${escapeHtml(b.cancelReason)}</small>` : '';
                 return `
                 <div class="chore-row">
                     <div class="chore-row-info">
-                        <strong>${b.icon} ${t('party_' + b.partyId)}</strong> — <span class="chore-tip">${b.price}</span><br>
-                        <small>📅 ${formatEventDate(b.eventDate)} · ⏰ ${b.eventTime || '-'} · 👥 ${b.guests} ${t('guestsLabel')}</small>${reasonNote}
+                        <strong>${escapeHtml(b.icon)} ${escapeHtml(t('party_' + b.partyId))}</strong> — <span class="chore-tip">${escapeHtml(b.price)}</span><br>
+                        <small>📅 ${formatEventDate(b.eventDate)} · ⏰ ${escapeHtml(b.eventTime || '-')} · 👥 ${escapeHtml(b.guests)} ${t('guestsLabel')}</small>${reasonNote}
                     </div>
                     <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
                         <span class="chore-status ${statusClass}">${statusLabel}</span>
@@ -11421,13 +11421,13 @@
                 const merchOrder = isMerch(order.cocktail);
                 return `
                 <div class="order-item${isPending ? ' order-pending' : ''}">
-                    <strong>${order.cocktail}</strong> - <em>${translateVariant(order.variant)}</em> - <strong style="color: var(--coral);">${order.price}</strong>
+                    <strong>${escapeHtml(order.cocktail)}</strong> - <em>${escapeHtml(translateVariant(order.variant))}</em> - <strong style="color: var(--coral);">${escapeHtml(order.price)}</strong>
                     ${isPending ? `<span class="pending-tag">⏳ ${t('pendingTag')}</span>` : ''}
                     ${needsSync ? `<span class="sync-tag">📡 ${t('syncTag')}</span>` : ''}<br>
-                    👤 ${order.customerName || '-'}<br>
-                    ${merchOrder ? `🛍️ ${t('merchPickupLabel')}<br>` : `📍 ${translateLocation(order.location)} | ⏰ ${translateTime(order.time)}<br>`}
-                    <small style="color: var(--dusk-soft);">${t('orderedLabel')} ${order.orderDate} ${order.orderTime}</small>
-                    ${order.notes ? `<br><small>📝 ${order.notes}</small>` : ''}
+                    👤 ${escapeHtml(order.customerName || '-')}<br>
+                    ${merchOrder ? `🛍️ ${t('merchPickupLabel')}<br>` : `📍 ${escapeHtml(translateLocation(order.location))} | ⏰ ${escapeHtml(translateTime(order.time))}<br>`}
+                    <small style="color: var(--dusk-soft);">${t('orderedLabel')} ${escapeHtml(order.orderDate)} ${escapeHtml(order.orderTime)}</small>
+                    ${order.notes ? `<br><small>📝 ${escapeHtml(order.notes)}</small>` : ''}
                     ${canReject ? `<div class="order-actions"><button class="reject-btn" onclick="openRejectModal(${order.id})">🚫 ${t('rejectOrder')}</button></div>` : ''}
                 </div>
             `;
@@ -11610,12 +11610,12 @@
             let html = pageReviews.map(r => `
                 <div class="review-item">
                     <div class="review-header">
-                        <strong>${r.customerName || '-'}</strong>
+                        <strong>${escapeHtml(r.customerName || '-')}</strong>
                         <span class="review-stars">${'★'.repeat(r.rating || 0)}${'☆'.repeat(5 - (r.rating || 0))}</span>
                     </div>
                     <div class="review-text">${escapeHtml(r.text || '')}</div>
                     <div class="review-date">
-                        ${r.date || ''} ${r.time || ''}
+                        ${escapeHtml(r.date || '')} ${escapeHtml(r.time || '')}
                         ${isAdmin() ? `<button class="delete-review-btn" onclick="deleteReview(${r.id})">🗑️</button>` : ''}
                     </div>
                 </div>
@@ -11637,11 +11637,30 @@
             list.innerHTML = html;
         }
 
-        // Evita che il testo delle recensioni possa iniettare HTML
+        // Neutralizza l'HTML in un valore prima di interpolarlo in una
+        // pagina. Da usare su TUTTO quello che arriva da Firestore: nomi,
+        // note, messaggi. Chiunque possa scrivere nel database potrebbe
+        // altrimenti far eseguire codice nel browser di tutti gli altri,
+        // compresa la sessione admin.
         function escapeHtml(str) {
             const div = document.createElement('div');
-            div.textContent = str;
+            div.textContent = str === undefined || str === null ? '' : str;
             return div.innerHTML;
+        }
+
+        // Come escapeHtml, ma sicura anche DENTRO un attributo: neutralizza
+        // pure gli apici, che altrimenti chiuderebbero l'attributo e
+        // lascerebbero agganciare un handler.
+        function escapeAttr(str) {
+            return escapeHtml(str).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
+
+        // I prodotti digitali sono file statici accanto all'app: un
+        // percorso relativo. Un valore con uno schema (javascript:, data:)
+        // non arriva da noi e non va messo in un href.
+        function safeFileUrl(url) {
+            const clean = String(url || '');
+            return /^[A-Za-z0-9][A-Za-z0-9._~%!$&'()*+,;=@/-]*$/.test(clean) ? escapeAttr(clean) : '#';
         }
 
         // =============================================
@@ -12232,9 +12251,9 @@
                                    onchange="document.getElementById('hoursRow-${d}').classList.toggle('hours-row-off', this.checked)">
                             <span>${t(dayKeys[d])}</span>
                         </label>
-                        <input type="time" data-day-open="${d}" value="${h.open}">
+                        <input type="time" data-day-open="${d}" value="${escapeAttr(h.open)}">
                         <span class="hours-sep">–</span>
-                        <input type="time" data-day-close="${d}" value="${h.close === '24:00' ? '23:59' : h.close}">
+                        <input type="time" data-day-close="${d}" value="${escapeAttr(h.close === '24:00' ? '23:59' : h.close)}">
                     </div>`;
             }).join('');
         }
