@@ -193,6 +193,170 @@
             };
         }
 
+        // =============================================
+        // IMMAGINE DI SFONDO DEL BANNER
+        // Prima si incollava un URL esterno: scomodo (bisogna avere la foto
+        // già ospitata da qualche parte) e fragile (se il link muore, il
+        // banner si rompe in silenzio). Ora si scatta o si scegle dalla
+        // galleria, e l'immagine viene compressa lato client.
+        //
+        // DOVE FINISCE: in un documento suo, bannerImages/<id>, non dentro
+        // settings/pricing. Il campo bgImage del messaggio resta una stringa,
+        // ma contiene un riferimento "img:<id>" invece dei dati.
+        //
+        // Il motivo è misurato, non teorico: settings/pricing viene riletto
+        // per intero da OGNI dispositivo ogni 60 secondi. Un'immagine
+        // difficile da comprimere pesa ~117 KB in base64; quattro messaggi
+        // con sfondo porterebbero il listino da 7 KB a ~475 KB, cioè circa
+        // 28 MB l'ora per dispositivo, su dati mobili. In un documento a
+        // parte l'immagine si scarica una volta e resta in cache.
+        //
+        // Gli URL esterni già inseriti continuano a funzionare: chi inizia
+        // per http, o è già un data URI, viene usato così com'è.
+        // =============================================
+        const BANNER_IMG_PREFIX = 'img:';
+
+        function isBannerImageRef(value) {
+            return typeof value === 'string' && value.startsWith(BANNER_IMG_PREFIX);
+        }
+
+        // La sorgente utilizzabile per un valore di bgImage, o null se
+        // l'immagine è un riferimento non ancora arrivato dal database.
+        function bannerImageSrc(value) {
+            if (!value) return null;
+            if (!isBannerImageRef(value)) return value;      // URL esterno o data URI
+            return photoCache.get(value.slice(BANNER_IMG_PREFIX.length)) || null;
+        }
+
+        function ensureBannerImages(valori, onLoaded) {
+            const ids = (valori || [])
+                .filter(isBannerImageRef)
+                .map(v => v.slice(BANNER_IMG_PREFIX.length));
+            ensurePhotos(ids, onLoaded, 'bannerImages', 'image');
+        }
+
+        // Scrive l'immagine e ritorna il riferimento da mettere nel campo
+        // nascosto, oppure null se il salvataggio non è andato. Il banner lo
+        // compone anche Renato, quindi la guardia è canSupervise(), non
+        // isAdmin() — le regole Firestore su bannerImages dicono staff().
+        async function saveBannerImage(dataUri) {
+            if (!canSupervise() || !cloudReady()) return null;
+            const id = 'banner_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+            try {
+                await firestoreDb.collection('bannerImages').doc(id).set({
+                    image: dataUri,
+                    updatedAt: Date.now()
+                });
+                photoCache.set(id, dataUri);
+                return BANNER_IMG_PREFIX + id;
+            } catch (error) {
+                console.log('Errore salvataggio immagine banner:', error);
+                return null;
+            }
+        }
+
+        // Le immagini non più citate da nessun messaggio restano documenti
+        // orfani: capita se si carica una foto e poi si chiude il form senza
+        // salvare, o se si sostituisce un'immagine con un'altra. Si spazzano
+        // solo quelle vecchie di oltre un giorno, per non cancellare quella
+        // che qualcuno sta caricando in questo momento su un altro
+        // dispositivo. Una volta per sessione, e solo da chi ha i permessi.
+        let bannerImagesPulite = false;
+        async function pulisciImmaginiBannerOrfane() {
+            if (bannerImagesPulite || !canSupervise() || !cloudReady()) return;
+            bannerImagesPulite = true;
+            const usate = new Set(
+                ((pricing.newsBanner && pricing.newsBanner.messages) || [])
+                    .map(m => (m && m.bgImage) || '')
+                    .filter(isBannerImageRef)
+                    .map(v => v.slice(BANNER_IMG_PREFIX.length))
+            );
+            const limite = Date.now() - 24 * 60 * 60 * 1000;
+            try {
+                const snap = await firestoreDb.collection('bannerImages').get();
+                for (const doc of snap.docs) {
+                    if (usate.has(doc.id)) continue;
+                    if ((doc.data().updatedAt || 0) > limite) continue;
+                    await firestoreDb.collection('bannerImages').doc(doc.id).delete();
+                }
+            } catch (error) {
+                console.log('Pulizia immagini banner non riuscita:', error);
+            }
+        }
+
+        // --- Controlli nell'editor ---
+        // Niente indici: ogni funzione risale alla propria card con closest().
+        // Passare l'indice della card avrebbe voluto dire tenerlo allineato
+        // dopo ogni rimozione (il pulsante ✕ elimina la card dal DOM) e
+        // costruire id univoci fra il pannello di Daniel e quello di Renato,
+        // che esistono nel DOM contemporaneamente. Così il problema non c'è.
+        function pickNewsBgImage(el) {
+            const area = el.closest('.news-bg-area');
+            if (area) area.querySelector('input[type=file]').click();
+        }
+
+        async function handleNewsBgImageSelected(input) {
+            const file = input.files && input.files[0];
+            input.value = '';                      // riscegliere lo stesso file deve rifunzionare
+            if (!file) return;
+            const area = input.closest('.news-bg-area');
+            if (!area) return;
+            try {
+                // Più aggressiva delle foto-prova delle checklist (640/0.55):
+                // qui è uno sfondo decorativo, non una prova da guardare.
+                const dataUri = await compressImageFile(file, 800, 0.6);
+                const ref = await saveBannerImage(dataUri);
+                if (!ref) { alert(t('newsImageError')); return; }
+                area.querySelector('[data-news-bg]').value = ref;
+                renderNewsBgArea(area, ref);
+            } catch (error) {
+                console.log('Errore compressione immagine banner:', error);
+                alert(t('newsImageError'));
+            }
+        }
+
+        function removeNewsBgImage(el) {
+            const area = el.closest('.news-bg-area');
+            if (!area) return;
+            // Si svuota solo il riferimento: il documento dell'immagine lo
+            // rimuove la pulizia degli orfani. Cancellarlo subito lascerebbe
+            // il listino a puntare a un'immagine che non c'è più, se poi
+            // l'utente chiudesse il form senza salvare.
+            area.querySelector('[data-news-bg]').value = '';
+            renderNewsBgArea(area, '');
+        }
+
+        function renderNewsBgArea(area, value) {
+            const src = bannerImageSrc(value);
+            const controlli = area.querySelector('.news-bg-controls');
+            if (!controlli) return;
+            controlli.innerHTML = value
+                ? `<img class="news-bg-thumb" src="${escapeAttr(src || '')}" alt="${t('newsBgThumbAlt')}"
+                        onclick="if (this.src) openPhotoLightbox(this.src)">
+                   <button type="button" class="checklist-photo-remove" onclick="removeNewsBgImage(this)">✕</button>`
+                : `<button type="button" class="checklist-photo-btn news-bg-btn" onclick="pickNewsBgImage(this)">📷 ${t('newsAddBgImage')}</button>`;
+            // Se è un riferimento non ancora scaricato, la miniatura resta
+            // vuota finché l'immagine non arriva: poi si ridisegna.
+            if (value && !src) ensureBannerImages([value], () => renderNewsBgArea(area, value));
+        }
+
+        // Il blocco completo da mettere in una card, sia quelle costruite da
+        // buildNewsMsgCardsHTML sia quella creata da addNewsMsgRow.
+        function newsBgAreaHTML(bgImage) {
+            const src = bannerImageSrc(bgImage);
+            const controlli = bgImage
+                ? `<img class="news-bg-thumb" src="${escapeAttr(src || '')}" alt="${t('newsBgThumbAlt')}"
+                        onclick="if (this.src) openPhotoLightbox(this.src)">
+                   <button type="button" class="checklist-photo-remove" onclick="removeNewsBgImage(this)">✕</button>`
+                : `<button type="button" class="checklist-photo-btn news-bg-btn" onclick="pickNewsBgImage(this)">📷 ${t('newsAddBgImage')}</button>`;
+            return `
+                    <div class="news-bg-area">
+                        <input type="hidden" data-news-bg value="${escapeAttr(bgImage || '')}">
+                        <input type="file" accept="image/*" style="display:none" onchange="handleNewsBgImageSelected(this)">
+                        <div class="news-bg-controls">${controlli}</div>
+                    </div>`;
+        }
+
         // Le card dei singoli messaggi: condivise tra il listino di
         // Daniel e il pannello dedicato di Renato, così le due interfacce
         // restano sempre coerenti tra loro.
@@ -204,8 +368,7 @@
                                style="flex:1;" placeholder="${t('newsMsgPlaceholder')}">
                         <button type="button" class="reject-btn" style="padding:8px 12px;" onclick="this.closest('.news-msg-card').remove()">✕</button>
                     </div>
-                    <input type="text" data-news-bg="${i}" value="${escapeAttr(msg.bgImage)}"
-                           placeholder="${t('newsBgPlaceholder')}" style="margin-top:6px;">
+${newsBgAreaHTML(msg.bgImage)}
                     <input type="text" data-news-badge="${i}" value="${escapeAttr(msg.badge)}"
                            placeholder="${t('newsBadgePlaceholder')}" style="margin-top:6px;">
                     <div style="display:flex; gap:8px; align-items:center; margin-top:8px;">
@@ -228,12 +391,19 @@
             const textEl = document.getElementById('newsBannerText');
             const badgeEl = document.getElementById('newsBannerBadge');
 
-            if (msg.bgImage) {
-                bgEl.style.backgroundImage = `url('${msg.bgImage}')`;
+            // bgImage può essere un URL esterno, un data URI, o un
+            // riferimento img:<id> a un documento di bannerImages. Nel terzo
+            // caso, se l'immagine non è ancora arrivata si mostra il banner
+            // senza sfondo e si ridisegna quando arriva: meglio un banner
+            // sobrio per un istante che un banner mancante.
+            const bgSrc = bannerImageSrc(msg.bgImage);
+            if (bgSrc) {
+                bgEl.style.backgroundImage = `url("${encodeURI(bgSrc).replace(/"/g, '%22')}")`;
                 bgEl.classList.add('has-image');
             } else {
                 bgEl.style.backgroundImage = '';
                 bgEl.classList.remove('has-image');
+                if (msg.bgImage) ensureBannerImages([msg.bgImage], () => renderNewsBannerSlide(msg));
             }
 
             textEl.textContent = msg.text;
@@ -558,6 +728,11 @@
                     // Semina il documento del magazzino la prima volta, dal
                     // dispositivo che ha il permesso di scriverlo tutto.
                     if (!stockDoc.exists && isAdmin()) saveStock();
+
+                    // Una volta per sessione: via le immagini del banner che
+                    // nessun messaggio cita più (si accumulano se si carica
+                    // una foto e poi si chiude il form senza salvare).
+                    pulisciImmaginiBannerOrfane();
 
                     if (changed) {
                         renderCocktails();
@@ -2381,7 +2556,7 @@
                     <input type="text" data-news-text="${idx}" value="" style="flex:1;" placeholder="${t('newsMsgPlaceholder')}">
                     <button type="button" class="reject-btn" style="padding:8px 12px;" onclick="this.closest('.news-msg-card').remove()">✕</button>
                 </div>
-                <input type="text" data-news-bg="${idx}" value="" placeholder="${t('newsBgPlaceholder')}" style="margin-top:6px;">
+${newsBgAreaHTML('')}
                 <input type="text" data-news-badge="${idx}" value="" placeholder="${t('newsBadgePlaceholder')}" style="margin-top:6px;">
                 <div style="display:flex; gap:8px; align-items:center; margin-top:8px;">
                     <label class="soldout-toggle" style="margin:0; flex-shrink:0;">
@@ -3903,15 +4078,21 @@
         // Scarica le foto che servono e richiama il render una volta sola,
         // quando sono arrivate. Le voci senza foto non costano nulla, e ogni
         // id viene chiesto una volta per sessione.
-        function ensurePhotos(ids, onLoaded) {
+        // collezione e campo sono parametri con un valore di default: lo stesso
+        // meccanismo serve anche alle immagini del banner novità, che stanno in
+        // bannerImages/<id> col campo "image". Le chiamate esistenti non
+        // cambiano.
+        function ensurePhotos(ids, onLoaded, collezione, campo) {
             if (!cloudReady()) return;
+            const nomeColl = collezione || 'checklistPhotos';
+            const nomeCampo = campo || 'photo';
             const daPrendere = ids.filter(id => id && !photoCache.has(id) && !photoInFlight.has(id));
             if (!daPrendere.length) return;
             daPrendere.forEach(id => photoInFlight.add(id));
             Promise.all(daPrendere.map(async (id) => {
                 try {
-                    const doc = await firestoreDb.collection('checklistPhotos').doc(id).get();
-                    photoCache.set(id, doc.exists ? (doc.data().photo || null) : null);
+                    const doc = await firestoreDb.collection(nomeColl).doc(id).get();
+                    photoCache.set(id, doc.exists ? (doc.data()[nomeCampo] || null) : null);
                 } catch (error) {
                     // Si registra null anche in caso di errore: senza questo il
                     // render successivo richiederebbe la stessa foto in un ciclo

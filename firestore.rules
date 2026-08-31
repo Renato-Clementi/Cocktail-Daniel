@@ -188,6 +188,17 @@ service cloud.firestore {
       allow delete: if admin();
     }
 
+    // ---------- IMMAGINI DEL BANNER NOVITÀ ----------
+    // Le carica chi compone i messaggi — Daniel o Renato, quindi staff() e
+    // non admin(). Le legge chiunque usi l'app: il banner è per i clienti.
+    // Stanno qui e non dentro settings/pricing perché quel documento viene
+    // riletto per intero da ogni dispositivo ogni 60 secondi: un'immagine
+    // là dentro si pagherebbe a ogni giro.
+    match /bannerImages/{id} {
+      allow read:  if utente();
+      allow write: if staff();
+    }
+
     // ---------- PROVE FOTOGRAFICHE ----------
     // Le carica e le rimuove solo Daniel: sono la prova del suo lavoro.
     match /checklistPhotos/{id} {
