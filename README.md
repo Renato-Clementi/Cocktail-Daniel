@@ -15,13 +15,20 @@ Installabile come app sul telefono (PWA), funziona offline, e si aggiorna da sol
 
 ## Come si accede ai ruoli
 
-Non c'è un vero login: l'app riconosce il ruolo dal **nome** scritto alla registrazione.
+L'app riconosce l'utente dal **nome** scritto alla registrazione. Per i clienti finisce lì; per la gestione serve anche un accesso (vedi sotto).
 
 | Nome inserito | Ruolo | Cosa vede/può fare |
 |---|---|---|
 | `Daniel` | **Admin** | Tutto: listino, magazzino, ordini, pagamenti, checklist, guida gestionale |
 | `Renato` | **Supervisore** | Vede tutti i pannelli di Daniel in sola lettura; unica azione concessa: attivare/disattivare la 🎓 Modalità Studio |
 | Qualsiasi altro nome | **Cliente** | Catalogo, ordini, carta prepagata, lavoretti, feste, recensioni |
+
+Il nome apre la porta giusta, ma **non è più quello che dà i poteri**. Daniel e
+Renato fanno un accesso vero (email e password, una volta per dispositivo) e le
+regole Firestore riconoscono i loro UID: prezzi, orari, conferme di pagamento,
+accrediti sul saldo, checklist e cancellazioni sono loro e basta, imposto dal
+server. I clienti restano anonimi — nessun login per ordinare un cocktail — e lo
+stesso nome continua a ritrovare i propri ordini da un altro dispositivo.
 
 ---
 
@@ -71,7 +78,8 @@ Non c'è un vero login: l'app riconosce il ruolo dal **nome** scritto alla regis
 - **Frontend**: HTML/CSS/JS puro, nessun framework, un solo file (`index.html`)
 - **Backend**: [Firebase Firestore](https://firebase.google.com/) (database), niente server proprio
 - **Hosting**: [GitHub Pages](https://pages.github.com/)
-- **PWA**: service worker con versionamento automatico (hash SHA-256 di `index.html`), cache offline, banner di aggiornamento non invasivo
+- **Auth**: Firebase Authentication — accesso anonimo per i clienti, email/password per la gestione
+- **PWA**: service worker con versionamento automatico (ETag di `index.html`), cache offline, banner di aggiornamento non invasivo
 
 ### Struttura dati (collezioni Firestore)
 
@@ -79,7 +87,9 @@ Non c'è un vero login: l'app riconosce il ruolo dal **nome** scritto alla regis
 |---|---|
 | `orders` | Ordini attivi da pagare |
 | `payments` | Richieste di pagamento in contanti in attesa di conferma |
-| `settings` | Listino prezzi, orari, checklist studio (doc singoli) |
+| `settings/pricing` | Listino prezzi, orari, offerte, banner — scrivibile solo dalla gestione |
+| `settings/stock` | Magazzino: lo scala anche il cliente che ordina, per questo sta a parte |
+| `settings/studyChecklist_<data>` | Checklist studio del giorno, una per data |
 | `reviews` | Recensioni pubbliche |
 | `chores` | Lavoretti assegnati a Daniel |
 | `wallets` | Saldo carta prepagata per utente |
@@ -103,7 +113,7 @@ Non c'è un vero login: l'app riconosce il ruolo dal **nome** scritto alla regis
 ├── icon-maskable-192.png / -512.png    # Icone adattive Android
 ├── apple-touch-icon.png                # Icona iOS
 ├── il-libro-dei-cocktail-di-daniel.pdf # Prodotto digitale in vendita
-└── firestore.rules                     # Regole di sicurezza Firestore (+ bozza con autenticazione)
+└── firestore.rules                     # Regole di sicurezza Firestore (permessi per ruolo)
 ```
 
 > ⚠️ **Da caricare manualmente su GitHub Pages**: tutti i file sopra, inclusi gli asset binari (immagini, PDF) — non vengono serviti automaticamente.
@@ -116,8 +126,24 @@ Non c'è un vero login: l'app riconosce il ruolo dal **nome** scritto alla regis
 2. Attiva **Firestore Database** (modalità produzione)
 3. Copia la configurazione del progetto nella costante `firebaseConfig` dentro `index.html`
 4. Pubblica le regole di sicurezza da `firestore.rules` in **Firestore Database → Regole**
+5. **Authentication → Sign-in method**: abilita *Anonimo* e *Email/password*
+6. **Authentication → Users**: crea gli account di Daniel e Renato, copia i loro UID
+7. Incolla quegli UID in **due** posti: `ADMIN_UIDS` / `SUPERADMIN_UIDS` dentro `index.html`, e `adminUids()` / `superadminUids()` dentro `firestore.rules`
+8. Ripubblica le regole
 
-Le regole attuali sono deliberatamente permissive (`allow read, write: if true` su ogni collezione): adatte a un'app familiare a fiducia reciproca, **non a un prodotto pubblico con estranei**. Se il progetto scalasse oltre l'uso familiare, andrebbero irrigidite con autenticazione vera.
+> L'ordine conta. Finché gli UID non sono incollati, l'app funziona col ruolo
+> dedotto dal nome (come prima) e le regole nuove **non** vanno pubblicate: senza
+> UID `admin()` è sempre falsa e Daniel non potrebbe scrivere niente.
+
+**Cosa protegge, e cosa no.** Protegge i poteri di gestione, il listino, gli
+orari, le checklist, e soprattutto il fatto che nessuno possa accreditarsi
+credito da solo: un saldo può scendere per mano di chi paga, ma può salire solo
+per mano di Daniel. Non protegge cliente da cliente: con l'accesso anonimo ogni
+dispositivo ha un uid diverso, quindi le regole non sanno distinguere "il mio
+ordine" da "quello di un altro" senza far registrare tutti — e un amico che
+passa non si registra per ordinare un cocktail. La chiave API è pubblica nella
+pagina (inevitabile), quindi un token anonimo lo può ottenere anche chi legge il
+sorgente.
 
 ---
 

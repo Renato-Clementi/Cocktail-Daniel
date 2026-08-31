@@ -3,100 +3,197 @@ rules_version = '2';
 // ==================================================
 // COCKTAIL DANIEL SRL — Regole di sicurezza Firestore
 // ==================================================
-// Questo file esiste perché le regole che governano l'accesso ai dati
-// vivevano SOLO nella console Firebase: non si potevano rivedere,
-// confrontare o ripristinare, e nessuno poteva accorgersi se cambiavano.
-// Il README ne citava una versione (firestore_rules_v10.txt) che non era
-// mai stata messa nel repository.
+// Prima queste regole erano `allow read, write: if true` su ogni
+// collezione, e vivevano solo nella console Firebase. Chiunque trovasse
+// l'URL dell'app poteva leggere, modificare e cancellare qualunque
+// documento chiamando l'API REST, senza nemmeno aprire l'app: saldi delle
+// carte, ordini, nomi e storico acquisti di tutti. Nessuna delle
+// protezioni scritte in JavaScript era nel percorso, perché il browser è
+// dell'utente e il codice che gira lì si può cambiare.
 //
-// ⚠️ QUESTE REGOLE SONO DELIBERATAMENTE PERMISSIVE, e rispecchiano quelle
-// attualmente pubblicate. Vanno bene per un'app familiare a fiducia
-// reciproca; NON vanno bene per un'app raggiungibile da chiunque, come
-// questa è, essendo pubblicata su GitHub Pages da un repository pubblico.
+// IL MODELLO SCELTO
+// - Daniel e Renato hanno un account vero (email e password). Le regole
+//   riconoscono i loro UID: prezzi, orari, conferme di pagamento,
+//   accrediti sul saldo, checklist e cancellazioni sono loro e basta,
+//   imposto dal server.
+// - I clienti restano anonimi: nessun login per ordinare un cocktail, e
+//   lo stesso nome continua a ritrovare i propri ordini da un altro
+//   dispositivo. Ottengono un token anonimo silenzioso all'avvio.
 //
-// Con "allow read, write: if true" chiunque trovi l'URL può leggere,
-// modificare e cancellare qualunque documento chiamando l'API REST
-// direttamente, senza nemmeno aprire l'app: saldi delle carte, ordini,
-// nomi e storico acquisti di tutti. Nessuna delle protezioni scritte in
-// JavaScript dentro index.html è nel percorso: il browser è dell'utente,
-// e il codice che gira lì si può cambiare.
+// COSA QUESTO PROTEGGE, E COSA NO — detto senza abbellimenti.
+// Protegge: i poteri di gestione, il listino, gli orari, le checklist, e
+// soprattutto il fatto che NESSUNO possa accreditarsi credito da solo.
+// Non protegge cliente da cliente: con l'accesso anonimo ogni dispositivo
+// ha un uid diverso, quindi le regole non possono distinguere "il mio
+// ordine" da "l'ordine di un altro" senza far registrare tutti. Era una
+// scelta deliberata: il chiosco perderebbe l'ordine dell'amico che passa.
+// E la chiave API è pubblica nella pagina — inevitabile — quindi un token
+// anonimo lo può ottenere anche chi legge il sorgente: il muro è attorno
+// ai poteri e al denaro, non attorno alla lettura dei dati fra clienti.
 //
-// Il rimedio è attivare Firebase Authentication (basta quella anonima,
-// invisibile all'utente: nessun login da fare) e legare ogni documento al
-// suo proprietario. In fondo al file c'è una bozza pronta, commentata.
-// Serve accesso alla console Firebase per attivare l'autenticazione e
-// pubblicare le regole nuove.
+// ⚠️ PRIMA DI PUBBLICARE, in questo ordine:
+//   1. Authentication → Sign-in method → abilita "Anonimo" e "Email/password".
+//   2. Authentication → Users → crea gli account di Daniel e Renato,
+//      copia i loro UID.
+//   3. Incollali sia qui sotto (admin/superadmin) sia in ADMIN_UIDS e
+//      SUPERADMIN_UIDS dentro index.html.
+//   4. Pubblica queste regole e ricarica l'app.
+// Saltare il passo 1 o 3 lascia l'app senza permessi: si vedrebbero
+// pannelli vuoti e scritture rifiutate.
 //
-// Per pubblicare: Firebase Console → Firestore Database → Regole,
-// oppure `firebase deploy --only firestore:rules` con la CLI.
+// Da provare senza rischi: Firestore Database → Regole → Playground.
+// Oppure `firebase deploy --only firestore:rules` con la CLI.
 // ==================================================
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    match /orders/{document=**}            { allow read, write: if true; }
-    match /payments/{document=**}          { allow read, write: if true; }
-    match /settings/{document=**}          { allow read, write: if true; }
-    match /reviews/{document=**}           { allow read, write: if true; }
-    match /chores/{document=**}            { allow read, write: if true; }
-    match /wallets/{document=**}           { allow read, write: if true; }
-    match /topupRequests/{document=**}     { allow read, write: if true; }
-    match /partyBookings/{document=**}     { allow read, write: if true; }
-    match /digitalPurchases/{document=**}  { allow read, write: if true; }
-    match /donations/{document=**}         { allow read, write: if true; }
-    match /checklistPhotos/{document=**}   { allow read, write: if true; }
+    // ---------- CHI SEI ----------
+    // Gli UID vanno incollati qui dopo aver creato gli account.
+    // Finché le liste sono vuote, admin() è sempre falsa: NON pubblicare
+    // queste regole prima di aver fatto i passi 1-3, o l'app resta muta.
+    function adminUids()      { return []; }   // ← UID di Daniel
+    function superadminUids() { return []; }   // ← UID di Renato
+
+    function signedIn() { return request.auth != null; }
+    function admin()    { return signedIn() && request.auth.uid in adminUids(); }
+    function super_()   { return signedIn() && request.auth.uid in superadminUids(); }
+    function staff()    { return admin() || super_(); }
+
+    // ---------- LISTINO, ORARI, CHECKLIST ----------
+    // settings/pricing: prezzi, orari, offerte, banner, soglie. Tutti
+    // leggono (l'app deve mostrare i prezzi), solo la gestione scrive.
+    // Renato ci scrive due sottoalberi: il banner novità e la modalità studio.
+    match /settings/pricing {
+      allow read:  if signedIn();
+      allow write: if staff();
+    }
+
+    // settings/stock: il magazzino. È l'unico pezzo del listino che un
+    // CLIENTE deve poter scrivere — ordinando scala il contatore del
+    // prodotto e gli ingredienti della ricetta. Sta in un documento a
+    // parte proprio per questo: finché era dentro pricing, permettere di
+    // scalare le scorte significava permettere di riscrivere i prezzi.
+    match /settings/stock {
+      allow read:  if signedIn();
+      allow write: if signedIn();
+    }
+
+    // settings/studyChecklist_<data>: la spunta è di Daniel e di nessun
+    // altro — l'autovalutazione è il punto. Tutta la famiglia la legge.
+    match /settings/{doc} {
+      allow read:  if signedIn();
+      allow write: if admin();
+    }
+
+    // ---------- CARTA PREPAGATA ----------
+    // La regola che conta di più del file: un saldo può SCENDERE per mano
+    // di chi paga, ma può SALIRE solo per mano di Daniel, che è quello che
+    // incassa i contanti. Nessuno può regalarsi credito.
+    match /wallets/{uid} {
+      allow read:   if signedIn();
+      allow create: if admin();
+      allow delete: if admin();
+      allow update: if admin()
+                    || (signedIn()
+                        && request.resource.data.balance is number
+                        && request.resource.data.balance >= 0
+                        && request.resource.data.balance < resource.data.balance);
+    }
+
+    // Il cliente chiede una ricarica; solo Daniel la chiude, ed è la
+    // chiusura che accredita (vedi wallets: create/salita = admin).
+    match /topupRequests/{id} {
+      allow read:   if signedIn();
+      allow create: if signedIn();
+      allow update: if admin();
+      allow delete: if admin();
+    }
+
+    // ---------- ORDINI E PAGAMENTI ----------
+    // Il cliente crea i propri ordini e li chiude pagando con la carta
+    // (cancellandoli); Daniel li rifiuta o li chiude alla conferma del
+    // contante. Senza identità stabile per i clienti non si può stringere
+    // oltre: è il limite dichiarato in testa al file.
+    match /orders/{id} {
+      allow read:   if signedIn();
+      allow create: if signedIn();
+      allow update: if signedIn();
+      allow delete: if signedIn();
+    }
+
+    // La richiesta di chiusura conto la crea il cliente; la conferma —
+    // cioè la cancellazione — è di Daniel: è lui che ha ricevuto i soldi.
+    match /payments/{uid} {
+      allow read:   if signedIn();
+      allow create: if signedIn();
+      allow update: if signedIn();
+      allow delete: if admin();
+    }
+
+    // ---------- FESTE ----------
+    // Il cliente prenota, modifica una richiesta ancora in attesa, e
+    // rimuove la propria una volta letto l'avviso di rifiuto o
+    // annullamento. Daniel accetta, rifiuta, annulla e spunta le checklist.
+    match /partyBookings/{id} {
+      allow read:   if signedIn();
+      allow create: if signedIn();
+      allow update: if signedIn();
+      allow delete: if signedIn();
+    }
+
+    // ---------- LAVORETTI ----------
+    // La famiglia assegna un lavoretto a Daniel; solo Daniel lo spunta
+    // come fatto e salda le mance.
+    match /chores/{id} {
+      allow read:   if signedIn();
+      allow create: if signedIn();
+      allow update: if admin();
+      allow delete: if admin();
+    }
+
+    // ---------- PROVE FOTOGRAFICHE ----------
+    // Le carica e le rimuove solo Daniel: sono la prova del suo lavoro.
+    match /checklistPhotos/{id} {
+      allow read:  if signedIn();
+      allow write: if admin();
+    }
+
+    // ---------- RECENSIONI ----------
+    // Pubbliche per chi usa l'app; le cancella solo Daniel.
+    match /reviews/{id} {
+      allow read:   if signedIn();
+      allow create: if signedIn();
+      allow update: if admin();
+      allow delete: if admin();
+    }
+
+    // ---------- ACQUISTI DIGITALI E DONAZIONI ----------
+    // La prova d'acquisto nasce alla chiusura del pagamento (dal cliente
+    // con la carta, da Daniel col contante) e non si tocca più: senza
+    // update né delete, il libro comprato resta comprato.
+    match /digitalPurchases/{id} {
+      allow read:   if signedIn();
+      allow create: if signedIn();
+      allow update: if admin();
+      allow delete: if admin();
+    }
+
+    // La ricevuta di una donazione: la scrive chi dona, non si modifica.
+    match /donations/{id} {
+      allow read:   if signedIn();
+      allow create: if signedIn();
+      allow update: if admin();
+      allow delete: if admin();
+    }
+
+    // Nota su come si combinano queste regole: Firestore fa l'UNIONE dei
+    // permessi: se una regola concede, concede, e nessun'altra può togliere.
+    // Per questo settings/stock resta scrivibile da chi ordina anche se la
+    // regola generica su /settings/{doc} chiede admin — e per questo NON si
+    // può "chiudere tutto" con una regola finale a false: non toglierebbe
+    // nulla. Quello che protegge il resto è il comportamento predefinito di
+    // Firestore, che nega tutto ciò che nessuna regola concede
+    // esplicitamente. Una collezione nuova, quindi, nasce chiusa.
   }
 }
-
-// ==================================================
-// BOZZA per quando ci sarà l'autenticazione
-// ==================================================
-// Non è ancora attiva: serve prima abilitare Firebase Authentication
-// (Accesso anonimo) dalla console, e far chiamare all'app
-// firebase.auth().signInAnonymously() all'avvio. Il ruolo di admin va su
-// un custom claim del token, non sul nome digitato alla registrazione.
-//
-// service cloud.firestore {
-//   match /databases/{database}/documents {
-//
-//     function autenticato()  { return request.auth != null; }
-//     function admin()        { return autenticato() && request.auth.token.admin == true; }
-//     function proprietario() { return autenticato() && request.auth.uid == resource.data.uid; }
-//
-//     // Ordini, carta, ricariche, acquisti, donazioni, lavoretti:
-//     // ognuno vede e scrive i propri; l'admin vede tutto.
-//     match /orders/{id} {
-//       allow read:   if proprietario() || admin();
-//       allow create: if autenticato() && request.resource.data.uid == request.auth.uid;
-//       allow update, delete: if proprietario() || admin();
-//     }
-//
-//     // Il saldo NON si scrive dal client: solo l'admin lo accredita, e gli
-//     // addebiti passerebbero da una Cloud Function. Finché non c'è, almeno
-//     // che sia il proprietario o l'admin.
-//     match /wallets/{uid} {
-//       allow read:  if autenticato() && (request.auth.uid == uid || admin());
-//       allow write: if autenticato() && (request.auth.uid == uid || admin());
-//     }
-//
-//     // Recensioni: chiunque autenticato le legge, ognuno scrive le proprie,
-//     // solo l'admin cancella.
-//     match /reviews/{id} {
-//       allow read:   if autenticato();
-//       allow create: if autenticato() && request.resource.data.uid == request.auth.uid;
-//       allow delete: if admin();
-//     }
-//
-//     // Listino, orari, checklist studio: tutti leggono, solo l'admin scrive.
-//     match /settings/{id} {
-//       allow read:  if autenticato();
-//       allow write: if admin();
-//     }
-//
-//     // Le prove fotografiche le carica e le cancella solo l'admin.
-//     match /checklistPhotos/{id} {
-//       allow read:  if autenticato();
-//       allow write: if admin();
-//     }
-//   }
-// }
