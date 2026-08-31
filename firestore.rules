@@ -1,0 +1,102 @@
+rules_version = '2';
+
+// ==================================================
+// COCKTAIL DANIEL SRL — Regole di sicurezza Firestore
+// ==================================================
+// Questo file esiste perché le regole che governano l'accesso ai dati
+// vivevano SOLO nella console Firebase: non si potevano rivedere,
+// confrontare o ripristinare, e nessuno poteva accorgersi se cambiavano.
+// Il README ne citava una versione (firestore_rules_v10.txt) che non era
+// mai stata messa nel repository.
+//
+// ⚠️ QUESTE REGOLE SONO DELIBERATAMENTE PERMISSIVE, e rispecchiano quelle
+// attualmente pubblicate. Vanno bene per un'app familiare a fiducia
+// reciproca; NON vanno bene per un'app raggiungibile da chiunque, come
+// questa è, essendo pubblicata su GitHub Pages da un repository pubblico.
+//
+// Con "allow read, write: if true" chiunque trovi l'URL può leggere,
+// modificare e cancellare qualunque documento chiamando l'API REST
+// direttamente, senza nemmeno aprire l'app: saldi delle carte, ordini,
+// nomi e storico acquisti di tutti. Nessuna delle protezioni scritte in
+// JavaScript dentro index.html è nel percorso: il browser è dell'utente,
+// e il codice che gira lì si può cambiare.
+//
+// Il rimedio è attivare Firebase Authentication (basta quella anonima,
+// invisibile all'utente: nessun login da fare) e legare ogni documento al
+// suo proprietario. In fondo al file c'è una bozza pronta, commentata.
+// Serve accesso alla console Firebase per attivare l'autenticazione e
+// pubblicare le regole nuove.
+//
+// Per pubblicare: Firebase Console → Firestore Database → Regole,
+// oppure `firebase deploy --only firestore:rules` con la CLI.
+// ==================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /orders/{document=**}            { allow read, write: if true; }
+    match /payments/{document=**}          { allow read, write: if true; }
+    match /settings/{document=**}          { allow read, write: if true; }
+    match /reviews/{document=**}           { allow read, write: if true; }
+    match /chores/{document=**}            { allow read, write: if true; }
+    match /wallets/{document=**}           { allow read, write: if true; }
+    match /topupRequests/{document=**}     { allow read, write: if true; }
+    match /partyBookings/{document=**}     { allow read, write: if true; }
+    match /digitalPurchases/{document=**}  { allow read, write: if true; }
+    match /donations/{document=**}         { allow read, write: if true; }
+    match /checklistPhotos/{document=**}   { allow read, write: if true; }
+  }
+}
+
+// ==================================================
+// BOZZA per quando ci sarà l'autenticazione
+// ==================================================
+// Non è ancora attiva: serve prima abilitare Firebase Authentication
+// (Accesso anonimo) dalla console, e far chiamare all'app
+// firebase.auth().signInAnonymously() all'avvio. Il ruolo di admin va su
+// un custom claim del token, non sul nome digitato alla registrazione.
+//
+// service cloud.firestore {
+//   match /databases/{database}/documents {
+//
+//     function autenticato()  { return request.auth != null; }
+//     function admin()        { return autenticato() && request.auth.token.admin == true; }
+//     function proprietario() { return autenticato() && request.auth.uid == resource.data.uid; }
+//
+//     // Ordini, carta, ricariche, acquisti, donazioni, lavoretti:
+//     // ognuno vede e scrive i propri; l'admin vede tutto.
+//     match /orders/{id} {
+//       allow read:   if proprietario() || admin();
+//       allow create: if autenticato() && request.resource.data.uid == request.auth.uid;
+//       allow update, delete: if proprietario() || admin();
+//     }
+//
+//     // Il saldo NON si scrive dal client: solo l'admin lo accredita, e gli
+//     // addebiti passerebbero da una Cloud Function. Finché non c'è, almeno
+//     // che sia il proprietario o l'admin.
+//     match /wallets/{uid} {
+//       allow read:  if autenticato() && (request.auth.uid == uid || admin());
+//       allow write: if autenticato() && (request.auth.uid == uid || admin());
+//     }
+//
+//     // Recensioni: chiunque autenticato le legge, ognuno scrive le proprie,
+//     // solo l'admin cancella.
+//     match /reviews/{id} {
+//       allow read:   if autenticato();
+//       allow create: if autenticato() && request.resource.data.uid == request.auth.uid;
+//       allow delete: if admin();
+//     }
+//
+//     // Listino, orari, checklist studio: tutti leggono, solo l'admin scrive.
+//     match /settings/{id} {
+//       allow read:  if autenticato();
+//       allow write: if admin();
+//     }
+//
+//     // Le prove fotografiche le carica e le cancella solo l'admin.
+//     match /checklistPhotos/{id} {
+//       allow read:  if autenticato();
+//       allow write: if admin();
+//     }
+//   }
+// }

@@ -87,6 +87,7 @@ Non c'è un vero login: l'app riconosce il ruolo dal **nome** scritto alla regis
 | `partyBookings` | Prenotazioni pacchetti festa |
 | `digitalPurchases` | Prova d'acquisto permanente per prodotti digitali (es. il libro PDF) |
 | `donations` | Donazioni volontarie del saldo carta |
+| `checklistPhotos` | Foto-prova delle checklist, una per documento (studio ed eventi) |
 
 ---
 
@@ -102,7 +103,7 @@ Non c'è un vero login: l'app riconosce il ruolo dal **nome** scritto alla regis
 ├── icon-maskable-192.png / -512.png    # Icone adattive Android
 ├── apple-touch-icon.png                # Icona iOS
 ├── il-libro-dei-cocktail-di-daniel.pdf # Prodotto digitale in vendita
-└── firestore_rules_v10.txt             # Regole di sicurezza Firestore (versione corrente)
+└── firestore.rules                     # Regole di sicurezza Firestore (+ bozza con autenticazione)
 ```
 
 > ⚠️ **Da caricare manualmente su GitHub Pages**: tutti i file sopra, inclusi gli asset binari (immagini, PDF) — non vengono serviti automaticamente.
@@ -114,7 +115,7 @@ Non c'è un vero login: l'app riconosce il ruolo dal **nome** scritto alla regis
 1. Crea un progetto su [Firebase Console](https://console.firebase.google.com/)
 2. Attiva **Firestore Database** (modalità produzione)
 3. Copia la configurazione del progetto nella costante `firebaseConfig` dentro `index.html`
-4. Pubblica le regole di sicurezza da `firestore_rules_v10.txt` in **Firestore Database → Regole**
+4. Pubblica le regole di sicurezza da `firestore.rules` in **Firestore Database → Regole**
 
 Le regole attuali sono deliberatamente permissive (`allow read, write: if true` su ogni collezione): adatte a un'app familiare a fiducia reciproca, **non a un prodotto pubblico con estranei**. Se il progetto scalasse oltre l'uso familiare, andrebbero irrigidite con autenticazione vera.
 
