@@ -16,14 +16,40 @@ const VERSION_KEY = './__app_version__';
 const APP_SHELL = [
   './',
   './index.html',
-  './background.png',
+  './background.jpg',
   './manifest.json',
   './icon-192.png',
   './icon-512.png'
 ];
 
-// Impronta del contenuto: se index.html cambia, cambia l'impronta.
+// Impronta della versione: se index.html cambia, cambia l'impronta.
+//
+// Prima si prova a ricavarla dagli HEADER, con una richiesta HEAD: ETag e
+// Last-Modified cambiano quando il file cambia, e non si scarica il
+// contenuto. Conta perche' index.html pesa oltre mezzo megabyte e il
+// controllo parte a ogni ritorno sull'app: chi passa avanti e indietro
+// fra applicazioni pagava quel mezzo megabyte ogni volta, in mobilita'.
+//
+// Se il server non fornisce ne' l'uno ne' l'altro si ricade sull'hash del
+// contenuto, come prima. Cosi' il versionamento resta AUTOMATICO in ogni
+// caso: nessun numero di versione da incrementare a mano.
 async function computeVersion() {
+  try {
+    const head = await fetch('./index.html', { method: 'HEAD', cache: 'no-store' });
+    if (head.ok) {
+      // ETag prima: dipende dal contenuto. Last-Modified puo' cambiare a
+      // ogni pubblicazione anche se il file e' identico, e nel peggiore dei
+      // casi costa un controllo aggiornamenti in piu', non un errore.
+      const marca = head.headers.get('ETag') || head.headers.get('Last-Modified');
+      if (marca) return 'h:' + marca;
+    }
+  } catch (error) {
+    // Nessuna rete, o HEAD non supportato: si prova col contenuto
+  }
+  return 'c:' + await hashIndexHtml();
+}
+
+async function hashIndexHtml() {
   const res = await fetch('./index.html', { cache: 'no-store' });
   const text = await res.text();
   const buffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));

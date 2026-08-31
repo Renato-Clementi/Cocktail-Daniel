@@ -97,7 +97,7 @@ Non c'è un vero login: l'app riconosce il ruolo dal **nome** scritto alla regis
 ├── manifest.json                       # Configurazione PWA
 ├── service-worker.js                   # Cache offline + auto-aggiornamento
 ├── danny-avatar.png                    # Illustrazione di Danny
-├── background.png                      # Sfondo "tramonto sulla spiaggia"
+├── background.jpg                      # Sfondo "tramonto sulla spiaggia"
 ├── icon-192.png / icon-512.png         # Icone app
 ├── icon-maskable-192.png / -512.png    # Icone adattive Android
 ├── apple-touch-icon.png                # Icona iOS
@@ -124,9 +124,11 @@ Le regole attuali sono deliberatamente permissive (`allow read, write: if true` 
 
 1. Modifica `index.html` (o altri file)
 2. Carica su GitHub Pages
-3. Il service worker rileva da solo il cambiamento (hash del contenuto) e mostra ai clienti già connessi un banner **"Nuova versione disponibile"** — nessun aggiornamento forzato, la scelta di quando ricaricare resta all'utente
+3. Il service worker rileva da solo il cambiamento e mostra ai clienti già connessi un banner **"Nuova versione disponibile"** — nessun aggiornamento forzato, la scelta di quando ricaricare resta all'utente
 
 Non serve incrementare manualmente numeri di versione: è tutto automatico.
+
+Come fa a rilevarlo: chiede al server solo gli **header** di `index.html` (richiesta `HEAD`) e guarda `ETag`, o in mancanza `Last-Modified`. Cambiano quando il file cambia, e non si scarica il contenuto — utile perché il controllo parte anche a ogni ritorno sull'app. Se il server non fornisse nessuno dei due, ricade sull'hash del contenuto: automatico in ogni caso.
 
 ---
 
