@@ -1335,10 +1335,49 @@ ${newsBgAreaHTML(msg.bgImage)}
         // fallisce: si registra il motivo e si va avanti. Con le regole
         // ancora aperte l'app funziona comunque; con le regole nuove no, ed è
         // per questo che l'ordine dei quattro passi qui sopra conta.
+        // Aspetta che Firebase abbia finito di rileggere la sessione salvata.
+        // Serve perché currentUser è null nei primi millisecondi dopo il
+        // caricamento della pagina: il ripristino è asincrono. Chi lo legge
+        // subito conclude "nessuno", e questa era la strada per cui Daniel,
+        // dopo aver messo email e password, si ritrovava anonimo al reload —
+        // con l'accesso anonimo che gli sostituiva la sessione appena fatta.
+        //
+        // onAuthStateChanged scatta una volta a ripristino concluso, con
+        // l'utente o con null. Il tempo massimo evita che l'app resti appesa
+        // se l'SDK non risponde: meglio proseguire da anonimo che non partire.
+        function waitForAuthReady(msMax = 5000) {
+            if (firebaseAuth.currentUser) return Promise.resolve(firebaseAuth.currentUser);
+            return new Promise(resolve => {
+                let stop = null, fatto = false;
+                // Il callback può scattare anche in modo sincrono, quando lo
+                // stato è già noto: in quel caso stop non è ancora assegnato,
+                // e ci si stacca subito dopo (vedi sotto).
+                const chiudi = (user) => {
+                    if (fatto) return;
+                    fatto = true;
+                    clearTimeout(timer);
+                    if (typeof stop === 'function') stop();
+                    resolve(user);
+                };
+                const timer = setTimeout(() => {
+                    console.log('Ripristino della sessione oltre i tempi: si prosegue senza.');
+                    chiudi(null);
+                }, msMax);
+                try {
+                    stop = firebaseAuth.onAuthStateChanged(chiudi);
+                    if (fatto && typeof stop === 'function') stop();
+                } catch (error) {
+                    console.log('Stato di autenticazione non osservabile:', error && error.code);
+                    chiudi(null);
+                }
+            });
+        }
+
         async function signInSilently() {
             if (!firebaseAuth) return null;
             try {
-                if (firebaseAuth.currentUser) return firebaseAuth.currentUser;
+                const gia = await waitForAuthReady();
+                if (gia) return gia;
                 const cred = await firebaseAuth.signInAnonymously();
                 return cred.user;
             } catch (error) {
@@ -1413,7 +1452,9 @@ ${newsBgAreaHTML(msg.bgImage)}
                 if (authEnforced()) console.log('SDK auth non caricato: i permessi non possono essere verificati');
                 return;
             }
-            const user = firebaseAuth.currentUser || await signInSilently();
+            // Non si legge currentUser qui: è null finché il ripristino non è
+            // finito. Ci pensa signInSilently, che aspetta prima di decidere.
+            const user = await signInSilently();
             authUid = user ? user.uid : null;
             if (!authEnforced()) {
                 console.log('Autenticazione attiva ma UID non ancora configurati: il ruolo viene dal nome. Vedi ADMIN_UIDS in app.js.');
