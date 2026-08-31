@@ -970,13 +970,18 @@ ${newsBgAreaHTML(msg.bgImage)}
         // regole Firestore impongono sul server. Senza UID configurati si
         // ricade sul nome, come prima: è la fase di transizione, in cui
         // l'aggiornamento è pubblicabile ma il muro non c'è ancora.
+        // Il controllo è per ruolo, non globale: gli UID arrivano dalla console
+        // uno alla volta, e con un solo elenco pieno un controllo globale
+        // toglierebbe i poteri all'altro ruolo — la lista vuota non contiene
+        // nessuno. Così ogni ruolo passa all'uid quando il SUO elenco è pronto,
+        // e fino a quel momento resta al nome, come prima.
         function isAdmin() {
-            if (authEnforced()) return ADMIN_UIDS.includes(authUid);
+            if (adminEnforced()) return ADMIN_UIDS.includes(authUid);
             return ADMIN_USER_IDS.includes(getUserId(customerName));
         }
 
         function isSuperAdmin() {
-            if (authEnforced()) return SUPERADMIN_UIDS.includes(authUid);
+            if (superEnforced()) return SUPERADMIN_UIDS.includes(authUid);
             return SUPERADMIN_USER_IDS.includes(getUserId(customerName));
         }
 
@@ -991,6 +996,13 @@ ${newsBgAreaHTML(msg.bgImage)}
 
         function needsAdminSignIn() {
             return authEnforced() && claimsPrivilegedName() && !canSupervise();
+        }
+
+        // "Esci" solo a chi è davvero entrato con un account che ha poteri.
+        // Non basta canSupervise(): finché un ruolo è ancora dedotto dal nome,
+        // quello mostrerebbe un'uscita a chi non è mai entrato.
+        function signedInAsStaff() {
+            return !!authUid && (ADMIN_UIDS.includes(authUid) || SUPERADMIN_UIDS.includes(authUid));
         }
 
         // Vede tutto ciò che vede Daniel, ma non è detto che possa agire:
@@ -1226,7 +1238,7 @@ ${newsBgAreaHTML(msg.bgImage)}
             const signIn = document.getElementById('adminSignInBtn');
             if (signIn) signIn.style.display = needsAdminSignIn() ? 'inline-block' : 'none';
             const signOut = document.getElementById('adminSignOutBtn');
-            if (signOut) signOut.style.display = (authEnforced() && canSupervise()) ? 'inline-block' : 'none';
+            if (signOut) signOut.style.display = signedInAsStaff() ? 'inline-block' : 'none';
 
             renderWalletPanel();
             renderSupervisorPanel();
@@ -1278,13 +1290,18 @@ ${newsBgAreaHTML(msg.bgImage)}
         // può pubblicare subito, senza restare a metà. Ma il muro non c'è
         // ancora — arriva col punto 4.
         const ADMIN_UIDS = [];       // es. ['aBcD1234...']  ← UID di Daniel
-        const SUPERADMIN_UIDS = [];  // es. ['eFgH5678...']  ← UID di Renato
+        const SUPERADMIN_UIDS = ['o59GV04RJiVJeb5ZIiUabg1cHYX2'];  // ← UID di Renato
 
         // Pubblicare gli UID qui non è un problema: conoscere un uid non
         // permette di autenticarsi come quell'utente. Serve la password.
-        function authEnforced() {
-            return ADMIN_UIDS.length > 0 || SUPERADMIN_UIDS.length > 0;
-        }
+        //
+        // Un elenco per volta: chi ha il suo pieno passa all'uid, chi non ce
+        // l'ha ancora resta al nome. authEnforced() risponde "c'è almeno un
+        // ruolo imposto dall'account", e serve solo dove la domanda riguarda
+        // l'accesso in sé e non un ruolo preciso.
+        function adminEnforced() { return ADMIN_UIDS.length > 0; }
+        function superEnforced() { return SUPERADMIN_UIDS.length > 0; }
+        function authEnforced()  { return adminEnforced() || superEnforced(); }
 
         function isApiConfigured() {
             return firebaseConfig.apiKey && !firebaseConfig.apiKey.includes('INCOLLA_QUI') &&
@@ -1399,7 +1416,7 @@ ${newsBgAreaHTML(msg.bgImage)}
             const user = firebaseAuth.currentUser || await signInSilently();
             authUid = user ? user.uid : null;
             if (!authEnforced()) {
-                console.log('Autenticazione attiva ma UID admin non ancora configurati: il ruolo viene dal nome. Vedi ADMIN_UIDS in index.html.');
+                console.log('Autenticazione attiva ma UID non ancora configurati: il ruolo viene dal nome. Vedi ADMIN_UIDS in app.js.');
             }
         }
 
