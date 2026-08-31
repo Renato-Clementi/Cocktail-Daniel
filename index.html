@@ -3784,10 +3784,14 @@
         async function loadMyLibraryFromCloud() {
             if (!cloudReady() || !customerName) return;
             try {
-                const snapshot = await firestoreDb.collection('digitalPurchases').get();
+                // Il filtro era in JavaScript: gli acquisti di tutti i
+                // clienti arrivavano comunque nel browser di ognuno, e si
+                // pagava una lettura per ciascuno. Ora filtra il database.
+                const snapshot = await firestoreDb.collection('digitalPurchases')
+                    .where('userId', '==', getUserId(customerName))
+                    .get();
                 myDigitalPurchases = snapshot.docs
                     .map(d => d.data())
-                    .filter(p => p.userId === getUserId(customerName))
                     .sort((a, b) => b.purchasedAt - a.purchasedAt);
                 renderMyLibraryPanel();
             } catch (error) {
@@ -8135,6 +8139,14 @@
             // Carica dal cloud gli ordini già associati a questo nome (da altri dispositivi)
             loadOrdersFromCloud();
             if (canSupervise()) { loadPendingPayments(); } else { checkMyPaymentStatus(); }
+            // Questi caricamenti ora sono legati all'identità (chiedono al
+            // database solo i propri dati), quindi all'avvio dell'app non
+            // avevano ancora un nome su cui filtrare: si rifanno adesso,
+            // senza far aspettare il prossimo giro di polling.
+            loadChoresFromCloud();
+            loadPartyBookingsFromCloud();
+            loadMyLibraryFromCloud();
+            loadDonationsFromCloud();
         }
 
         // Change name (pencil button)
@@ -9913,9 +9925,18 @@
 
         // Carica i lavoretti dal cloud
         async function loadChoresFromCloud() {
-            if (!cloudReady()) return;
+            if (!cloudReady() || !customerName) return;
             try {
-                const snapshot = await firestoreDb.collection('chores').get();
+                // Daniel e Renato hanno bisogno di tutti i lavoretti; a un
+                // cliente serve solo quello che ha assegnato lui. Chiedere
+                // l'intera collezione a tutti costava una lettura per
+                // documento a ogni giro di polling e faceva transitare i
+                // dati degli altri nel suo browser.
+                let query = firestoreDb.collection('chores');
+                if (!canSupervise()) {
+                    query = query.where('userId', '==', getUserId(customerName));
+                }
+                const snapshot = await query.get();
                 chores_data = snapshot.docs.map(d => d.data()).sort((a, b) => b.id - a.id);
                 renderChoresPanels();
             } catch (error) {
@@ -10302,10 +10323,29 @@
         }
 
         async function loadPartyBookingsFromCloud() {
-            if (!cloudReady()) return;
+            if (!cloudReady() || !customerName) return;
             try {
-                const snapshot = await firestoreDb.collection('partyBookings').get();
-                partyBookings_data = snapshot.docs.map(d => d.data()).sort((a, b) => b.requestedAt - a.requestedAt);
+                let docs;
+                if (canSupervise()) {
+                    docs = (await firestoreDb.collection('partyBookings').get()).docs;
+                } else {
+                    // Al cliente servono due cose, e nient'altro: le proprie
+                    // prenotazioni in qualunque stato, e quelle confermate di
+                    // tutti, che il pannello "feste in arrivo" mostra a tutta
+                    // la famiglia. Due query mirate invece dell'intera
+                    // collezione: le richieste in attesa, rifiutate e
+                    // annullate degli altri non escono più dal database.
+                    const [mine, confirmed] = await Promise.all([
+                        firestoreDb.collection('partyBookings').where('userId', '==', getUserId(customerName)).get(),
+                        firestoreDb.collection('partyBookings').where('status', '==', 'confirmed').get()
+                    ]);
+                    docs = mine.docs.concat(confirmed.docs);
+                }
+                // Le due query possono restituire lo stesso documento (una
+                // festa mia e confermata): si tiene una copia per id.
+                const byId = new Map();
+                docs.forEach(d => byId.set(d.id, d.data()));
+                partyBookings_data = Array.from(byId.values()).sort((a, b) => b.requestedAt - a.requestedAt);
                 await cleanupOldCancelledParties();
                 renderPartyPanels();
             } catch (error) {
@@ -12379,6 +12419,10 @@
         function startPaymentPolling() {
             const poll = () => {
                 if (!customerName) return;
+                // Con l'app in secondo piano nessuno sta guardando: il giro
+                // di interrogazioni si ferma e riprende al rientro, invece
+                // di continuare a pagare letture per uno schermo spento.
+                if (document.hidden) return;
                 if (canSupervise()) {
                     loadPendingPayments();
                     loadPendingTopups();
@@ -12400,6 +12444,12 @@
             };
             poll();
             setInterval(poll, 15000); // ogni 15 secondi
+
+            // Al rientro si aggiorna subito, senza aspettare il prossimo
+            // giro: è il momento in cui l'utente vuole vedere i dati freschi.
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) poll();
+            });
         }
 
         // Ricarica periodicamente il listino: se l'admin cambia un prezzo
